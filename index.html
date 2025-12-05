@@ -14,18 +14,26 @@
         body { font-family: 'Roboto', sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
         
         /* HEADER */
-        header { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        header { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .logo { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .logo i { color: #3498db; }
-        nav ul { display: flex; list-style: none; gap: 1.5rem; }
-        nav a { color: white; text-decoration: none; font-weight: 500; padding: 0.5rem 0.8rem; border-radius: 4px; transition: background 0.3s; font-size: 0.95rem; }
+        nav ul { display: flex; list-style: none; gap: 1rem; flex-wrap: wrap; }
+        nav a { color: white; text-decoration: none; font-weight: 500; padding: 0.5rem; border-radius: 4px; transition: background 0.3s; font-size: 0.9rem; white-space: nowrap; }
         nav a:hover { background: rgba(255,255,255,0.1); }
         
         /* MAIN */
-        main { max-width: 1400px; margin: 1rem auto; padding: 0 1rem; }
+        main { max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
         .container { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1.5rem; }
-        h1 { color: #2c3e50; margin-bottom: 1rem; border-bottom: 3px solid #3498db; padding-bottom: 0.5rem; font-size: 1.5rem; }
-        h2 { color: #34495e; margin: 1rem 0 0.8rem; font-size: 1.2rem; }
+        h1 { color: #2c3e50; margin-bottom: 1rem; border-bottom: 3px solid #3498db; padding-bottom: 0.5rem; font-size: 1.4rem; }
+        h2 { color: #34495e; margin: 1rem 0 0.5rem; font-size: 1.2rem; }
+        h3 { color: #2c3e50; margin: 0.8rem 0 0.5rem; font-size: 1.1rem; }
+        
+        /* TABS */
+        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 1.5rem; overflow-x: auto; }
+        .tab { padding: 0.8rem 1.2rem; background: none; border: none; font-size: 1rem; color: #666; cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; }
+        .tab.active { color: #3498db; border-bottom-color: #3498db; font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         
         /* FORMS */
         .form-group { margin-bottom: 1rem; }
@@ -37,15 +45,17 @@
         .btn-secondary:hover { background: #7f8c8d; }
         .btn-success { background: #27ae60; }
         .btn-success:hover { background: #219653; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
         
         /* CALENDAR */
-        .calendar-controls { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }
-        .calendar-controls select { width: auto; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .calendar-header { background: #3498db; color: white; padding: 0.8rem; text-align: center; font-weight: 600; border-radius: 5px; }
-        .calendar-day { background: #f8f9fa; border: 1px solid #e0e0e0; min-height: 90px; padding: 0.5rem; position: relative; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
-        .calendar-day:hover { background: #e9ecef; transform: translateY(-2px); }
-        .day-number { font-weight: bold; margin-bottom: 0.3rem; color: #555; }
+        .calendar-controls { display: flex; gap: 0.8rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+        .calendar-controls select, .calendar-controls input { flex: 1; min-width: 120px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .calendar-header { background: #3498db; color: white; padding: 0.6rem; text-align: center; font-weight: 600; border-radius: 5px; font-size: 0.85rem; }
+        .calendar-day { background: #f8f9fa; border: 1px solid #e0e0e0; min-height: 70px; padding: 0.4rem; position: relative; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+        .calendar-day:hover { background: #e9ecef; }
+        .day-number { font-weight: bold; margin-bottom: 0.2rem; color: #555; font-size: 0.9rem; }
         
         /* SHIFT COLORS */
         .shift-regular { background: #2ecc71; } /* зелёный */
@@ -58,50 +68,65 @@
         .shift-paid-extra { background: #e84393; color: white; } /* розовый */
         
         .shift-marker { 
-            height: 12px; 
+            height: 10px; 
             width: 100%; 
-            border-radius: 3px; 
+            border-radius: 2px; 
             margin-top: 3px;
             cursor: pointer;
         }
         
         /* SHIFT LEGEND */
         .legend { display: flex; flex-wrap: wrap; gap: 0.8rem; margin: 1rem 0; }
-        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
-        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+        .legend-color { width: 16px; height: 16px; border-radius: 3px; }
         
-        /* USER LIST */
-        .user-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
-        .user-card { background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #3498db; }
-        .user-card.admin { border-left-color: #e74c3c; }
+        /* USER PROFILE */
+        .user-profile { background: linear-gradient(135deg, #3498db, #2c3e50); color: white; padding: 1.2rem; border-radius: 10px; margin-bottom: 1.5rem; }
+        .user-profile h1 { color: white; border-bottom: none; margin-bottom: 0.5rem; }
+        .profile-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .profile-item { }
+        .profile-label { font-size: 0.8rem; opacity: 0.8; }
+        .profile-value { font-size: 1.1rem; font-weight: bold; }
         
         /* STATS */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1rem 0; }
         .stat-card { background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center; }
-        .stat-value { font-size: 2rem; font-weight: bold; }
+        .stat-value { font-size: 1.8rem; font-weight: bold; }
+        
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .table-responsive { overflow-x: auto; }
         
         /* UTILS */
         .hidden { display: none !important; }
         .message { padding: 0.8rem; border-radius: 5px; margin: 0.8rem 0; font-size: 0.9rem; }
         .error { background: #ffeaea; color: #c0392b; border: 1px solid #ffcccc; }
         .success { background: #e8f6ef; color: #27ae60; border: 1px solid #abebc6; }
-        .flex { display: flex; gap: 1rem; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
+        .flex { display: flex; gap: 1rem; flex-wrap: wrap; }
         
         /* FOOTER */
         footer { text-align: center; padding: 1.5rem; color: #7f8c8d; border-top: 1px solid #eee; margin-top: 2rem; font-size: 0.9rem; }
         
-        /* TABLE */
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; }
-        
+        /* MOBILE */
         @media (max-width: 768px) {
-            .calendar-grid { grid-template-columns: repeat(2, 1fr); }
-            .calendar-controls { flex-direction: column; }
-            nav ul { flex-direction: column; gap: 0.8rem; }
             header { flex-direction: column; gap: 1rem; padding: 1rem; }
-            .grid-2 { grid-template-columns: 1fr; }
+            nav ul { width: 100%; justify-content: center; }
+            .calendar-grid { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+            .calendar-day { min-height: 60px; padding: 0.3rem; }
+            .calendar-header { padding: 0.5rem; font-size: 0.8rem; }
+            .shift-marker { height: 8px; }
+            .container { padding: 1rem; }
+            .tabs { overflow-x: scroll; -webkit-overflow-scrolling: touch; }
+            .tab { padding: 0.6rem 1rem; font-size: 0.9rem; }
+            .profile-info { grid-template-columns: 1fr; }
+        }
+        
+        @media (max-width: 480px) {
+            .calendar-day { min-height: 50px; }
+            .day-number { font-size: 0.8rem; }
+            .calendar-header { font-size: 0.75rem; padding: 0.4rem; }
         }
     </style>
 </head>
@@ -149,9 +174,9 @@
 
         <!-- ADMIN SECTION -->
         <section id="admin-section" class="container hidden">
-            <div class="grid-2">
+            <div class="flex">
                 <!-- ЛЕВАЯ КОЛОНКА -->
-                <div>
+                <div style="flex: 1;">
                     <h1><i class="fas fa-user-cog"></i> Админ-панель</h1>
                     
                     <h2><i class="fas fa-user-plus"></i> Новый сотрудник</h2>
@@ -169,24 +194,12 @@
                     </div>
                     <button id="create-user-btn"><i class="fas fa-plus"></i> Создать сотрудника</button>
                     
-                    <h2 style="margin-top: 1.5rem;"><i class="fas fa-users"></i> Все сотрудники</h2>
-                    <div id="users-container"></div>
-                    
-                    <h2 style="margin-top: 1.5rem;"><i class="fas fa-calculator"></i> Расчёт выплат</h2>
-                    <div class="form-group">
-                        <label>Период с:</label>
-                        <input type="date" id="period-from">
-                    </div>
-                    <div class="form-group">
-                        <label>Период по:</label>
-                        <input type="date" id="period-to">
-                    </div>
-                    <button id="calculate-payment-btn" class="btn-success"><i class="fas fa-calculator"></i> Рассчитать и выплатить</button>
-                    <div id="calculation-result"></div>
+                    <h2><i class="fas fa-users"></i> Все сотрудники</h2>
+                    <div id="users-container" class="user-list"></div>
                 </div>
                 
                 <!-- ПРАВАЯ КОЛОНКА -->
-                <div>
+                <div style="flex: 2;">
                     <h2><i class="fas fa-calendar-alt"></i> Назначение смен</h2>
                     
                     <div class="calendar-controls">
@@ -213,138 +226,171 @@
                     
                     <!-- ЦВЕТА СМЕН -->
                     <div class="legend">
-                        <div class="legend-item">
-                            <div class="legend-color shift-regular"></div>
-                            <span>Обычная ставка</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-extra"></div>
-                            <span>Подработка</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-done"></div>
-                            <span>Отработано (обычная)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-done-extra"></div>
-                            <span>Отработано (подработка)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-paid"></div>
-                            <span>Оплачено (обычная)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-paid-extra"></div>
-                            <span>Оплачено (подработка)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-dayoff"></div>
-                            <span>Выходной</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-problem"></div>
-                            <span>Проблема</span>
-                        </div>
+                        <div class="legend-item"><div class="legend-color shift-regular"></div><span>Обычная</span></div>
+                        <div class="legend-item"><div class="legend-color shift-extra"></div><span>Подработка</span></div>
+                        <div class="legend-item"><div class="legend-color shift-done"></div><span>Отработано</span></div>
+                        <div class="legend-item"><div class="legend-color shift-done-extra"></div><span>Подработка отр.</span></div>
+                        <div class="legend-item"><div class="legend-color shift-paid"></div><span>Оплачено</span></div>
+                        <div class="legend-item"><div class="legend-color shift-paid-extra"></div><span>Подр. оплач.</span></div>
+                        <div class="legend-item"><div class="legend-color shift-dayoff"></div><span>Выходной</span></div>
+                        <div class="legend-item"><div class="legend-color shift-problem"></div><span>Проблема</span></div>
                     </div>
                     
-                    <!-- КАЛЕНДАРЬ -->
+                    <!-- КАЛЕНДАРЬ (5 строк по 7 дней) -->
                     <div id="admin-calendar" class="calendar-grid"></div>
                     
                     <div style="margin-top: 1rem;">
                         <button id="save-shifts-btn"><i class="fas fa-save"></i> Сохранить смены</button>
                     </div>
+                    
+                    <!-- УПРАВЛЕНИЕ ВЫПЛАТАМИ -->
+                    <h2 style="margin-top: 2rem;"><i class="fas fa-money-bill-wave"></i> Управление выплатами</h2>
+                    <div class="flex">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Сотрудник:</label>
+                            <select id="payment-user"></select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Период с:</label>
+                            <input type="date" id="period-from">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Период по:</label>
+                            <input type="date" id="period-to">
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Премия/Удержание:</label>
+                            <input type="number" id="bonus-amount" placeholder="Сумма (+/-)">
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label>Примечание:</label>
+                            <textarea id="bonus-note" placeholder="Причина" rows="1"></textarea>
+                        </div>
+                    </div>
+                    <button id="calculate-payment-btn" class="btn-success"><i class="fas fa-calculator"></i> Рассчитать и выплатить</button>
+                    <div id="calculation-result"></div>
                 </div>
             </div>
         </section>
 
         <!-- USER SECTION -->
         <section id="user-section" class="container hidden">
-            <div style="background: #3498db; color: white; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                <h1 style="color: white; border-bottom: none;">
-                    <i class="fas fa-user"></i> <span id="user-full-name">Имя Фамилия</span>
-                </h1>
-                <div style="display: flex; gap: 2rem; margin-top: 1rem;">
-                    <div>
-                        <div style="font-size: 0.9rem; opacity: 0.8;">Должность</div>
-                        <div style="font-size: 1.2rem; font-weight: bold;" id="user-position">Сотрудник</div>
+            <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
+            <div class="user-profile">
+                <h1><i class="fas fa-user"></i> <span id="user-full-name">Имя Фамилия</span></h1>
+                <div class="profile-info">
+                    <div class="profile-item">
+                        <div class="profile-label">Должность</div>
+                        <div class="profile-value" id="user-position">Сотрудник</div>
                     </div>
-                    <div>
-                        <div style="font-size: 0.9rem; opacity: 0.8;">Ставка</div>
-                        <div style="font-size: 1.2rem; font-weight: bold;" id="user-rate">0 ₽</div>
+                    <div class="profile-item">
+                        <div class="profile-label">Ставка за смену</div>
+                        <div class="profile-value" id="user-rate">0 ₽</div>
                     </div>
-                    <div>
-                        <div style="font-size: 0.9rem; opacity: 0.8;">Email</div>
-                        <div style="font-size: 1.1rem;" id="user-email">email</div>
+                    <div class="profile-item">
+                        <div class="profile-label">Email</div>
+                        <div class="profile-value" id="user-email">email@example.com</div>
                     </div>
                 </div>
             </div>
             
-            <div class="grid-2">
-                <!-- ЛЕВАЯ КОЛОНКА -->
-                <div>
-                    <h2><i class="fas fa-chart-bar"></i> Статистика</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div style="font-size: 0.9rem; color: #666;">Обычных смен</div>
-                            <div class="stat-value" id="stat-regular">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div style="font-size: 0.9rem; color: #666;">Подработок</div>
-                            <div class="stat-value" id="stat-extra">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div style="font-size: 0.9rem; color: #666;">Ожидает выплаты</div>
-                            <div class="stat-value" id="stat-pending">0 ₽</div>
-                        </div>
-                        <div class="stat-card">
-                            <div style="font-size: 0.9rem; color: #666;">Выплачено</div>
-                            <div class="stat-value" id="stat-paid">0 ₽</div>
-                        </div>
+            <!-- ВКЛАДКИ ПОЛЬЗОВАТЕЛЯ -->
+            <div class="tabs">
+                <button class="tab active" data-tab="shifts"><i class="fas fa-calendar-alt"></i> Смены</button>
+                <button class="tab" data-tab="stats"><i class="fas fa-chart-bar"></i> Статистика</button>
+                <button class="tab" data-tab="payments"><i class="fas fa-money-bill-wave"></i> Выплаты</button>
+            </div>
+            
+            <!-- ВКЛАДКА: СМЕНЫ -->
+            <div id="tab-shifts" class="tab-content active">
+                <h2><i class="fas fa-calendar-alt"></i> Мой график смен</h2>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-color shift-regular"></div><span>Обычная</span></div>
+                    <div class="legend-item"><div class="legend-color shift-extra"></div><span>Подработка</span></div>
+                    <div class="legend-item"><div class="legend-color shift-done"></div><span>Отработано</span></div>
+                    <div class="legend-item"><div class="legend-color shift-done-extra"></div><span>Подработка отр.</span></div>
+                    <div class="legend-item"><div class="legend-color shift-paid"></div><span>Оплачено</span></div>
+                    <div class="legend-item"><div class="legend-color shift-paid-extra"></div><span>Подр. оплач.</span></div>
+                    <div class="legend-item"><div class="legend-color shift-dayoff"></div><span>Выходной</span></div>
+                    <div class="legend-item"><div class="legend-color shift-problem"></div><span>Проблема</span></div>
+                </div>
+                <div id="user-calendar" class="calendar-grid"></div>
+            </div>
+            
+            <!-- ВКЛАДКА: СТАТИСТИКА -->
+            <div id="tab-stats" class="tab-content">
+                <h2><i class="fas fa-chart-bar"></i> Статистика</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="profile-label">Обычных смен</div>
+                        <div class="stat-value" id="stat-regular">0</div>
                     </div>
-                    
-                    <h2 style="margin-top: 1.5rem;"><i class="fas fa-history"></i> История выплат</h2>
-                    <div id="payments-history"></div>
+                    <div class="stat-card">
+                        <div class="profile-label">Подработок</div>
+                        <div class="stat-value" id="stat-extra">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="profile-label">Ожидает выплаты</div>
+                        <div class="stat-value" id="stat-pending">0 ₽</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="profile-label">Выплачено всего</div>
+                        <div class="stat-value" id="stat-paid">0 ₽</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ВКЛАДКА: ВЫПЛАТЫ -->
+            <div id="tab-payments" class="tab-content">
+                <h2><i class="fas fa-money-bill-wave"></i> Выплаты</h2>
+                
+                <!-- ОЖИДАЕМЫЕ ВЫПЛАТЫ -->
+                <h3><i class="fas fa-clock"></i> Ожидаемые выплаты</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Тип смены</th>
+                                <th>Количество</th>
+                                <th>Ставка</th>
+                                <th>Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-payments">
+                            <tr><td colspan="4">Нет ожидающих выплат</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight: bold;">
+                                <td colspan="3">Итого к выплате:</td>
+                                <td id="pending-total">0 ₽</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
                 
-                <!-- ПРАВАЯ КОЛОНКА -->
-                <div>
-                    <h2><i class="fas fa-calendar-alt"></i> Мой график смен</h2>
-                    <div class="legend">
-                        <div class="legend-item">
-                            <div class="legend-color shift-regular"></div>
-                            <span>Обычная ставка</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-extra"></div>
-                            <span>Подработка</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-done"></div>
-                            <span>Отработано (обычная)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-done-extra"></div>
-                            <span>Отработано (подработка)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-paid"></div>
-                            <span>Оплачено (обычная)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-paid-extra"></div>
-                            <span>Оплачено (подработка)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-dayoff"></div>
-                            <span>Выходной</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color shift-problem"></div>
-                            <span>Проблема</span>
-                        </div>
-                    </div>
-                    
-                    <div id="user-calendar" class="calendar-grid"></div>
+                <!-- ИСТОРИЯ ВЫПЛАТ -->
+                <h3 style="margin-top: 2rem;"><i class="fas fa-history"></i> История выплат</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Период</th>
+                                <th>Обычные</th>
+                                <th>Подработки</th>
+                                <th>Сумма</th>
+                                <th>Премия</th>
+                                <th>Удержание</th>
+                                <th>Примечание</th>
+                                <th>Итого</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-history">
+                            <tr><td colspan="9">Нет выплат</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -380,18 +426,13 @@
         let selectedUserId = '';
         let shiftsMap = {};
         
-        // === ЭЛЕМЕНТЫ ===
-        const sections = {
-            welcome: document.getElementById('welcome-section'),
-            login: document.getElementById('login-section'),
-            admin: document.getElementById('admin-section'),
-            user: document.getElementById('user-section')
-        };
-        
         // === ПОКАЗАТЬ/СКРЫТЬ СЕКЦИИ ===
         function showSection(sectionId) {
-            Object.values(sections).forEach(s => s.classList.add('hidden'));
-            sections[sectionId].classList.remove('hidden');
+            document.getElementById('welcome-section').classList.add('hidden');
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('admin-section').classList.add('hidden');
+            document.getElementById('user-section').classList.add('hidden');
+            document.getElementById(sectionId).classList.remove('hidden');
             updateNavigation();
         }
         
@@ -399,13 +440,28 @@
             const isLoggedIn = !!currentUser;
             const isAdmin = currentUser && allUsers.find(u => u.id === currentUser.uid && u.role === 'admin');
             
-            // Скрыть "Главная" для сотрудников
             document.getElementById('nav-home').classList.toggle('hidden', isLoggedIn && !isAdmin);
-            
             document.getElementById('nav-login').classList.toggle('hidden', isLoggedIn);
             document.getElementById('nav-admin').classList.toggle('hidden', !isAdmin);
             document.getElementById('nav-user').classList.toggle('hidden', !isLoggedIn);
             document.getElementById('nav-logout').classList.toggle('hidden', !isLoggedIn);
+        }
+        
+        // === ТАБЫ ===
+        function initTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Убрать активный класс у всех табов
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Добавить активный класс текущему табу
+                    this.classList.add('active');
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                });
+            });
         }
         
         // === АУТЕНТИФИКАЦИЯ ===
@@ -443,14 +499,17 @@
             
             // Селект выбора пользователя
             const select = document.getElementById('selected-user');
+            const paymentSelect = document.getElementById('payment-user');
             select.innerHTML = '<option value="">Выберите сотрудника</option>';
+            paymentSelect.innerHTML = '<option value="">Выберите сотрудника</option>';
             
             allUsers.forEach(user => {
                 if (user.role !== 'admin') {
                     const option = document.createElement('option');
                     option.value = user.id;
                     option.textContent = `${user.fullName || user.email} (${user.rate || 0} ₽)`;
-                    select.appendChild(option);
+                    select.appendChild(option.cloneNode(true));
+                    paymentSelect.appendChild(option);
                 }
             });
             
@@ -533,6 +592,7 @@
             // Дни месяца
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
             const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
             
             // Пустые клетки до первого дня
@@ -541,7 +601,7 @@
             }
             
             // Дни месяца
-            for (let day = 1; day <= lastDay.getDate(); day++) {
+            for (let day = 1; day <= totalDays; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const shift = shiftsMap[selectedUserId] ? shiftsMap[selectedUserId][dateStr] : null;
                 
@@ -573,9 +633,16 @@
                 `;
             }
             
+            // Дополняем до 35 клеток (5 строк)
+            const totalCells = 35;
+            const filledCells = startDay + totalDays;
+            for (let i = filledCells; i < totalCells; i++) {
+                html += `<div class="calendar-day"></div>`;
+            }
+            
             container.innerHTML = html;
             
-            // Обработка кликов по дням (админ)
+            // Обработка кликов по дням
             container.querySelectorAll('.calendar-day').forEach(day => {
                 day.addEventListener('click', function(e) {
                     if (!selectedUserId) {
@@ -584,6 +651,8 @@
                     }
                     
                     const date = this.getAttribute('data-date');
+                    if (!date) return; // пустая клетка
+                    
                     const marker = this.querySelector('.shift-marker');
                     const currentType = marker.getAttribute('data-shift-type');
                     const isDone = marker.getAttribute('data-done') === 'true';
@@ -600,9 +669,9 @@
                         {type: 'extra', color: 'shift-extra'},
                         {type: 'dayoff', color: 'shift-dayoff'},
                         {type: 'problem', color: 'shift-problem'},
-                        {type: 'done', color: 'shift-done'}, // обычная отработанная
-                        {type: 'done-extra', color: 'shift-done-extra'}, // подработка отработанная
-                        null // удаление
+                        {type: 'done', color: 'shift-done'},
+                        {type: 'done-extra', color: 'shift-done-extra'},
+                        null
                     ];
                     
                     // Находим текущую позицию
@@ -625,22 +694,30 @@
                     } else {
                         marker.setAttribute('data-shift-type', '');
                         marker.setAttribute('data-done', 'false');
+                        marker.setAttribute('data-paid', 'false');
                     }
                     
                     // Сохраняем в локальной карте
                     if (!shiftsMap[selectedUserId]) shiftsMap[selectedUserId] = {};
                     
                     if (nextItem) {
-                        const type = nextItem.type.includes('extra') ? 'extra' : 
-                                    nextItem.type.includes('done') ? (nextItem.type.includes('extra') ? 'extra' : 'regular') :
-                                    nextItem.type;
-                        const done = nextItem.type.includes('done');
+                        let type, done, paid;
                         
-                        shiftsMap[selectedUserId][date] = {
-                            type: type,
-                            done: done,
-                            paid: false
-                        };
+                        if (nextItem.type === 'regular') {
+                            type = 'regular'; done = false; paid = false;
+                        } else if (nextItem.type === 'extra') {
+                            type = 'extra'; done = false; paid = false;
+                        } else if (nextItem.type === 'dayoff') {
+                            type = 'dayoff'; done = false; paid = false;
+                        } else if (nextItem.type === 'problem') {
+                            type = 'problem'; done = false; paid = false;
+                        } else if (nextItem.type === 'done') {
+                            type = 'regular'; done = true; paid = false;
+                        } else if (nextItem.type === 'done-extra') {
+                            type = 'extra'; done = true; paid = false;
+                        }
+                        
+                        shiftsMap[selectedUserId][date] = { type, done, paid };
                     } else {
                         delete shiftsMap[selectedUserId][date];
                     }
@@ -692,6 +769,8 @@
                 
                 await batch.commit();
                 alert('Смены сохранены!');
+                renderAdminCalendar();
+                
             } catch (error) {
                 alert('Ошибка сохранения: ' + error.message);
             }
@@ -717,6 +796,7 @@
             // Дни месяца
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
             const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
             
             // Пустые клетки
@@ -725,7 +805,7 @@
             }
             
             // Дни месяца
-            for (let day = 1; day <= lastDay.getDate(); day++) {
+            for (let day = 1; day <= totalDays; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const userShifts = shiftsMap[currentUser.uid] || {};
                 const shift = userShifts[dateStr];
@@ -755,36 +835,45 @@
                 `;
             }
             
+            // Дополняем до 35 клеток (5 строк)
+            const totalCells = 35;
+            const filledCells = startDay + totalDays;
+            for (let i = filledCells; i < totalCells; i++) {
+                html += `<div class="calendar-day"></div>`;
+            }
+            
             container.innerHTML = html;
         }
         
-        // === СТАТИСТИКА И ЗАРАБОТОК ===
+        // === ОБНОВЛЕНИЕ СТАТИСТИКИ ===
         function updateUserStats() {
             if (!currentUser) return;
             
             const user = allUsers.find(u => u.id === currentUser.uid);
-            const rate = user?.rate || 0;
+            if (!user) return;
+            
+            const rate = user.rate || 0;
             const shifts = shiftsMap[currentUser.uid] || {};
             
-            let pending = 0; // ожидает выплаты
-            let totalPaid = 0; // уже выплачено
             let regularCount = 0;
             let extraCount = 0;
+            let pendingAmount = 0;
+            let paidAmount = 0;
             
             Object.values(shifts).forEach(shift => {
                 if (shift.type === 'regular') {
                     if (shift.done && !shift.paid) {
                         regularCount++;
-                        pending += rate;
+                        pendingAmount += rate;
                     } else if (shift.paid) {
-                        totalPaid += rate;
+                        paidAmount += rate;
                     }
                 } else if (shift.type === 'extra') {
                     if (shift.done && !shift.paid) {
                         extraCount++;
-                        pending += rate + 100;
+                        pendingAmount += rate + 100;
                     } else if (shift.paid) {
-                        totalPaid += rate + 100;
+                        paidAmount += rate + 100;
                     }
                 }
             });
@@ -792,34 +881,61 @@
             // Обновляем статистику
             document.getElementById('stat-regular').textContent = regularCount;
             document.getElementById('stat-extra').textContent = extraCount;
-            document.getElementById('stat-pending').textContent = `${pending} ₽`;
-            document.getElementById('stat-paid').textContent = `${totalPaid} ₽`;
+            document.getElementById('stat-pending').textContent = `${pendingAmount} ₽`;
+            document.getElementById('stat-paid').textContent = `${paidAmount} ₽`;
+            
+            // Обновляем ожидаемые выплаты
+            const pendingTable = document.getElementById('pending-payments');
+            const pendingTotal = document.getElementById('pending-total');
+            
+            if (regularCount === 0 && extraCount === 0) {
+                pendingTable.innerHTML = '<tr><td colspan="4">Нет ожидающих выплат</td></tr>';
+            } else {
+                pendingTable.innerHTML = '';
+                if (regularCount > 0) {
+                    pendingTable.innerHTML += `
+                        <tr>
+                            <td>Обычные смены</td>
+                            <td>${regularCount}</td>
+                            <td>${rate} ₽</td>
+                            <td>${regularCount * rate} ₽</td>
+                        </tr>
+                    `;
+                }
+                if (extraCount > 0) {
+                    pendingTable.innerHTML += `
+                        <tr>
+                            <td>Подработки</td>
+                            <td>${extraCount}</td>
+                            <td>${rate + 100} ₽</td>
+                            <td>${extraCount * (rate + 100)} ₽</td>
+                        </tr>
+                    `;
+                }
+            }
+            pendingTotal.textContent = `${pendingAmount} ₽`;
             
             // Данные пользователя
-            if (user) {
-                document.getElementById('user-full-name').textContent = user.fullName || 'Имя не указано';
-                document.getElementById('user-position').textContent = user.role === 'admin' ? 'Администратор' : 'Сотрудник';
-                document.getElementById('user-rate').textContent = `${rate} ₽`;
-                document.getElementById('user-email').textContent = user.email;
-            }
+            document.getElementById('user-full-name').textContent = user.fullName || 'Имя не указано';
+            document.getElementById('user-position').textContent = user.role === 'admin' ? 'Администратор' : 'Сотрудник';
+            document.getElementById('user-rate').textContent = `${rate} ₽`;
+            document.getElementById('user-email').textContent = user.email;
         }
         
         // === РАСЧЕТ ВЫПЛАТ ===
         document.getElementById('calculate-payment-btn').addEventListener('click', async () => {
+            const userId = document.getElementById('payment-user').value;
             const fromDate = document.getElementById('period-from').value;
             const toDate = document.getElementById('period-to').value;
+            const bonusAmount = parseInt(document.getElementById('bonus-amount').value) || 0;
+            const bonusNote = document.getElementById('bonus-note').value;
             
-            if (!fromDate || !toDate) {
-                alert('Выберите период');
+            if (!userId || !fromDate || !toDate) {
+                alert('Заполните все поля');
                 return;
             }
             
-            if (!selectedUserId) {
-                alert('Выберите сотрудника');
-                return;
-            }
-            
-            const user = allUsers.find(u => u.id === selectedUserId);
+            const user = allUsers.find(u => u.id === userId);
             if (!user) return;
             
             const rate = user.rate || 0;
@@ -827,29 +943,27 @@
             try {
                 // Получаем смены за период
                 const shifts = await db.collection('shifts')
-                    .where('userId', '==', selectedUserId)
+                    .where('userId', '==', userId)
                     .where('date', '>=', fromDate)
                     .where('date', '<=', toDate)
                     .get();
                 
+                let regularCount = 0;
+                let extraCount = 0;
                 let totalAmount = 0;
-                let shiftDetails = [];
                 const batch = db.batch();
                 
                 shifts.forEach(doc => {
                     const data = doc.data();
                     // Считаем только отработанные и неоплаченные
                     if (data.done && !data.paid) {
-                        let amount = 0;
                         if (data.type === 'regular') {
-                            amount = rate;
-                            shiftDetails.push(`${data.date}: Обычная - ${rate} ₽`);
+                            regularCount++;
+                            totalAmount += rate;
                         } else if (data.type === 'extra') {
-                            amount = rate + 100;
-                            shiftDetails.push(`${data.date}: Подработка - ${rate + 100} ₽`);
+                            extraCount++;
+                            totalAmount += rate + 100;
                         }
-                        
-                        totalAmount += amount;
                         
                         // Помечаем как оплаченные
                         batch.update(doc.ref, { 
@@ -859,21 +973,27 @@
                     }
                 });
                 
-                if (totalAmount === 0) {
+                if (regularCount === 0 && extraCount === 0) {
                     alert('Нет смен для выплаты в выбранном периоде');
                     return;
                 }
                 
+                // Добавляем премию/удержание
+                const finalAmount = totalAmount + bonusAmount;
+                
                 // Создаём запись о выплате
                 const paymentRef = db.collection('salary_payments').doc();
                 await paymentRef.set({
-                    userId: selectedUserId,
+                    userId: userId,
                     userName: user.fullName || user.email,
                     periodFrom: fromDate,
                     periodTo: toDate,
-                    amount: totalAmount,
-                    shiftCount: shiftDetails.length,
-                    details: shiftDetails.join('\n'),
+                    regularShifts: regularCount,
+                    extraShifts: extraCount,
+                    baseAmount: totalAmount,
+                    bonus: bonusAmount,
+                    bonusNote: bonusNote,
+                    totalAmount: finalAmount,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     adminId: currentUser.uid
                 });
@@ -882,16 +1002,28 @@
                 await batch.commit();
                 
                 // Обновляем данные
-                await loadShiftsForUser(selectedUserId);
-                renderAdminCalendar();
+                await loadShiftsForUser(userId);
+                if (userId === selectedUserId) {
+                    renderAdminCalendar();
+                }
+                if (userId === currentUser?.uid) {
+                    updateUserStats();
+                    loadPaymentHistory(userId);
+                }
+                
+                // Очищаем поля
+                document.getElementById('bonus-amount').value = '';
+                document.getElementById('bonus-note').value = '';
                 
                 document.getElementById('calculation-result').innerHTML = `
                     <div class="success">
                         <strong>Выплата создана!</strong><br>
                         Сотрудник: ${user.fullName || user.email}<br>
                         Период: ${fromDate} - ${toDate}<br>
-                        Сумма: ${totalAmount} ₽<br>
-                        Количество смен: ${shiftDetails.length}
+                        Обычных: ${regularCount} × ${rate} ₽ = ${regularCount * rate} ₽<br>
+                        Подработок: ${extraCount} × ${rate + 100} ₽ = ${extraCount * (rate + 100)} ₽<br>
+                        Премия/удержание: ${bonusAmount > 0 ? '+' : ''}${bonusAmount} ₽<br>
+                        <strong>Итого: ${finalAmount} ₽</strong>
                     </div>
                 `;
                 
@@ -904,34 +1036,40 @@
         async function loadPaymentHistory(userId) {
             const snapshot = await db.collection('salary_payments')
                 .where('userId', '==', userId)
+                .orderBy('createdAt', 'desc')
                 .limit(20)
                 .get();
             
             const container = document.getElementById('payments-history');
             if (snapshot.empty) {
-                container.innerHTML = '<p>Нет выплат</p>';
+                container.innerHTML = '<tr><td colspan="9">Нет выплат</td></tr>';
                 return;
             }
             
-            let html = '<table><tr><th>Дата</th><th>Период</th><th>Сумма</th><th>Смен</th></tr>';
+            let html = '';
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Дата неизвестна';
+                const bonusSign = data.bonus > 0 ? '+' : '';
                 
                 html += `
                     <tr>
                         <td>${date}</td>
-                        <td>${data.periodFrom} - ${data.periodTo}</td>
-                        <td><strong>${data.amount} ₽</strong></td>
-                        <td>${data.shiftCount}</td>
+                        <td>${data.periodFrom}<br>${data.periodTo}</td>
+                        <td>${data.regularShifts || 0}</td>
+                        <td>${data.extraShifts || 0}</td>
+                        <td>${data.baseAmount || 0} ₽</td>
+                        <td>${bonusSign}${data.bonus || 0} ₽</td>
+                        <td>${data.bonus < 0 ? data.bonus * -1 : 0} ₽</td>
+                        <td>${data.bonusNote || ''}</td>
+                        <td><strong>${data.totalAmount || 0} ₽</strong></td>
                     </tr>
                 `;
             });
-            html += '</table>';
             container.innerHTML = html;
         }
         
-        // === СОБЫТИЯ ИНТЕРФЕЙСА ===
+        // === ИНИЦИАЛИЗАЦИЯ ===
         function init() {
             // Навигация
             document.getElementById('nav-home').addEventListener('click', (e) => {
@@ -953,6 +1091,9 @@
             document.getElementById('nav-logout').addEventListener('click', () => {
                 auth.signOut();
             });
+            
+            // Табы
+            initTabs();
             
             // Управление календарем
             document.getElementById('selected-month').addEventListener('change', renderAdminCalendar);
@@ -984,9 +1125,9 @@
                     showSection('admin');
                 } else {
                     await loadShiftsForUser(user.uid);
-                    await loadPaymentHistory(user.uid);
                     updateUserStats();
                     renderUserCalendar();
+                    loadPaymentHistory(user.uid);
                     showSection('user');
                 }
                 
@@ -996,15 +1137,6 @@
                 updateNavigation();
             }
         });
-        
-        // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
-        function showMessage(elementId, text, isError = false) {
-            const el = document.getElementById(elementId);
-            el.textContent = text;
-            el.className = `message ${isError ? 'error' : 'success'}`;
-            el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 5000);
-        }
         
         // ЗАПУСК
         document.addEventListener('DOMContentLoaded', init);
