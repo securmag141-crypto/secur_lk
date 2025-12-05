@@ -948,7 +948,7 @@ payments.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0
             }
         });
         
-        // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
+         // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
         function showMessage(elementId, text, isError = false) {
             const el = document.getElementById(elementId);
             el.textContent = text;
@@ -958,9 +958,8 @@ payments.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0
         }
         
         // ЗАПУСК
-               // ЗАПУСК
         document.addEventListener('DOMContentLoaded', init);
-});
+    }); // ← ЭТА СТРОКА ДОЛЖНА БЫТЬ ОДНА И БЫТЬ В КОНЦЕ
 </script>
 </body>
 </html>
