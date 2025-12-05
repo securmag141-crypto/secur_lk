@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь смен</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        
+        /* HEADER */
+        header { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: #3498db; }
+        nav ul { display: flex; list-style: none; gap: 1.5rem; }
+        nav a { color: white; text-decoration: none; font-weight: 500; padding: 0.5rem 0.8rem; border-radius: 4px; transition: background 0.3s; font-size: 0.95rem; }
+        nav a:hover { background: rgba(255,255,255,0.1); }
+        
+        /* MAIN */
+        main { max-width: 1400px; margin: 1rem auto; padding: 0 1rem; }
+        .container { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1.5rem; }
+        h1 { color: #2c3e50; margin-bottom: 1rem; border-bottom: 3px solid #3498db; padding-bottom: 0.5rem; font-size: 1.5rem; }
+        h2 { color: #34495e; margin: 1rem 0 0.8rem; font-size: 1.2rem; }
+        
+        /* FORMS */
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.3rem; font-weight: 500; color: #555; font-size: 0.9rem; }
+        input, select, button, textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 5px; font-size: 0.95rem; }
+        button { background: linear-gradient(to right, #3498db, #2980b9); color: white; border: none; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        button:hover { background: linear-gradient(to right, #2980b9, #1c5a80); }
+        .btn-secondary { background: #95a5a6; }
+        .btn-secondary:hover { background: #7f8c8d; }
+        
+        /* CALENDAR */
+        .calendar-controls { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }
+        .calendar-controls select { width: auto; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-header { background: #3498db; color: white; padding: 0.8rem; text-align: center; font-weight: 600; border-radius: 5px; }
+        .calendar-day { background: #f8f9fa; border: 1px solid #e0e0e0; min-height: 90px; padding: 0.5rem; position: relative; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+        .calendar-day:hover { background: #e9ecef; transform: translateY(-2px); }
+        .day-number { font-weight: bold; margin-bottom: 0.3rem; color: #555; }
+        
+        /* SHIFT COLORS */
+        .shift-regular { background: #2ecc71; } /* зелёный */
+        .shift-extra { background: #a3e4d7; } /* салатовый */
+        .shift-dayoff { background: #3498db; } /* синий */
+        .shift-paid { background: #9b59b6; } /* фиолетовый */
+        .shift-problem { background: #e74c3c; } /* красный */
+        .shift-done { background: #2c3e50; color: white; } /* чёрный */
+        
+        .shift-marker { 
+            height: 12px; 
+            width: 100%; 
+            border-radius: 3px; 
+            margin-top: 3px;
+            cursor: pointer;
+        }
+        
+        /* SHIFT LEGEND */
+        .legend { display: flex; flex-wrap: wrap; gap: 0.8rem; margin: 1rem 0; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        
+        /* USER LIST */
+        .user-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .user-card { background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #3498db; }
+        .user-card.admin { border-left-color: #e74c3c; }
+        
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .stat-card { background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; }
+        
+        /* UTILS */
+        .hidden { display: none !important; }
+        .message { padding: 0.8rem; border-radius: 5px; margin: 0.8rem 0; font-size: 0.9rem; }
+        .error { background: #ffeaea; color: #c0392b; border: 1px solid #ffcccc; }
+        .success { background: #e8f6ef; color: #27ae60; border: 1px solid #abebc6; }
+        .flex { display: flex; gap: 1rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
+        
+        /* FOOTER */
+        footer { text-align: center; padding: 1.5rem; color: #7f8c8d; border-top: 1px solid #eee; margin-top: 2rem; font-size: 0.9rem; }
+        
+        @media (max-width: 768px) {
+            .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+            .calendar-controls { flex-direction: column; }
+            nav ul { flex-direction: column; gap: 0.8rem; }
+            header { flex-direction: column; gap: 1rem; padding: 1rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Календарь смен</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" id="nav-home"><i class="fas fa-home"></i> Главная</a></li>
+                <li><a href="#" id="nav-login"><i class="fas fa-sign-in-alt"></i> Вход</a></li>
+                <li><a href="#" id="nav-admin" class="hidden"><i class="fas fa-user-cog"></i> Админ</a></li>
+                <li><a href="#" id="nav-user" class="hidden"><i class="fas fa-user"></i> Кабинет</a></li>
+                <li><a href="#" id="nav-logout" class="hidden"><i class="fas fa-sign-out-alt"></i> Выход</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- WELCOME SECTION -->
+        <section id="welcome-section" class="container">
+            <h1><i class="fas fa-calendar-check"></i> Система планирования смен</h1>
+            <p>Администраторы назначают смены, сотрудники просматривают свои графики работы.</p>
+            <button id="go-to-login" onclick="showSection('login')"><i class="fas fa-sign-in-alt"></i> Вход в систему</button>
+        </section>
+
+        <!-- LOGIN SECTION -->
+        <section id="login-section" class="container hidden">
+            <h1><i class="fas fa-sign-in-alt"></i> Авторизация</h1>
+            <div class="form-group">
+                <label for="login-email">Email:</label>
+                <input type="email" id="login-email" placeholder="admin@example.com">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Пароль:</label>
+                <input type="password" id="login-password" placeholder="Ваш пароль">
+            </div>
+            <button id="login-btn"><i class="fas fa-sign-in-alt"></i> Войти</button>
+            <div id="login-message" class="message hidden"></div>
+        </section>
+
+        <!-- ADMIN SECTION -->
+        <section id="admin-section" class="container hidden">
+            <div class="grid-2">
+                <!-- ЛЕВАЯ КОЛОНКА -->
+                <div>
+                    <h1><i class="fas fa-user-cog"></i> Админ-панель</h1>
+                    
+                    <h2><i class="fas fa-user-plus"></i> Новый сотрудник</h2>
+                    <div class="form-group">
+                        <input type="email" id="new-user-email" placeholder="Email сотрудника">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="new-user-password" placeholder="Пароль">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="new-user-name" placeholder="Имя и фамилия">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="new-user-rate" placeholder="Ставка за смену" value="1500">
+                    </div>
+                    <button id="create-user-btn"><i class="fas fa-plus"></i> Создать сотрудника</button>
+                    
+                    <h2 style="margin-top: 1.5rem;"><i class="fas fa-users"></i> Все сотрудники</h2>
+                    <div id="users-container"></div>
+                </div>
+                
+                <!-- ПРАВАЯ КОЛОНКА -->
+                <div>
+                    <h2><i class="fas fa-calendar-alt"></i> Назначение смен</h2>
+                    
+                    <div class="calendar-controls">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Сотрудник:</label>
+                            <select id="selected-user"></select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Месяц:</label>
+                            <select id="selected-month">
+                                <option value="0">Январь</option><option value="1">Февраль</option>
+                                <option value="2">Март</option><option value="3">Апрель</option>
+                                <option value="4">Май</option><option value="5">Июнь</option>
+                                <option value="6">Июль</option><option value="7">Август</option>
+                                <option value="8">Сентябрь</option><option value="9">Октябрь</option>
+                                <option value="10">Ноябрь</option><option value="11">Декабрь</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Год:</label>
+                            <input type="number" id="selected-year" value="2024">
+                        </div>
+                    </div>
+                    
+                    <!-- ЦВЕТА СМЕН -->
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color shift-regular"></div>
+                            <span>Обычная ставка</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-extra"></div>
+                            <span>Подработка (+100)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-dayoff"></div>
+                            <span>Выходной</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-done"></div>
+                            <span>Отработано</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-problem"></div>
+                            <span>Проблема</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-paid"></div>
+                            <span>Оплачено</span>
+                        </div>
+                    </div>
+                    
+                    <!-- КАЛЕНДАРЬ -->
+                    <div id="admin-calendar" class="calendar-grid"></div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <button id="save-shifts-btn"><i class="fas fa-save"></i> Сохранить смены</button>
+                    </div>
+                    
+                    <!-- УПРАВЛЕНИЕ ВЫПЛАТАМИ -->
+                    <h2 style="margin-top: 2rem;"><i class="fas fa-money-bill-wave"></i> Управление выплатами</h2>
+                    <div class="form-group">
+                        <label>Сотрудник:</label>
+                        <select id="payment-user"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Тип операции:</label>
+                        <select id="payment-type">
+                            <option value="bonus">Премия</option>
+                            <option value="deduction">Удержание</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Сумма:</label>
+                        <input type="number" id="payment-amount" placeholder="Сумма">
+                    </div>
+                    <div class="form-group">
+                        <label>Примечание:</label>
+                        <textarea id="payment-note" placeholder="Причина премии/удержания" rows="2"></textarea>
+                    </div>
+                    <button id="add-payment-btn"><i class="fas fa-plus"></i> Добавить операцию</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- USER SECTION -->
+        <section id="user-section" class="container hidden">
+            <div style="background: #3498db; color: white; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+                <h1 style="color: white; border-bottom: none;">
+                    <i class="fas fa-user"></i> <span id="user-full-name">Имя Фамилия</span>
+                </h1>
+                <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+                    <div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Должность</div>
+                        <div style="font-size: 1.2rem; font-weight: bold;" id="user-position">Сотрудник</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Ставка</div>
+                        <div style="font-size: 1.2rem; font-weight: bold;" id="user-rate">0 ₽</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Email</div>
+                        <div style="font-size: 1.1rem;" id="user-email">email</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <!-- ЛЕВАЯ КОЛОНКА -->
+                <div>
+                    <h2><i class="fas fa-chart-bar"></i> Статистика</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div style="font-size: 0.9rem; color: #666;">Обычных смен</div>
+                            <div class="stat-value" id="stat-regular">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div style="font-size: 0.9rem; color: #666;">Подработок</div>
+                            <div class="stat-value" id="stat-extra">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div style="font-size: 0.9rem; color: #666;">Отработано</div>
+                            <div class="stat-value" id="stat-done">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div style="font-size: 0.9rem; color: #666;">Проблемных</div>
+                            <div class="stat-value" id="stat-problem">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" style="margin-top: 1rem; background: #2c3e50; color: white;">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Заработано за месяц</div>
+                        <div class="stat-value" id="stat-earned">0 ₽</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;" id="stat-breakdown"></div>
+                    </div>
+                    
+                    <h2 style="margin-top: 1.5rem;"><i class="fas fa-history"></i> Последние выплаты</h2>
+                    <div id="payments-history"></div>
+                </div>
+                
+                <!-- ПРАВАЯ КОЛОНКА -->
+                <div>
+                    <h2><i class="fas fa-calendar-alt"></i> Мой график смен</h2>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color shift-regular"></div>
+                            <span>Обычная ставка</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-extra"></div>
+                            <span>Подработка (+100)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-dayoff"></div>
+                            <span>Выходной</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-done"></div>
+                            <span>Отработано</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-problem"></div>
+                            <span>Проблема</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shift-paid"></div>
+                            <span>Оплачено</span>
+                        </div>
+                    </div>
+                    
+                    <div id="user-calendar" class="calendar-grid"></div>
+                    
+                    <div style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                        <i class="fas fa-info-circle"></i> Просмотр смен
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2024 Календарь смен. Работает на Firebase.</p>
+    </footer>
+
+    <!-- FIREBASE & APP -->
+    <script>
+        // === FIREBASE CONFIG ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyAy60J96o9uzaEx96NQVSFVBNCRxn4NFWY",
+            authDomain: "ssss-7ac80.firebaseapp.com",
+            projectId: "ssss-7ac80",
+            storageBucket: "ssss-7ac80.firebasestorage.app",
+            messagingSenderId: "185019094690",
+            appId: "1:185019094690:web:f75df54462ed848acd29fb"
+        };
+        
+        // === ИНИЦИАЛИЗАЦИЯ ===
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // === СОСТОЯНИЕ ===
+        let currentUser = null;
+        let allUsers = [];
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let selectedUserId = '';
+        let shiftsMap = {};
+        let paymentsMap = {};
+        
+        // === ЭЛЕМЕНТЫ ===
+        const sections = {
+            welcome: document.getElementById('welcome-section'),
+            login: document.getElementById('login-section'),
+            admin: document.getElementById('admin-section'),
+            user: document.getElementById('user-section')
+        };
+        
+        // === ПОКАЗАТЬ/СКРЫТЬ СЕКЦИИ ===
+        function showSection(sectionId) {
+            Object.values(sections).forEach(s => s.classList.add('hidden'));
+            sections[sectionId].classList.remove('hidden');
+            updateNavigation();
+        }
+        
+        function updateNavigation() {
+            const isLoggedIn = !!currentUser;
+            const isAdmin = currentUser && allUsers.find(u => u.id === currentUser.uid && u.role === 'admin');
+            
+            document.getElementById('nav-login').classList.toggle('hidden', isLoggedIn);
+            document.getElementById('nav-admin').classList.toggle('hidden', !isAdmin);
+            document.getElementById('nav-user').classList.toggle('hidden', !isLoggedIn);
+            document.getElementById('nav-logout').classList.toggle('hidden', !isLoggedIn);
+        }
+        
+        // === АУТЕНТИФИКАЦИЯ ===
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                alert('Введите email и пароль');
+                return;
+            }
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        });
+        
+        // === ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ===
+        async function loadUsers() {
+            const snapshot = await db.collection('users').get();
+            allUsers = [];
+            snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data() }));
+            
+            // Показ списка пользователей
+            const container = document.getElementById('users-container');
+            container.innerHTML = allUsers.map(user => `
+                <div class="user-card ${user.role === 'admin' ? 'admin' : ''}">
+                    <strong>${user.fullName || user.email}</strong><br>
+                    <small>${user.role === 'admin' ? 'Администратор' : 'Сотрудник'}</small><br>
+                    <small>Ставка: ${user.rate || 0} ₽</small>
+                </div>
+            `).join('');
+            
+            // Селект выбора пользователя для смен
+            const select = document.getElementById('selected-user');
+            const paymentSelect = document.getElementById('payment-user');
+            select.innerHTML = '<option value="">Выберите сотрудника</option>';
+            paymentSelect.innerHTML = '<option value="">Выберите сотрудника</option>';
+            
+            allUsers.forEach(user => {
+                if (user.role !== 'admin') {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.fullName || user.email} (${user.rate || 0} ₽)`;
+                    select.appendChild(option.cloneNode(true));
+                    paymentSelect.appendChild(option);
+                }
+            });
+            
+            select.addEventListener('change', function() {
+                selectedUserId = this.value;
+                if (selectedUserId) {
+                    loadShiftsForUser(selectedUserId);
+                    renderAdminCalendar();
+                }
+            });
+        }
+        
+        // === СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ ===
+        document.getElementById('create-user-btn').addEventListener('click', async () => {
+            const email = document.getElementById('new-user-email').value;
+            const password = document.getElementById('new-user-password').value;
+            const fullName = document.getElementById('new-user-name').value;
+            const rate = parseInt(document.getElementById('new-user-rate').value) || 1500;
+            
+            if (!email || !password || !fullName) {
+                alert('Заполните все поля');
+                return;
+            }
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    email: email,
+                    role: 'user',
+                    fullName: fullName,
+                    rate: rate,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Очистка полей
+                document.getElementById('new-user-email').value = '';
+                document.getElementById('new-user-password').value = '';
+                document.getElementById('new-user-name').value = '';
+                
+                loadUsers();
+                alert(`Сотрудник ${fullName} создан!`);
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        });
+        
+        // === РАБОТА СО СМЕНАМИ ===
+        async function loadShiftsForUser(userId) {
+            const snapshot = await db.collection('shifts')
+                .where('userId', '==', userId)
+                .get();
+            
+            shiftsMap[userId] = {};
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                shiftsMap[userId][data.date] = {
+                    type: data.type,
+                    done: data.done || false,
+                    paid: data.paid || false
+                };
+            });
+        }
+        
+        // === РЕНДЕР КАЛЕНДАРЯ АДМИНА ===
+        function renderAdminCalendar() {
+            if (!selectedUserId) return;
+            
+            const container = document.getElementById('admin-calendar');
+            const year = parseInt(document.getElementById('selected-year').value);
+            const month = parseInt(document.getElementById('selected-month').value);
+            
+            // Заголовки дней
+            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            let html = '';
+            
+            days.forEach(day => {
+                html += `<div class="calendar-header">${day}</div>`;
+            });
+            
+            // Дни месяца
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+            
+            // Пустые клетки до первого дня
+            for (let i = 0; i < startDay; i++) {
+                html += `<div class="calendar-day"></div>`;
+            }
+            
+            // Дни месяца
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const shift = shiftsMap[selectedUserId] ? shiftsMap[selectedUserId][dateStr] : null;
+                
+                let shiftClass = '';
+                if (shift) {
+                    if (shift.paid) shiftClass = 'shift-paid';
+                    else if (shift.done) shiftClass = 'shift-done';
+                    else shiftClass = `shift-${shift.type}`;
+                }
+                
+                html += `
+                    <div class="calendar-day" data-date="${dateStr}">
+                        <div class="day-number">${day}</div>
+                        <div class="shift-marker ${shiftClass}" 
+                             data-shift-type="${shift ? shift.type : ''}"
+                             data-done="${shift ? shift.done : false}"
+                             data-paid="${shift ? shift.paid : false}"></div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+            
+            // Обработка кликов по дням (админ)
+            container.querySelectorAll('.calendar-day').forEach(day => {
+                day.addEventListener('click', function(e) {
+                    if (!selectedUserId) {
+                        alert('Сначала выберите сотрудника');
+                        return;
+                    }
+                    
+                    const date = this.getAttribute('data-date');
+                    const marker = this.querySelector('.shift-marker');
+                    const currentType = marker.getAttribute('data-shift-type');
+                    const isDone = marker.getAttribute('data-done') === 'true';
+                    const isPaid = marker.getAttribute('data-paid') === 'true';
+                    
+                    if (isPaid) {
+                        alert('Смена оплачена, нельзя изменить');
+                        return;
+                    }
+                    
+                    // ЦИКЛ: нет смены → обычная → подработка → выходной → проблема → отработано → удалить
+                    const shiftCycle = [
+                        {type: 'regular', color: 'shift-regular'},
+                        {type: 'extra', color: 'shift-extra'},
+                        {type: 'dayoff', color: 'shift-dayoff'},
+                        {type: 'problem', color: 'shift-problem'},
+                        {type: 'done', color: 'shift-done'},
+                        null // удаление
+                    ];
+                    
+                    // Находим текущую позицию в цикле
+                    let currentIndex = shiftCycle.findIndex(item => 
+                        item ? item.type === currentType : currentType === ''
+                    );
+                    if (currentIndex === -1) currentIndex = shiftCycle.length - 1;
+                    
+                    // Следующая позиция
+                    const nextIndex = (currentIndex + 1) % shiftCycle.length;
+                    const nextItem = shiftCycle[nextIndex];
+                    
+                    // Обновляем визуально
+                    marker.className = 'shift-marker';
+                    if (nextItem) {
+                        marker.classList.add(nextItem.color);
+                        marker.setAttribute('data-shift-type', nextItem.type);
+                        marker.setAttribute('data-done', nextItem.type === 'done' ? 'true' : 'false');
+                    } else {
+                        marker.setAttribute('data-shift-type', '');
+                        marker.setAttribute('data-done', 'false');
+                    }
+                    
+                    // Сохраняем в локальной карте
+                    if (!shiftsMap[selectedUserId]) shiftsMap[selectedUserId] = {};
+                    
+                    if (nextItem) {
+                        shiftsMap[selectedUserId][date] = {
+                            type: nextItem.type === 'done' ? 'regular' : nextItem.type,
+                            done: nextItem.type === 'done',
+                            paid: false
+                        };
+                    } else {
+                        delete shiftsMap[selectedUserId][date];
+                    }
+                });
+            });
+        }
+        
+        // === СОХРАНЕНИЕ СМЕН ===
+        document.getElementById('save-shifts-btn').addEventListener('click', async () => {
+            if (!selectedUserId) {
+                alert('Выберите сотрудника');
+                return;
+            }
+            
+            try {
+                const year = parseInt(document.getElementById('selected-year').value);
+                const month = parseInt(document.getElementById('selected-month').value);
+                const monthStr = String(month + 1).padStart(2, '0');
+                
+                // Удаляем старые смены за этот месяц
+                const oldShifts = await db.collection('shifts')
+                    .where('userId', '==', selectedUserId)
+                    .get();
+                
+                const batch = db.batch();
+                oldShifts.forEach(doc => {
+                    const data = doc.data();
+                    if (data.date.startsWith(`${year}-${monthStr}`)) {
+                        batch.delete(doc.ref);
+                    }
+                });
+                
+                // Добавляем новые смены
+                if (shiftsMap[selectedUserId]) {
+                    for (const [date, shift] of Object.entries(shiftsMap[selectedUserId])) {
+                        if (date.startsWith(`${year}-${monthStr}`)) {
+                            const shiftRef = db.collection('shifts').doc();
+                            batch.set(shiftRef, {
+                                userId: selectedUserId,
+                                date: date,
+                                type: shift.type,
+                                done: shift.done || false,
+                                paid: shift.paid || false,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    }
+                }
+                
+                await batch.commit();
+                alert('Смены сохранены!');
+            } catch (error) {
+                alert('Ошибка сохранения: ' + error.message);
+            }
+        });
+        
+        // === КАЛЕНДАРЬ ПОЛЬЗОВАТЕЛЯ ===
+        function renderUserCalendar() {
+            if (!currentUser) return;
+            
+            const container = document.getElementById('user-calendar');
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            
+            // Заголовки дней
+            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            let html = '';
+            
+            days.forEach(day => {
+                html += `<div class="calendar-header">${day}</div>`;
+            });
+            
+            // Дни месяца
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+            
+            // Пустые клетки
+            for (let i = 0; i < startDay; i++) {
+                html += `<div class="calendar-day"></div>`;
+            }
+            
+            // Дни месяца
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const userShifts = shiftsMap[currentUser.uid] || {};
+                const shift = userShifts[dateStr];
+                
+                let shiftClass = '';
+                if (shift) {
+                    if (shift.paid) shiftClass = 'shift-paid';
+                    else if (shift.done) shiftClass = 'shift-done';
+                    else shiftClass = `shift-${shift.type}`;
+                }
+                
+                html += `
+                    <div class="calendar-day" data-date="${dateStr}">
+                        <div class="day-number">${day}</div>
+                        ${shift ? `<div class="shift-marker ${shiftClass}"></div>` : ''}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // === СТАТИСТИКА И ЗАРАБОТОК ===
+        function updateUserStats() {
+            if (!currentUser) return;
+            
+            const user = allUsers.find(u => u.id === currentUser.uid);
+            const rate = user?.rate || 0;
+            const shifts = shiftsMap[currentUser.uid] || {};
+            
+            const stats = { regular: 0, extra: 0, done: 0, problem: 0 };
+            let earned = 0;
+            
+            Object.values(shifts).forEach(shift => {
+                if (shift.type === 'regular' && shift.done) {
+                    stats.regular++;
+                    earned += rate;
+                } else if (shift.type === 'extra' && shift.done) {
+                    stats.extra++;
+                    earned += rate + 100;
+                } else if (shift.type === 'problem') {
+                    stats.problem++;
+                }
+                if (shift.done) stats.done++;
+            });
+            
+            // Обновляем статистику
+            document.getElementById('stat-regular').textContent = stats.regular;
+            document.getElementById('stat-extra').textContent = stats.extra;
+            document.getElementById('stat-done').textContent = stats.done;
+            document.getElementById('stat-problem').textContent = stats.problem;
+            document.getElementById('stat-earned').textContent = `${earned} ₽`;
+            
+            // Детализация
+            const breakdown = [];
+            if (stats.regular > 0) breakdown.push(`${stats.regular} × ${rate} ₽`);
+            if (stats.extra > 0) breakdown.push(`${stats.extra} × ${rate + 100} ₽`);
+            document.getElementById('stat-breakdown').textContent = breakdown.join(' + ') || 'Нет отработанных смен';
+            
+            // Данные пользователя
+            if (user) {
+                document.getElementById('user-full-name').textContent = user.fullName || 'Имя не указано';
+                document.getElementById('user-position').textContent = user.role === 'admin' ? 'Администратор' : 'Сотрудник';
+                document.getElementById('user-rate').textContent = `${rate} ₽`;
+                document.getElementById('user-email').textContent = user.email;
+            }
+        }
+        
+        // === ВЫПЛАТЫ ===
+        document.getElementById('add-payment-btn').addEventListener('click', async () => {
+            const userId = document.getElementById('payment-user').value;
+            const type = document.getElementById('payment-type').value;
+            const amount = parseInt(document.getElementById('payment-amount').value);
+            const note = document.getElementById('payment-note').value;
+            
+            if (!userId || !amount || amount <= 0) {
+                alert('Заполните все поля правильно');
+                return;
+            }
+            
+            try {
+                await db.collection('payments').add({
+                    userId: userId,
+                    type: type,
+                    amount: amount,
+                    note: note,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    adminId: currentUser.uid
+                });
+                
+                if (type === 'bonus') {
+                    const shifts = await db.collection('shifts')
+                        .where('userId', '==', userId)
+                        .where('done', '==', true)
+                        .where('paid', '==', false)
+                        .get();
+                    
+                    const batch = db.batch();
+                    shifts.forEach(doc => {
+                        batch.update(doc.ref, { paid: true });
+                    });
+                    await batch.commit();
+                }
+                
+                alert('Операция добавлена!');
+                document.getElementById('payment-amount').value = '';
+                document.getElementById('payment-note').value = '';
+                
+                if (userId === currentUser?.uid || userId === selectedUserId) {
+                    await loadShiftsForUser(userId);
+                    if (userId === currentUser?.uid) {
+                        updateUserStats();
+                        renderUserCalendar();
+                    }
+                    if (userId === selectedUserId) {
+                        renderAdminCalendar();
+                    }
+                }
+                
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        });
+        
+        // === ЗАГРУЗКА ВЫПЛАТ ===
+        async function loadPayments(userId) {
+            const snapshot = await db.collection('payments')
+                .where('userId', '==', userId)
+                .limit(10)
+                .get();
+            
+            const payments = [];
+            snapshot.forEach(doc => payments.push({ id: doc.id, ...doc.data() }));
+            payments.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+            
+            const container = document.getElementById('payments-history');
+            if (payments.length === 0) {
+                container.innerHTML = '<p>Нет операций</p>';
+                return;
+            }
+            
+            let html = '<div style="max-height: 300px; overflow-y: auto;">';
+            payments.forEach(data => {
+                const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Дата неизвестна';
+                const typeClass = data.type === 'bonus' ? 'success' : 'error';
+                const typeText = data.type === 'bonus' ? 'Премия' : 'Удержание';
+                
+                html += `
+                    <div style="padding: 0.8rem; border-bottom: 1px solid #eee;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>${typeText}</strong>
+                            <span class="${typeClass}">${data.type === 'bonus' ? '+' : '-'}${data.amount} ₽</span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">${date}</div>
+                        <div style="font-size: 0.9rem;">${data.note || 'Без примечания'}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // === СОБЫТИЯ ИНТЕРФЕЙСА ===
+        function init() {
+            // Навигация
+            document.getElementById('nav-home').addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('welcome');
+            });
+            document.getElementById('nav-login').addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('login');
+            });
+            document.getElementById('nav-admin').addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('admin');
+            });
+            document.getElementById('nav-user').addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('user');
+            });
+            document.getElementById('nav-logout').addEventListener('click', () => {
+                auth.signOut();
+            });
+            
+            // Управление календарем
+            document.getElementById('selected-month').addEventListener('change', renderAdminCalendar);
+            document.getElementById('selected-year').addEventListener('change', renderAdminCalendar);
+            
+            // Начальное состояние
+            document.getElementById('selected-month').value = currentMonth;
+            document.getElementById('selected-year').value = currentYear;
+            showSection('welcome');
+        }
+        
+        // === ОБРАБОТЧИК АУТЕНТИФИКАЦИИ ===
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            
+            if (user) {
+                await loadUsers();
+                
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const isAdmin = userDoc.exists && userDoc.data().role === 'admin';
+                
+                if (isAdmin) {
+                    showSection('admin');
+                } else {
+                    await loadShiftsForUser(user.uid);
+                    await loadPayments(user.uid);
+                    updateUserStats();
+                    renderUserCalendar();
+                    showSection('user');
+                }
+                
+                updateNavigation();
+            } else {
+                showSection('welcome');
+                updateNavigation();
+            }
+        });
+        
+        // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
+        function showMessage(elementId, text, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = text;
+            el.className = `message ${isError ? 'error' : 'success'}`;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 5000);
+        }
+        
+        // ЗАПУСК
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
