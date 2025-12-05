@@ -426,19 +426,7 @@
                 return el;
             },
             
-            showSection: function(sectionId) {
-                const sections = ['welcome-section', 'login-section', 'admin-section', 'user-section'];
-                sections.forEach(id => {
-                    const el = this.getElement(id);
-                    if (el) el.classList.add('hidden');
-                });
-                
-                const targetSection = this.getElement(sectionId);
-                if (targetSection) {
-                    targetSection.classList.remove('hidden');
-                }
-                this.updateNavigation();
-            },
+           
             
             updateNavigation: function() {
                 const isLoggedIn = !!currentUser;
