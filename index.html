@@ -720,38 +720,10 @@ document.getElementById('login-btn').addEventListener('click', async () => {
             
             container.innerHTML = html;
             
-            // Обработка кликов для отметки "отработано"
-            container.querySelectorAll('.calendar-day').forEach(day => {
-                day.addEventListener('click', async function() {
-                    const date = this.getAttribute('data-date');
-                    const userShifts = shiftsMap[currentUser.uid] || {};
-                    const shift = userShifts[date];
-                    
-                    if (!shift || shift.paid) return;
-                    
-                    if (shift.done) {
-                        // Снимаем отметку
-                        shift.done = false;
-                        this.querySelector('.shift-marker').classList.remove('shift-done');
-                        this.querySelector('.shift-marker').classList.add(`shift-${shift.type}`);
-                    } else {
-                        // Ставим отметку
-                        shift.done = true;
-                        this.querySelector('.shift-marker').classList.remove(`shift-${shift.type}`);
-                        this.querySelector('.shift-marker').classList.add('shift-done');
-                    }
-                    
-                    // Сохраняем в БД
-                    const shiftRef = db.collection('shifts').where('userId', '==', currentUser.uid).where('date', '==', date);
-                    const snapshot = await shiftRef.get();
-                    if (!snapshot.empty) {
-                        const doc = snapshot.docs[0];
-                        await doc.ref.update({ done: shift.done });
-                    }
-                    
-                    updateUserStats();
-                });
-            });
+            // Только отображение, без кликов
+container.querySelectorAll('.calendar-day').forEach(day => {
+    // Никаких обработчиков клика
+});
         }
         
         // === СТАТИСТИКА И ЗАРАБОТОК ===
