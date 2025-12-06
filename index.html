@@ -325,6 +325,7 @@
                         <table class="posts-table">
                             <thead>
                                 <tr>
+                                    <th>№</th>
                                     <th>Пост</th>
                                     <th>Время</th>
                                     <th>Действия</th>
@@ -545,20 +546,20 @@
         let postsData = [];
         let isAdmin = false;
         
-        // === ПРЕДУСТАНОВЛЕННЫЕ ПОСТЫ (ШАБЛОН) ===
+        // === ПРЕДУСТАНОВЛЕННЫЕ ПОСТЫ (ШАБЛОН) С НОМЕРАМИ ===
         const defaultPosts = [
-            { post: "Старший смены", time: "06:00" },
-            { post: "Помощник ст.смены", time: "18:00" },
-            { post: "Оператор CCTV", time: "06:00" },
-            { post: "Оператор-аналитик ТСБ", time: "08:00" },
-            { post: "Оператор CCTV", time: "18:00" },
-            { post: "Служебный вход", time: "07:00" },
-            { post: "Выход без покупок", time: "07:15" },
-            { post: "КСО", time: "10:00" },
-            { post: "Приёмка", time: "07:00" },
-            { post: "Интернет", time: "07:30" },
-            { post: "Выезд со стройдвора", time: "07:15" },
-            { post: "Резерв", time: "08:00" }
+            { number: "1", post: "Старший смены", time: "06:00" },
+            { number: "2", post: "Помощник ст.смены", time: "18:00" },
+            { number: "3", post: "Оператор CCTV", time: "06:00" },
+            { number: "4", post: "Оператор-аналитик ТСБ", time: "08:00" },
+            { number: "3.1", post: "Оператор CCTV", time: "18:00" },
+            { number: "5", post: "Служебный вход", time: "07:00" },
+            { number: "6", post: "Выход без покупок", time: "07:15" },
+            { number: "8", post: "КСО", time: "10:00" },
+            { number: "11", post: "Приёмка", time: "07:00" },
+            { number: "12", post: "Интернет", time: "07:30" },
+            { number: "14", post: "Выезд со стройдвора", time: "07:15" },
+            { number: "15", post: "Резерв", time: "08:00" }
         ];
         
         // === ТАБЫ ===
@@ -1013,6 +1014,7 @@
             defaultPosts.forEach((item, index) => {
                 html += `
                     <tr>
+                        <td>${item.number}</td>
                         <td>${item.post}</td>
                         <td>${item.time}</td>
                         <td>
@@ -1043,13 +1045,16 @@
         
         function editTemplatePost(index) {
             const post = defaultPosts[index];
-            const newPost = prompt('Измените название поста:', post.post);
-            if (newPost !== null) {
-                const newTime = prompt('Измените время (формат ЧЧ:ММ):', post.time);
-                if (newTime !== null) {
-                    defaultPosts[index] = { post: newPost, time: newTime };
-                    renderPostsTemplate();
-                    alert('Шаблон обновлен!');
+            const newNumber = prompt('Измените номер поста:', post.number);
+            if (newNumber !== null) {
+                const newPost = prompt('Измените название поста:', post.post);
+                if (newPost !== null) {
+                    const newTime = prompt('Измените время (формат ЧЧ:ММ):', post.time);
+                    if (newTime !== null) {
+                        defaultPosts[index] = { number: newNumber, post: newPost, time: newTime };
+                        renderPostsTemplate();
+                        alert('Шаблон обновлен!');
+                    }
                 }
             }
         }
@@ -1093,21 +1098,28 @@
                     batch.delete(doc.ref);
                 });
                 
-                // Добавляем новые посты из шаблона
-                defaultPosts.forEach(post => {
+                // Добавляем новые посты из шаблона в ТОЧНОМ ПОРЯДКЕ
+                for (let i = 0; i < defaultPosts.length; i++) {
+                    const post = defaultPosts[i];
                     const postRef = db.collection('posts').doc();
+                    
+                    // Сохраняем порядковый номер как строку (1, 2, 3.1, 4...)
+                    const order = i + 1; // Внутренний порядок для сортировки
+                    
                     batch.set(postRef, {
                         date: dateInput.value,
+                        number: post.number, // Номер поста (1, 2, 3.1, 4...)
                         post: post.post,
                         guardId: '',
                         guardName: '',
                         time: post.time,
+                        order: order, // Внутренний порядковый номер для сортировки
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                });
+                }
                 
                 await batch.commit();
-                alert('Шаблон постов создан!');
+                alert('Шаблон постов создан в правильном порядке!');
                 await loadPostsForDate(dateInput.value, true);
                 
             } catch (error) {
@@ -1116,38 +1128,38 @@
         });
         
         async function loadPostsForDate(date, isAdminView = false) {
-    try {
-        const snapshot = await db.collection('posts')
-            .where('date', '==', date)
-            .get();
-        
-        postsData = [];
-        snapshot.forEach(doc => {
-            postsData.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // СОРТИРУЕМ ПО ПОЛЮ order (если есть), иначе по времени
-        postsData.sort((a, b) => {
-            const orderA = a.order || 999; // Если нет order, ставим в конец
-            const orderB = b.order || 999;
-            return orderA - orderB; // Сортировка по порядку
-        });
-        
-        if (isAdminView) {
-            renderAdminPostsTable(date);
-        } else {
-            renderUserPostsTable(date);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки постов:', error);
-        if (isAdminView) {
-            const container = app.getElement('posts-admin-container');
-            if (container) {
-                container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
+            try {
+                const snapshot = await db.collection('posts')
+                    .where('date', '==', date)
+                    .get();
+                
+                postsData = [];
+                snapshot.forEach(doc => {
+                    postsData.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // СОРТИРУЕМ ПО ПОЛЮ order (если есть), иначе по времени
+                postsData.sort((a, b) => {
+                    const orderA = a.order || 999; // Если нет order, ставим в конец
+                    const orderB = b.order || 999;
+                    return orderA - orderB; // Сортировка по порядку
+                });
+                
+                if (isAdminView) {
+                    renderAdminPostsTable(date);
+                } else {
+                    renderUserPostsTable(date);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки постов:', error);
+                if (isAdminView) {
+                    const container = app.getElement('posts-admin-container');
+                    if (container) {
+                        container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
+                    }
+                }
             }
         }
-    }
-}
         
         function renderAdminPostsTable(date) {
             const container = app.getElement('posts-admin-container');
@@ -1176,6 +1188,7 @@
                     <table class="posts-table">
                         <thead>
                             <tr>
+                                <th>№</th>
                                 <th>Пост</th>
                                 <th>Время</th>
                                 <th>Охранник</th>
@@ -1188,6 +1201,9 @@
             postsData.forEach((post) => {
                 html += `
                     <tr class="post-row" data-id="${post.id}">
+                        <td>
+                            <input type="text" value="${post.number || ''}" class="number-input" placeholder="№" style="width: 60px;">
+                        </td>
                         <td>
                             <input type="text" value="${post.post || ''}" class="post-input" placeholder="Название поста" style="width: 100%;">
                         </td>
@@ -1254,70 +1270,74 @@
         }
         
         async function addNewPostRowToTable(date) {
-    try {
-        // Находим максимальный order для этой даты
-        let maxOrder = 0;
-        postsData.forEach(post => {
-            if (post.order !== undefined && post.order > maxOrder) {
-                maxOrder = post.order;
+            try {
+                // Находим максимальный order для этой даты
+                let maxOrder = 0;
+                postsData.forEach(post => {
+                    if (post.order !== undefined && post.order > maxOrder) {
+                        maxOrder = post.order;
+                    }
+                });
+                
+                const postRef = await db.collection('posts').add({
+                    date: date,
+                    number: '',
+                    post: 'Новый пост',
+                    guardId: '',
+                    guardName: '',
+                    time: '08:00',
+                    order: maxOrder + 1, // ДОБАВЛЯЕМ ПОРЯДОК
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                await loadPostsForDate(date, true);
+            } catch (error) {
+                alert('Ошибка создания поста: ' + error.message);
             }
-        });
-        
-        const postRef = await db.collection('posts').add({
-            date: date,
-            post: 'Новый пост',
-            guardId: '',
-            guardName: '',
-            time: '08:00',
-            order: maxOrder + 1, // ДОБАВЛЯЕМ ПОРЯДОК
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        await loadPostsForDate(date, true);
-    } catch (error) {
-        alert('Ошибка создания поста: ' + error.message);
-    }
-}
+        }
         
         async function savePostRow(row, date) {
-    const postId = row.getAttribute('data-id');
-    const postInput = row.querySelector('.post-input');
-    const guardSelect = row.querySelector('.guard-select');
-    const timeInput = row.querySelector('.time-input');
-    
-    if (!postId || !postInput || !guardSelect || !timeInput) return;
-    
-    const post = postInput.value.trim();
-    const guardId = guardSelect.value;
-    const time = timeInput.value;
-    
-    if (!post) {
-        alert('Введите название поста');
-        return;
-    }
-    
-    const guard = allUsers.find(u => u.id === guardId);
-    const guardName = guard ? guard.fullName : '';
-    
-    // Сохраняем существующий order или оставляем undefined
-    const existingPost = postsData.find(p => p.id === postId);
-    const order = existingPost ? existingPost.order : undefined;
-    
-    try {
-        await db.collection('posts').doc(postId).update({
-            post: post,
-            guardId: guardId,
-            guardName: guardName,
-            time: time,
-            order: order, // Сохраняем существующий порядок
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        alert('Пост сохранен!');
-    } catch (error) {
-        alert('Ошибка сохранения: ' + error.message);
-    }
-}
+            const postId = row.getAttribute('data-id');
+            const numberInput = row.querySelector('.number-input');
+            const postInput = row.querySelector('.post-input');
+            const guardSelect = row.querySelector('.guard-select');
+            const timeInput = row.querySelector('.time-input');
+            
+            if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) return;
+            
+            const number = numberInput.value.trim();
+            const post = postInput.value.trim();
+            const guardId = guardSelect.value;
+            const time = timeInput.value;
+            
+            if (!post) {
+                alert('Введите название поста');
+                return;
+            }
+            
+            const guard = allUsers.find(u => u.id === guardId);
+            const guardName = guard ? guard.fullName : '';
+            
+            // Сохраняем существующий order
+            const existingPost = postsData.find(p => p.id === postId);
+            const order = existingPost ? existingPost.order : (postsData.length + 1);
+            
+            try {
+                await db.collection('posts').doc(postId).update({
+                    number: number,
+                    post: post,
+                    guardId: guardId,
+                    guardName: guardName,
+                    time: time,
+                    order: order, // Сохраняем существующий порядок
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('Пост сохранен!');
+            } catch (error) {
+                alert('Ошибка сохранения: ' + error.message);
+            }
+        }
         
         async function saveAllPosts(date) {
             const rows = document.querySelectorAll('.post-row');
@@ -1325,12 +1345,14 @@
             
             for (const row of rows) {
                 const postId = row.getAttribute('data-id');
+                const numberInput = row.querySelector('.number-input');
                 const postInput = row.querySelector('.post-input');
                 const guardSelect = row.querySelector('.guard-select');
                 const timeInput = row.querySelector('.time-input');
                 
-                if (!postId || !postInput || !guardSelect || !timeInput) continue;
+                if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) continue;
                 
+                const number = numberInput.value.trim();
                 const post = postInput.value.trim();
                 const guardId = guardSelect.value;
                 const time = timeInput.value;
@@ -1344,12 +1366,18 @@
                 const guard = allUsers.find(u => u.id === guardId);
                 const guardName = guard ? guard.fullName : '';
                 
+                // Сохраняем существующий order
+                const existingPost = postsData.find(p => p.id === postId);
+                const order = existingPost ? existingPost.order : (postsData.length + 1);
+                
                 try {
                     await db.collection('posts').doc(postId).update({
+                        number: number,
                         post: post,
                         guardId: guardId,
                         guardName: guardName,
                         time: time,
+                        order: order,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 } catch (error) {
@@ -1365,59 +1393,46 @@
             }
         }
         
-        async function deletePostRow(row, date) {
-            const postId = row.getAttribute('data-id');
-            if (!postId) return;
-            
-            if (!confirm('Удалить этот пост?')) return;
-            
+        async function createPostsFromTemplate(date) {
             try {
-                await db.collection('posts').doc(postId).delete();
+                // Удаляем старые посты на эту дату
+                const oldPosts = await db.collection('posts')
+                    .where('date', '==', date)
+                    .get();
+                
+                const batch = db.batch();
+                oldPosts.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Добавляем новые посты из шаблона в ТОЧНОМ ПОРЯДКЕ
+                for (let i = 0; i < defaultPosts.length; i++) {
+                    const post = defaultPosts[i];
+                    const postRef = db.collection('posts').doc();
+                    
+                    // Сохраняем порядковый номер как строку (1, 2, 3.1, 4...)
+                    const order = i + 1; // Внутренний порядок для сортировки
+                    
+                    batch.set(postRef, {
+                        date: date,
+                        number: post.number, // Номер поста (1, 2, 3.1, 4...)
+                        post: post.post,
+                        guardId: '',
+                        guardName: '',
+                        time: post.time,
+                        order: order, // Внутренний порядковый номер для сортировки
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                await batch.commit();
+                alert('Шаблон постов создан в правильном порядке!');
                 await loadPostsForDate(date, true);
+                
             } catch (error) {
-                alert('Ошибка удаления: ' + error.message);
+                alert('Ошибка создания шаблона: ' + error.message);
             }
         }
-        
-        async function createPostsFromTemplate(date) {
-    try {
-        // Удаляем старые посты на эту дату
-        const oldPosts = await db.collection('posts')
-            .where('date', '==', date)
-            .get();
-        
-        const batch = db.batch();
-        oldPosts.forEach(doc => {
-            batch.delete(doc.ref);
-        });
-        
-        // Добавляем новые посты из шаблона в ТОЧНОМ ПОРЯДКЕ
-        for (let i = 0; i < defaultPosts.length; i++) {
-            const post = defaultPosts[i];
-            const postRef = db.collection('posts').doc();
-            
-            // Сохраняем порядковый номер
-            const order = i + 1;
-            
-            batch.set(postRef, {
-                date: date,
-                post: post.post,
-                guardId: '',
-                guardName: '',
-                time: post.time,
-                order: order, // Порядковый номер (1, 2, 3...)
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-        
-        await batch.commit();
-        alert('Шаблон постов создан в правильном порядке!');
-        await loadPostsForDate(date, true);
-        
-    } catch (error) {
-        alert('Ошибка создания шаблона: ' + error.message);
-    }
-}
         
         // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
         app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
@@ -1452,6 +1467,7 @@
                     <table class="posts-table">
                         <thead>
                             <tr>
+                                <th>№</th>
                                 <th>Пост</th>
                                 <th>Время</th>
                                 <th>Охранник</th>
@@ -1463,6 +1479,7 @@
             postsData.forEach((post) => {
                 html += `
                     <tr>
+                        <td>${post.number || ''}</td>
                         <td>${post.post || ''}</td>
                         <td>${post.time || ''}</td>
                         <td>${post.guardName || 'Не назначен'}</td>
