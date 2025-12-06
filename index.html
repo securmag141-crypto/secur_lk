@@ -1899,134 +1899,107 @@
             return text.split('').map(char => cyr[char] || char).join('');
         }
         
-        // === СКАЧАТЬ ШАБЛОН CSV ===
+        // === ЭКСПОРТ CSV ===
+        app.safeAddEventListener('export-csv-btn', 'click', async function() {
+            const month = parseInt(app.getElement('selected-month').value);
+            const year = parseInt(app.getElement('selected-year').value);
+    
+            try {
+                const csvContent = await generateCSVExport(month, year);
         
-        app.safeAddEventListener('download-template-btn', 'click', function() {
-            const month = parseInt(app.getElement('csv-month').value);
-            const year = parseInt(app.getElement('csv-year').value);
+        // Создаем и скачиваем файл
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+        
+                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        
+                link.setAttribute('href', url);
+                link.setAttribute('download', `smens_${monthNames[month]}_${year}.csv`);
+                link.style.visibility = 'hidden';
+        
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+        
+                alert('CSV файл скачан!');
+        
+            } catch (error) {
+                alert('Ошибка экспорта: ' + error.message);
+            }
+        });
+
+        async function generateCSVExport(month, year) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = firstDay.toISOString().split('T')[0];
+            const endDate = lastDay.toISOString().split('T')[0];
     
-            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
-                               'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    // Загружаем смены за месяц
+            const snapshot = await db.collection('shifts')
+                .where('date', '>=', startDate)
+                .where('date', '<=', endDate)
+                .get();
     
-    // Создаем заголовки
-            let csvContent = 'Sotrudnik'; // или 'Employee'
-            for (let day = 1; day <= 31; day++) {
+    // Группируем смены по сотрудникам
+            const shiftsByUser = {};
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (!shiftsByUser[data.userId]) {
+                    shiftsByUser[data.userId] = {};
+                }
+                shiftsByUser[data.userId][data.date] = {
+                    type: data.type,
+                    done: data.done,
+                    paid: data.paid
+                };
+            });
+    
+    // Создаем CSV
+            let csvContent = 'Sotrudnik'; // Заголовок на латинице
+            const daysInMonth = lastDay.getDate();
+    
+    // Заголовки дней
+            for (let day = 1; day <= daysInMonth; day++) {
                 csvContent += `,${day}`;
             }
             csvContent += '\n';
     
-    // Добавляем реальных сотрудников
-            const employees = allUsers.filter(u => u.role !== 'admin');
-
-            if (employees.length > 0) {
-                employees.forEach(employee => {
-                    const name = employee.displayName || employee.fullName || `${employee.lastName} ${employee.firstName}`;
-                    const nameLatin = cyrillicToLatin(name); // ← переводим в латиницу
-                    csvContent += nameLatin; // ← используем латиницу
-            
-                    for (let day = 1; day <= 31; day++) {
-                // Оставляем пустые ячейки для заполнения
-                        csvContent += ', ';
-                    }
-                    csvContent += '\n';
-                });
-            } else {
-        // Пример если нет сотрудников
-                csvContent += 'Иван Иванов';
-                for (let day = 1; day <= 31; day++) {
-                    csvContent += ', ';
-                }
-                csvContent += '\nПетр Петров';
-                for (let day = 1; day <= 31; day++) {
-                    csvContent += ', ';
-                }
-                csvContent += '\n';
-            }
-    
-    // Создаем и скачиваем файл
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-    
-            link.setAttribute('href', url);
-            link.setAttribute('download', `смены_${monthNames[month]}_${year}.csv`);
-            link.style.visibility = 'hidden';
-    
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
-        async function generateCSVExport(month, year) {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = firstDay.toISOString().split('T')[0];
-    const endDate = lastDay.toISOString().split('T')[0];
-    
-    // Загружаем смены за месяц
-    const snapshot = await db.collection('shifts')
-        .where('date', '>=', startDate)
-        .where('date', '<=', endDate)
-        .get();
-    
-    // Группируем смены по сотрудникам
-    const shiftsByUser = {};
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        if (!shiftsByUser[data.userId]) {
-            shiftsByUser[data.userId] = {};
-        }
-        shiftsByUser[data.userId][data.date] = {
-            type: data.type,
-            done: data.done,
-            paid: data.paid
-        };
-    });
-    
-    // Создаем CSV
-    let csvContent = 'Sotrudnik'; // Заголовок на латинице
-    const daysInMonth = lastDay.getDate();
-    
-    // Заголовки дней
-    for (let day = 1; day <= daysInMonth; day++) {
-        csvContent += `,${day}`;
-    }
-    csvContent += '\n';
-    
     // Данные по каждому сотруднику
-    const employees = allUsers.filter(u => u.role !== 'admin');
+            const employees = allUsers.filter(u => u.role !== 'admin');
     
-    employees.forEach(employee => {
+            employees.forEach(employee => {
         // Имя в латинице
-        const name = employee.displayName || employee.fullName || `${employee.lastName} ${employee.firstName}`;
-        const nameLatin = cyrillicToLatin(name);
-        csvContent += nameLatin;
+                const name = employee.displayName || employee.fullName || `${employee.lastName} ${employee.firstName}`;
+                const nameLatin = cyrillicToLatin(name);
+                csvContent += nameLatin;
         
-        const userShifts = shiftsByUser[employee.id] || {};
+                const userShifts = shiftsByUser[employee.id] || {};
         
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const shift = userShifts[dateStr];
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const shift = userShifts[dateStr];
             
-            let symbol = ' ';
-            if (shift) {
+                    let symbol = ' ';
+                    if (shift) {
                 // Только * и # как в импорте
-                if (shift.type === 'regular') {
-                    symbol = '*'; // основная смена
-                } else if (shift.type === 'extra') {
-                    symbol = '#'; // подработка
-                }
+                        if (shift.type === 'regular') {
+                            symbol = '*'; // основная смена
+                        } else if (shift.type === 'extra') {
+                            symbol = '#'; // подработка
+                        }
                 // Выходные, проблемные и другие - пропускаем (пусто)
-            }
+                    }
             
-            csvContent += `,${symbol}`;
-        }
+                    csvContent += `,${symbol}`;
+                }
         
-        csvContent += '\n';
-    });
+                csvContent += '\n';
+            });
     
-    return csvContent;
-}
+            return csvContent;
+        }
         // === ЗАГРУЗКА СМЕН ПО КНОПКЕ ===
         app.safeAddEventListener('load-all-shifts-btn', 'click', async () => {
             await loadAllShiftsForAdmin();
