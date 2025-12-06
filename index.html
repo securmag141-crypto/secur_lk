@@ -13,7 +13,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; background: #0a192f; color: #e6f1ff; line-height: 1.6; }
         
-        /* HEADER - ТЕМНО-СИНИЙ */
+        /* HEADER */
         header { 
             background: linear-gradient(135deg, #0a192f, #112240); 
             color: #64ffda; 
@@ -216,21 +216,24 @@
             background: #0a192f;
             border-radius: 8px;
             overflow: hidden;
-            table-layout: fixed;
         }
         .shifts-admin-table th, 
         .shifts-admin-table td { 
             padding: 0.5rem; 
             text-align: center; 
             border: 1px solid #233554; 
-            height: 50px;
             vertical-align: middle;
             box-sizing: border-box;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
-        /* Колонка № */
+        .shifts-admin-table th { 
+            background: #112240; 
+            font-weight: 600; 
+            color: #64ffda;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        /* Колонка № - 50px */
         .shifts-admin-table th:nth-child(1),
         .shifts-admin-table td:nth-child(1) {
             width: 50px;
@@ -246,7 +249,7 @@
             font-weight: bold;
             color: #64ffda;
         }
-        /* Колонка Сотрудник */
+        /* Колонка Сотрудник - 200px */
         .shifts-admin-table th:nth-child(2),
         .shifts-admin-table td:nth-child(2) {
             width: 200px;
@@ -262,21 +265,73 @@
         .shifts-admin-table td:nth-child(2) {
             background: #0a192f;
         }
-        /* Колонки дней (начиная с 3-й) */
-        .shifts-admin-table th:nth-child(n+3),
-        .shifts-admin-table td:nth-child(n+3) {
+        /* ВСЕ КОЛОНКИ ДНЕЙ - 50px */
+        .shifts-admin-table th:nth-child(3),
+        .shifts-admin-table th:nth-child(4),
+        .shifts-admin-table th:nth-child(5),
+        .shifts-admin-table th:nth-child(6),
+        .shifts-admin-table th:nth-child(7),
+        .shifts-admin-table th:nth-child(8),
+        .shifts-admin-table th:nth-child(9),
+        .shifts-admin-table th:nth-child(10),
+        .shifts-admin-table th:nth-child(11),
+        .shifts-admin-table th:nth-child(12),
+        .shifts-admin-table th:nth-child(13),
+        .shifts-admin-table th:nth-child(14),
+        .shifts-admin-table th:nth-child(15),
+        .shifts-admin-table th:nth-child(16),
+        .shifts-admin-table th:nth-child(17),
+        .shifts-admin-table th:nth-child(18),
+        .shifts-admin-table th:nth-child(19),
+        .shifts-admin-table th:nth-child(20),
+        .shifts-admin-table th:nth-child(21),
+        .shifts-admin-table th:nth-child(22),
+        .shifts-admin-table th:nth-child(23),
+        .shifts-admin-table th:nth-child(24),
+        .shifts-admin-table th:nth-child(25),
+        .shifts-admin-table th:nth-child(26),
+        .shifts-admin-table th:nth-child(27),
+        .shifts-admin-table th:nth-child(28),
+        .shifts-admin-table th:nth-child(29),
+        .shifts-admin-table th:nth-child(30),
+        .shifts-admin-table th:nth-child(31),
+        .shifts-admin-table th:nth-child(32),
+        .shifts-admin-table th:nth-child(33),
+        .shifts-admin-table td:nth-child(3),
+        .shifts-admin-table td:nth-child(4),
+        .shifts-admin-table td:nth-child(5),
+        .shifts-admin-table td:nth-child(6),
+        .shifts-admin-table td:nth-child(7),
+        .shifts-admin-table td:nth-child(8),
+        .shifts-admin-table td:nth-child(9),
+        .shifts-admin-table td:nth-child(10),
+        .shifts-admin-table td:nth-child(11),
+        .shifts-admin-table td:nth-child(12),
+        .shifts-admin-table td:nth-child(13),
+        .shifts-admin-table td:nth-child(14),
+        .shifts-admin-table td:nth-child(15),
+        .shifts-admin-table td:nth-child(16),
+        .shifts-admin-table td:nth-child(17),
+        .shifts-admin-table td:nth-child(18),
+        .shifts-admin-table td:nth-child(19),
+        .shifts-admin-table td:nth-child(20),
+        .shifts-admin-table td:nth-child(21),
+        .shifts-admin-table td:nth-child(22),
+        .shifts-admin-table td:nth-child(23),
+        .shifts-admin-table td:nth-child(24),
+        .shifts-admin-table td:nth-child(25),
+        .shifts-admin-table td:nth-child(26),
+        .shifts-admin-table td:nth-child(27),
+        .shifts-admin-table td:nth-child(28),
+        .shifts-admin-table td:nth-child(29),
+        .shifts-admin-table td:nth-child(30),
+        .shifts-admin-table td:nth-child(31),
+        .shifts-admin-table td:nth-child(32),
+        .shifts-admin-table td:nth-child(33) {
             width: 50px !important;
             min-width: 50px !important;
             max-width: 50px !important;
             height: 50px !important;
-        }
-        .shifts-admin-table th { 
-            background: #112240; 
-            font-weight: 600; 
-            color: #64ffda;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
         .shifts-admin-table tr:nth-child(even) {
             background: rgba(17, 34, 64, 0.5);
@@ -308,15 +363,15 @@
             box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
         }
         
-        /* ЦВЕТА СМЕН - ИСПРАВЛЕННЫЕ */
-        .shift-regular { background: #27ae60; } /* темно-зеленый вместо кислотного */
-        .shift-extra { background: #a3e4d7; } /* салатовый */
-        .shift-dayoff { background: #3498db; } /* синий */
-        .shift-paid { background: #9b59b6; } /* фиолетовый */
-        .shift-problem { background: #e74c3c; } /* красный */
-        .shift-done { background: #2c3e50; color: #bdc3c7; } /* чёрный с светлым текстом */
-        .shift-done-extra { background: #95a5a6; color: white; } /* серый */
-        .shift-paid-extra { background: #e84393; color: white; } /* розовый */
+        /* ЦВЕТА СМЕН */
+        .shift-regular { background: #27ae60; }
+        .shift-extra { background: #a3e4d7; }
+        .shift-dayoff { background: #3498db; }
+        .shift-paid { background: #9b59b6; }
+        .shift-problem { background: #e74c3c; }
+        .shift-done { background: #2c3e50; color: #bdc3c7; }
+        .shift-done-extra { background: #95a5a6; color: white; }
+        .shift-paid-extra { background: #e84393; color: white; }
         
         /* КОНТРОЛЫ ДЛЯ ТАБЛИЦЫ СМЕН */
         .shifts-controls { 
@@ -564,73 +619,7 @@
             font-size: 0.9rem; 
             background: #0a192f;
         }
-        /* ИСПРАВЛЕНИЕ РАЗМЕРА СТОЛБЦОВ ДНЕЙ */
-.shifts-admin-table th:nth-child(3),
-.shifts-admin-table th:nth-child(4),
-.shifts-admin-table th:nth-child(5),
-.shifts-admin-table th:nth-child(6),
-.shifts-admin-table th:nth-child(7),
-.shifts-admin-table th:nth-child(8),
-.shifts-admin-table th:nth-child(9),
-.shifts-admin-table th:nth-child(10),
-.shifts-admin-table th:nth-child(11),
-.shifts-admin-table th:nth-child(12),
-.shifts-admin-table th:nth-child(13),
-.shifts-admin-table th:nth-child(14),
-.shifts-admin-table th:nth-child(15),
-.shifts-admin-table th:nth-child(16),
-.shifts-admin-table th:nth-child(17),
-.shifts-admin-table th:nth-child(18),
-.shifts-admin-table th:nth-child(19),
-.shifts-admin-table th:nth-child(20),
-.shifts-admin-table th:nth-child(21),
-.shifts-admin-table th:nth-child(22),
-.shifts-admin-table th:nth-child(23),
-.shifts-admin-table th:nth-child(24),
-.shifts-admin-table th:nth-child(25),
-.shifts-admin-table th:nth-child(26),
-.shifts-admin-table th:nth-child(27),
-.shifts-admin-table th:nth-child(28),
-.shifts-admin-table th:nth-child(29),
-.shifts-admin-table th:nth-child(30),
-.shifts-admin-table th:nth-child(31),
-.shifts-admin-table th:nth-child(32),
-.shifts-admin-table th:nth-child(33),
-.shifts-admin-table td:nth-child(3),
-.shifts-admin-table td:nth-child(4),
-.shifts-admin-table td:nth-child(5),
-.shifts-admin-table td:nth-child(6),
-.shifts-admin-table td:nth-child(7),
-.shifts-admin-table td:nth-child(8),
-.shifts-admin-table td:nth-child(9),
-.shifts-admin-table td:nth-child(10),
-.shifts-admin-table td:nth-child(11),
-.shifts-admin-table td:nth-child(12),
-.shifts-admin-table td:nth-child(13),
-.shifts-admin-table td:nth-child(14),
-.shifts-admin-table td:nth-child(15),
-.shifts-admin-table td:nth-child(16),
-.shifts-admin-table td:nth-child(17),
-.shifts-admin-table td:nth-child(18),
-.shifts-admin-table td:nth-child(19),
-.shifts-admin-table td:nth-child(20),
-.shifts-admin-table td:nth-child(21),
-.shifts-admin-table td:nth-child(22),
-.shifts-admin-table td:nth-child(23),
-.shifts-admin-table td:nth-child(24),
-.shifts-admin-table td:nth-child(25),
-.shifts-admin-table td:nth-child(26),
-.shifts-admin-table td:nth-child(27),
-.shifts-admin-table td:nth-child(28),
-.shifts-admin-table td:nth-child(29),
-.shifts-admin-table td:nth-child(30),
-.shifts-admin-table td:nth-child(31),
-.shifts-admin-table td:nth-child(32),
-.shifts-admin-table td:nth-child(33) {
-    width: 50px !important;
-    min-width: 50px !important;
-    max-width: 50px !important;
-}
+        
         /* MOBILE */
         @media (max-width: 768px) {
             header { flex-direction: column; gap: 1rem; padding: 1rem; }
@@ -1091,12 +1080,7 @@
             },
             
             showSection: function(sectionId) {
-                // Автоматически добавляем '-section' если нужно
-                let fullId = sectionId;
-                if (!sectionId.includes('-section')) {
-                    fullId = sectionId + '-section';
-                }
-                
+                let fullId = sectionId.includes('-section') ? sectionId : sectionId + '-section';
                 const sections = ['welcome-section', 'login-section', 'admin-section', 'user-section'];
                 sections.forEach(id => {
                     const el = this.getElement(id);
@@ -1104,9 +1088,7 @@
                 });
                 
                 const targetSection = this.getElement(fullId);
-                if (targetSection) {
-                    targetSection.classList.remove('hidden');
-                }
+                if (targetSection) targetSection.classList.remove('hidden');
                 this.updateNavigation();
             },
             
@@ -1114,33 +1096,21 @@
                 const isLoggedIn = !!currentUser;
                 const isAdmin = currentUser && allUsers.find(u => u.id === currentUser.uid && u.role === 'admin');
                 
-                const navHome = this.getElement('nav-home');
-                const navLogin = this.getElement('nav-login');
-                const navAdmin = this.getElement('nav-admin');
-                const navUser = this.getElement('nav-user');
-                const navLogout = this.getElement('nav-logout');
-                
-                // Админ видит и "Админ" и "Кабинет"
-                if (navHome) navHome.classList.toggle('hidden', isLoggedIn);
-                if (navLogin) navLogin.classList.toggle('hidden', isLoggedIn);
-                if (navAdmin) navAdmin.classList.toggle('hidden', !isAdmin);
-                if (navUser) navUser.classList.toggle('hidden', !isLoggedIn); // Админ ТОЖЕ видит кабинет!
-                if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
+                ['nav-home', 'nav-login', 'nav-admin', 'nav-user', 'nav-logout'].forEach((id, i) => {
+                    const el = this.getElement(id);
+                    if (el) {
+                        if (id === 'nav-home') el.classList.toggle('hidden', isLoggedIn);
+                        else if (id === 'nav-login') el.classList.toggle('hidden', isLoggedIn);
+                        else if (id === 'nav-admin') el.classList.toggle('hidden', !isAdmin);
+                        else if (id === 'nav-user') el.classList.toggle('hidden', !isLoggedIn);
+                        else if (id === 'nav-logout') el.classList.toggle('hidden', !isLoggedIn);
+                    }
+                });
             },
             
             safeAddEventListener: function(id, event, handler) {
                 const el = this.getElement(id);
                 if (el) el.addEventListener(event, handler);
-            },
-            
-            showMessage: function(elementId, text, isError = false) {
-                const el = this.getElement(elementId);
-                if (el) {
-                    el.textContent = text;
-                    el.className = `message ${isError ? 'error' : 'success'}`;
-                    el.classList.remove('hidden');
-                    setTimeout(() => el.classList.add('hidden'), 5000);
-                }
             }
         };
         
@@ -1154,9 +1124,9 @@
         let shiftsMap = {};
         let postsData = [];
         let isAdmin = false;
-        let adminShiftsData = {}; // Данные для таблицы админа
+        let adminShiftsData = {};
         
-        // === ПРЕДУСТАНОВЛЕННЫЕ ПОСТЫ (ШАБЛОН) С НОМЕРАМИ ===
+        // === ПРЕДУСТАНОВЛЕННЫЕ ПОСТЫ ===
         const defaultPosts = [
             { number: "1", post: "Старший смены", time: "06:00" },
             { number: "2", post: "Помощник ст.смены", time: "18:00" },
@@ -1177,24 +1147,20 @@
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
-                    
-                    // Убрать активный класс у всех табов
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    
-                    // Добавить активный класс текущему табу
                     this.classList.add('active');
                     const content = document.getElementById(`tab-${tabId}`);
                     if (content) content.classList.add('active');
                     
-                    // Если открыли вкладку выплат админа, загружаем архив
-                    if (tabId === 'payments-admin' && isAdmin) {
-                        loadPaymentsArchive();
-                    }
-                    // Если открыли вкладку выплат пользователя, обновляем данные
+                    if (tabId === 'payments-admin' && isAdmin) loadPaymentsArchive();
                     if (tabId === 'payments-user' && currentUser) {
                         updateUserStats();
                         loadUserPaymentHistory();
+                    }
+                    if (tabId === 'posts' && currentUser) {
+                        const dateInput = app.getElement('user-posts-date');
+                        if (dateInput.value) loadPostsForDate(dateInput.value, false);
                     }
                 });
             });
@@ -1202,19 +1168,9 @@
         
         // === АУТЕНТИФИКАЦИЯ ===
         app.safeAddEventListener('login-btn', 'click', async () => {
-            const emailInput = app.getElement('login-email');
-            const passwordInput = app.getElement('login-password');
-            
-            if (!emailInput || !passwordInput) return;
-            
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            
-            if (!email || !password) {
-                alert('Введите email и пароль');
-                return;
-            }
-            
+            const email = app.getElement('login-email')?.value;
+            const password = app.getElement('login-password')?.value;
+            if (!email || !password) return alert('Введите email и пароль');
             try {
                 await auth.signInWithEmailAndPassword(email, password);
             } catch (error) {
@@ -1229,10 +1185,7 @@
                 allUsers = [];
                 snapshot.forEach(doc => {
                     const userData = doc.data();
-                    // Разделяем ФИО на фамилию и имя
-                    let lastName = '';
-                    let firstName = '';
-                    
+                    let lastName = '', firstName = '';
                     if (userData.fullName) {
                         const nameParts = userData.fullName.split(' ');
                         if (nameParts.length >= 2) {
@@ -1242,52 +1195,42 @@
                             firstName = userData.fullName;
                         }
                     }
-                    
                     allUsers.push({ 
                         id: doc.id, 
                         ...userData,
-                        lastName: lastName,
-                        firstName: firstName,
+                        lastName, firstName,
                         displayName: lastName ? `${lastName} ${firstName}` : (userData.fullName || userData.email)
                     });
                 });
                 
-                // Сортируем по фамилии
-                allUsers.sort((a, b) => {
-                    if (a.lastName && b.lastName) {
-                        return a.lastName.localeCompare(b.lastName);
-                    }
-                    return (a.displayName || '').localeCompare(b.displayName || '');
-                });
+                allUsers.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
                 
-                // Показ списка пользователей
+                // Список пользователей
                 const container = app.getElement('users-container');
                 if (container) {
-                    container.innerHTML = allUsers.map((user, index) => `
-                        <div class="user-card ${user.role === 'admin' ? 'admin' : ''}" style="background: #112240; padding: 0.8rem; margin: 0.5rem 0; border-radius: 5px; border: 1px solid #233554;">
+                    container.innerHTML = allUsers.map(user => `
+                        <div class="user-card" style="background: #112240; padding: 0.8rem; margin: 0.5rem 0; border-radius: 5px; border: 1px solid #233554;">
                             <strong style="color: #64ffda;">${user.displayName || user.email}</strong><br>
                             <small style="color: #a8b2d1;">${user.role === 'admin' ? 'Администратор' : 'Охранник'}</small><br>
                             <small style="color: #8892b0;">Ставка: ${user.rate || 0} ₽</small>
-                            ${user.role !== 'admin' ? `<br><small style="color: #495670;">ID: ${user.id.substring(0, 8)}...</small>` : ''}
                         </div>
                     `).join('');
                 }
                 
-                // Селект выбора пользователя для выплат админа
-                const paymentSelectAdmin = app.getElement('payment-user-admin');
-                if (paymentSelectAdmin) {
-                    paymentSelectAdmin.innerHTML = '<option value="">Выберите охранника</option>';
+                // Селект для выплат админа
+                const paymentSelect = app.getElement('payment-user-admin');
+                if (paymentSelect) {
+                    paymentSelect.innerHTML = '<option value="">Выберите охранника</option>';
                     allUsers.forEach(user => {
                         if (user.role !== 'admin') {
                             const option = document.createElement('option');
                             option.value = user.id;
                             option.textContent = `${user.displayName} (${user.rate || 0} ₽)`;
-                            paymentSelectAdmin.appendChild(option);
+                            paymentSelect.appendChild(option);
                         }
                     });
                 }
                 
-                // Обновляем таблицу смен если она уже загружена
                 if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
                     await loadAllShiftsForAdmin();
                 }
@@ -1299,46 +1242,30 @@
         
         // === СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ ===
         app.safeAddEventListener('create-user-btn', 'click', async () => {
-            const emailInput = app.getElement('new-user-email');
-            const passwordInput = app.getElement('new-user-password');
-            const lastnameInput = app.getElement('new-user-lastname');
-            const firstnameInput = app.getElement('new-user-firstname');
-            const rateInput = app.getElement('new-user-rate');
-            
-            if (!emailInput || !passwordInput || !lastnameInput || !firstnameInput || !rateInput) return;
-            
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            const lastName = lastnameInput.value.trim();
-            const firstName = firstnameInput.value.trim();
-            const rate = parseInt(rateInput.value) || 1500;
+            const email = app.getElement('new-user-email')?.value;
+            const password = app.getElement('new-user-password')?.value;
+            const lastName = app.getElement('new-user-lastname')?.value.trim();
+            const firstName = app.getElement('new-user-firstname')?.value.trim();
+            const rate = parseInt(app.getElement('new-user-rate')?.value) || 1500;
             
             if (!email || !password || !lastName || !firstName) {
                 alert('Заполните все поля');
                 return;
             }
             
-            // Формируем полное имя: Фамилия Имя
             const fullName = `${lastName} ${firstName}`;
-            
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 await db.collection('users').doc(userCredential.user.uid).set({
-                    email: email,
-                    role: 'user',
-                    fullName: fullName,
-                    lastName: lastName,
-                    firstName: firstName,
-                    rate: rate,
+                    email, role: 'user', fullName, lastName, firstName, rate,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                // Очистка полей
-                emailInput.value = '';
-                passwordInput.value = '';
-                lastnameInput.value = '';
-                firstnameInput.value = '';
-                rateInput.value = '1500';
+                ['new-user-email', 'new-user-password', 'new-user-lastname', 'new-user-firstname'].forEach(id => {
+                    const el = app.getElement(id);
+                    if (el) el.value = '';
+                });
+                app.getElement('new-user-rate').value = '1500';
                 
                 loadUsers();
                 alert(`Охранник ${fullName} создан!`);
@@ -1347,13 +1274,11 @@
             }
         });
         
-        // === ЗАГРУЗКА ВСЕХ СМЕН ДЛЯ АДМИНА ===
+        // === ЗАГРУЗКА СМЕН ДЛЯ АДМИНА ===
         async function loadAllShiftsForAdmin() {
             try {
                 const month = parseInt(app.getElement('selected-month')?.value || currentMonth);
                 const year = parseInt(app.getElement('selected-year')?.value || currentYear);
-                
-                // Получаем все смены за выбранный месяц
                 const firstDay = new Date(year, month, 1);
                 const lastDay = new Date(year, month + 1, 0);
                 const startDate = firstDay.toISOString().split('T')[0];
@@ -1364,19 +1289,16 @@
                     .where('date', '<=', endDate)
                     .get();
                 
-                // Сбрасываем данные
                 adminShiftsData = {};
                 shiftsMap = {};
                 
-                // Группируем смены по пользователям
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const userId = data.userId;
                     const date = data.date;
                     
-                    if (!adminShiftsData[userId]) {
-                        adminShiftsData[userId] = {};
-                    }
+                    if (!adminShiftsData[userId]) adminShiftsData[userId] = {};
+                    if (!shiftsMap[userId]) shiftsMap[userId] = {};
                     
                     adminShiftsData[userId][date] = {
                         type: data.type,
@@ -1385,10 +1307,6 @@
                         shiftId: doc.id
                     };
                     
-                    // Также сохраняем в shiftsMap для других функций
-                    if (!shiftsMap[userId]) {
-                        shiftsMap[userId] = {};
-                    }
                     shiftsMap[userId][date] = {
                         type: data.type,
                         done: data.done || false,
@@ -1396,7 +1314,6 @@
                     };
                 });
                 
-                // Рендерим таблицу
                 renderAdminShiftsTable(month, year);
                 
             } catch (error) {
@@ -1413,15 +1330,12 @@
             
             if (!tableBody || !daysHeader || !monthYearHeader) return;
             
-            // Обновляем заголовок месяца
             const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
                                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
             monthYearHeader.textContent = `${monthNames[month]} ${year}`;
             
-            // Рассчитываем дни месяца
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             
-            // Генерируем заголовки дней
             let daysHtml = '';
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
@@ -1434,17 +1348,14 @@
             }
             daysHeader.innerHTML = daysHtml;
             
-            // Фильтруем только охранников (не админов)
             const guards = allUsers.filter(user => user.role !== 'admin');
-            
-            // Генерируем строки таблицы
             let tableHtml = '';
+            
             guards.forEach((guard, index) => {
                 tableHtml += `<tr data-user-id="${guard.id}">`;
                 tableHtml += `<td>${index + 1}</td>`;
                 tableHtml += `<td><strong>${guard.displayName}</strong><br><small style="color: #8892b0;">${guard.rate || 0} ₽</small></td>`;
                 
-                // Ячейки дней
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const shift = adminShiftsData[guard.id] ? adminShiftsData[guard.id][dateStr] : null;
@@ -1503,37 +1414,23 @@
             
             tableBody.innerHTML = tableHtml;
             
-            // Добавляем обработчики кликов на ячейки
             tableBody.querySelectorAll('.shifts-cell').forEach(cell => {
                 cell.addEventListener('click', function(e) {
                     e.stopPropagation();
                     handleShiftCellClick(this);
                 });
             });
-        }
-        
-        // === КНОПКИ СКРОЛЛА ТАБЛИЦЫ ===
-        function initTableScrollButtons() {
+            
+            // Инициализация кнопок скролла
             const scrollLeftBtn = app.getElement('scroll-left-btn');
             const scrollRightBtn = app.getElement('scroll-right-btn');
             const tableContainer = document.querySelector('.table-responsive');
             
             if (scrollLeftBtn && tableContainer) {
-                scrollLeftBtn.addEventListener('click', function() {
-                    tableContainer.scrollBy({
-                        left: -200,
-                        behavior: 'smooth'
-                    });
-                });
+                scrollLeftBtn.addEventListener('click', () => tableContainer.scrollBy({ left: -200, behavior: 'smooth' }));
             }
-            
             if (scrollRightBtn && tableContainer) {
-                scrollRightBtn.addEventListener('click', function() {
-                    tableContainer.scrollBy({
-                        left: 200,
-                        behavior: 'smooth'
-                    });
-                });
+                scrollRightBtn.addEventListener('click', () => tableContainer.scrollBy({ left: 200, behavior: 'smooth' }));
             }
         }
         
@@ -1550,7 +1447,6 @@
                 return;
             }
             
-            // ЦИКЛ ТИПОВ СМЕН
             const shiftCycle = [
                 {type: 'regular', color: 'shift-regular', title: 'Обычная смена'},
                 {type: 'extra', color: 'shift-extra', title: 'Подработка'},
@@ -1561,23 +1457,16 @@
                 null
             ];
             
-            // Находим текущую позицию
-            let currentIndex = shiftCycle.findIndex(item => 
-                item ? item.type === currentType : currentType === ''
-            );
+            let currentIndex = shiftCycle.findIndex(item => item ? item.type === currentType : currentType === '');
             if (currentIndex === -1) currentIndex = shiftCycle.length - 1;
-            
-            // Следующая позиция
             const nextIndex = (currentIndex + 1) % shiftCycle.length;
             const nextItem = shiftCycle[nextIndex];
             
-            // Обновляем визуально
             cell.className = 'shifts-cell';
             if (nextItem) {
                 cell.classList.add(nextItem.color);
                 cell.setAttribute('data-shift-type', nextItem.type);
-                cell.setAttribute('data-done', 
-                    nextItem.type === 'done' || nextItem.type === 'done-extra' ? 'true' : 'false');
+                cell.setAttribute('data-done', nextItem.type === 'done' || nextItem.type === 'done-extra' ? 'true' : 'false');
                 cell.setAttribute('title', nextItem.title);
                 cell.innerHTML = '';
             } else {
@@ -1588,57 +1477,22 @@
                 cell.innerHTML = '+';
             }
             
-            // Сохраняем в локальной карте
             if (!adminShiftsData[userId]) adminShiftsData[userId] = {};
-            
-            if (nextItem) {
-                let type, done, paid;
-                
-                if (nextItem.type === 'regular') {
-                    type = 'regular'; done = false; paid = false;
-                } else if (nextItem.type === 'extra') {
-                    type = 'extra'; done = false; paid = false;
-                } else if (nextItem.type === 'dayoff') {
-                    type = 'dayoff'; done = false; paid = false;
-                } else if (nextItem.type === 'problem') {
-                    type = 'problem'; done = false; paid = false;
-                } else if (nextItem.type === 'done') {
-                    type = 'regular'; done = true; paid = false;
-                } else if (nextItem.type === 'done-extra') {
-                    type = 'extra'; done = true; paid = false;
-                }
-                
-                adminShiftsData[userId][date] = { 
-                    type, 
-                    done, 
-                    paid,
-                    shiftId: adminShiftsData[userId][date]?.shiftId || null
-                };
-            } else {
-                delete adminShiftsData[userId][date];
-            }
-            
-            // Также обновляем shiftsMap для совместимости
             if (!shiftsMap[userId]) shiftsMap[userId] = {};
+            
             if (nextItem) {
                 let type, done, paid;
+                if (nextItem.type === 'regular') { type = 'regular'; done = false; paid = false; }
+                else if (nextItem.type === 'extra') { type = 'extra'; done = false; paid = false; }
+                else if (nextItem.type === 'dayoff') { type = 'dayoff'; done = false; paid = false; }
+                else if (nextItem.type === 'problem') { type = 'problem'; done = false; paid = false; }
+                else if (nextItem.type === 'done') { type = 'regular'; done = true; paid = false; }
+                else if (nextItem.type === 'done-extra') { type = 'extra'; done = true; paid = false; }
                 
-                if (nextItem.type === 'regular') {
-                    type = 'regular'; done = false; paid = false;
-                } else if (nextItem.type === 'extra') {
-                    type = 'extra'; done = false; paid = false;
-                } else if (nextItem.type === 'dayoff') {
-                    type = 'dayoff'; done = false; paid = false;
-                } else if (nextItem.type === 'problem') {
-                    type = 'problem'; done = false; paid = false;
-                } else if (nextItem.type === 'done') {
-                    type = 'regular'; done = true; paid = false;
-                } else if (nextItem.type === 'done-extra') {
-                    type = 'extra'; done = true; paid = false;
-                }
-                
+                adminShiftsData[userId][date] = { type, done, paid, shiftId: adminShiftsData[userId][date]?.shiftId || null };
                 shiftsMap[userId][date] = { type, done, paid };
             } else {
+                delete adminShiftsData[userId][date];
                 delete shiftsMap[userId][date];
             }
         }
@@ -1649,32 +1503,24 @@
                 const month = parseInt(app.getElement('selected-month')?.value || currentMonth);
                 const year = parseInt(app.getElement('selected-year')?.value || currentYear);
                 const monthStr = String(month + 1).padStart(2, '0');
-                
                 const batch = db.batch();
                 let changesCount = 0;
                 
-                // Для каждого пользователя
                 for (const userId in adminShiftsData) {
                     const userShifts = adminShiftsData[userId];
-                    
-                    // Удаляем старые смены за этот месяц для этого пользователя
                     const oldShifts = await db.collection('shifts')
                         .where('userId', '==', userId)
                         .where('date', '>=', `${year}-${monthStr}-01`)
                         .where('date', '<=', `${year}-${monthStr}-31`)
                         .get();
                     
-                    oldShifts.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
+                    oldShifts.forEach(doc => batch.delete(doc.ref));
                     
-                    // Добавляем новые смены
                     for (const [date, shift] of Object.entries(userShifts)) {
                         if (date.startsWith(`${year}-${monthStr}`)) {
                             const shiftRef = db.collection('shifts').doc();
                             batch.set(shiftRef, {
-                                userId: userId,
-                                date: date,
+                                userId, date,
                                 type: shift.type,
                                 done: shift.done || false,
                                 paid: shift.paid || false,
@@ -1699,18 +1545,283 @@
             await loadAllShiftsForAdmin();
         });
         
-        // === ОБНОВЛЕНИЕ ТАБЛИЦЫ ПРИ ИЗМЕНЕНИИ МЕСЯЦА/ГОДА ===
-        app.safeAddEventListener('selected-month', 'change', async () => {
-            if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
-                await loadAllShiftsForAdmin();
-            }
+        // === КНОПКИ МЕСЯЦА/ГОДА ===
+        ['selected-month', 'selected-year'].forEach(id => {
+            app.safeAddEventListener(id, 'change', async () => {
+                if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
+                    await loadAllShiftsForAdmin();
+                }
+            });
         });
         
-        app.safeAddEventListener('selected-year', 'change', async () => {
-            if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
-                await loadAllShiftsForAdmin();
+        // === КАЛЕНДАРЬ ПОЛЬЗОВАТЕЛЯ ===
+        async function loadUserShiftsForMonth() {
+            if (!currentUser) return;
+            try {
+                const month = parseInt(app.getElement('user-selected-month')?.value || userViewMonth);
+                const year = parseInt(app.getElement('user-selected-year')?.value || userViewYear);
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const startDate = firstDay.toISOString().split('T')[0];
+                const endDate = lastDay.toISOString().split('T')[0];
+                
+                const snapshot = await db.collection('shifts')
+                    .where('userId', '==', currentUser.uid)
+                    .where('date', '>=', startDate)
+                    .where('date', '<=', endDate)
+                    .get();
+                
+                if (!shiftsMap[currentUser.uid]) shiftsMap[currentUser.uid] = {};
+                Object.keys(shiftsMap[currentUser.uid]).forEach(date => {
+                    if (date >= startDate && date <= endDate) delete shiftsMap[currentUser.uid][date];
+                });
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    shiftsMap[currentUser.uid][data.date] = {
+                        type: data.type,
+                        done: data.done || false,
+                        paid: data.paid || false
+                    };
+                });
+                
+                renderUserCalendar(month, year);
+                updateUserStats();
+                
+            } catch (error) {
+                console.error('Ошибка загрузки смен:', error);
+                alert('Ошибка загрузки смен: ' + error.message);
             }
+        }
+        
+        function renderUserCalendar(month, year) {
+            const container = app.getElement('user-calendar');
+            if (!container || !currentUser) return;
+            
+            const today = new Date();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+            
+            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            let html = days.map(day => `<div class="calendar-header">${day}</div>`).join('');
+            
+            for (let i = 0; i < startDay; i++) html += `<div class="calendar-day"></div>`;
+            
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const shift = shiftsMap[currentUser.uid] ? shiftsMap[currentUser.uid][dateStr] : null;
+                let shiftClass = '';
+                
+                if (shift) {
+                    if (shift.type === 'regular') {
+                        if (shift.paid) shiftClass = 'shift-paid';
+                        else if (shift.done) shiftClass = 'shift-done';
+                        else shiftClass = 'shift-regular';
+                    } else if (shift.type === 'extra') {
+                        if (shift.paid) shiftClass = 'shift-paid-extra';
+                        else if (shift.done) shiftClass = 'shift-done-extra';
+                        else shiftClass = 'shift-extra';
+                    } else if (shift.type === 'dayoff') shiftClass = 'shift-dayoff';
+                    else if (shift.type === 'problem') shiftClass = 'shift-problem';
+                }
+                
+                const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+                
+                html += `
+                    <div class="calendar-day" data-date="${dateStr}" style="${isToday ? 'border: 2px solid #64ffda;' : ''}">
+                        <div class="day-number" style="${isToday ? 'color: #64ffda; font-size: 1.1rem;' : ''}">${day}</div>
+                        ${shift ? `<div class="shift-marker ${shiftClass}"></div>` : ''}
+                    </div>
+                `;
+            }
+            
+            const totalCells = 35;
+            const filledCells = startDay + totalDays;
+            for (let i = filledCells; i < totalCells; i++) html += `<div class="calendar-day"></div>`;
+            
+            container.innerHTML = html;
+        }
+        
+        // КНОПКИ НАВИГАЦИИ МЕСЯЦА
+        app.safeAddEventListener('prev-month', 'click', function() {
+            let month = parseInt(app.getElement('user-selected-month').value);
+            let year = parseInt(app.getElement('user-selected-year').value);
+            month--;
+            if (month < 0) { month = 11; year--; }
+            app.getElement('user-selected-month').value = month;
+            app.getElement('user-selected-year').value = year;
+            loadUserShiftsForMonth();
         });
+        
+        app.safeAddEventListener('next-month', 'click', function() {
+            let month = parseInt(app.getElement('user-selected-month').value);
+            let year = parseInt(app.getElement('user-selected-year').value);
+            month++;
+            if (month > 11) { month = 0; year++; }
+            app.getElement('user-selected-month').value = month;
+            app.getElement('user-selected-year').value = year;
+            loadUserShiftsForMonth();
+        });
+        
+        app.safeAddEventListener('load-user-shifts', 'click', () => loadUserShiftsForMonth());
+        app.safeAddEventListener('user-selected-month', 'change', () => loadUserShiftsForMonth());
+        app.safeAddEventListener('user-selected-year', 'change', () => loadUserShiftsForMonth());
+        
+        // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
+        app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
+            const dateInput = app.getElement('user-posts-date');
+            if (!dateInput || !dateInput.value) return alert('Выберите дату');
+            await loadPostsForDate(dateInput.value, false);
+        });
+        
+        async function loadPostsForDate(date, isAdminView) {
+            try {
+                const snapshot = await db.collection('posts').where('date', '==', date).get();
+                postsData = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let guardDisplayName = data.guardName || '';
+                    if (guardDisplayName) {
+                        const nameParts = guardDisplayName.split(' ');
+                        if (nameParts.length >= 2) guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
+                    }
+                    postsData.push({ id: doc.id, ...data, guardDisplayName });
+                });
+                
+                postsData.sort((a, b) => (a.order || 999) - (b.order || 999));
+                
+                if (isAdminView) renderAdminPostsTable(date);
+                else renderUserPostsTable(date);
+            } catch (error) {
+                console.error('Ошибка загрузки постов:', error);
+                if (isAdminView) {
+                    const container = app.getElement('posts-admin-container');
+                    if (container) container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
+                }
+            }
+        }
+        
+        function renderUserPostsTable(date) {
+            const container = app.getElement('posts-user-container');
+            if (!container) return;
+            
+            if (postsData.length === 0) {
+                container.innerHTML = `<div class="message"><p>Нет постов на выбранную дату ${date}</p></div>`;
+                return;
+            }
+            
+            const dateObj = new Date(date);
+            const formattedDate = dateObj.toLocaleDateString('ru-RU');
+            
+            // Все посты, которые видны пользователю (включая назначенные другим)
+            const userPosts = postsData; // Показываем все посты на эту дату
+            
+            let html = `
+                <h3>Посты на дату: ${formattedDate}</h3>
+                <div class="table-responsive">
+                    <table class="posts-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Пост</th>
+                                <th>Время</th>
+                                <th>Назначен</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            userPosts.forEach((post) => {
+                const isAssignedToMe = post.guardId === currentUser?.uid;
+                html += `
+                    <tr>
+                        <td>${post.number || ''}</td>
+                        <td><strong>${post.post || ''}</strong></td>
+                        <td>${post.time || ''}</td>
+                        <td>
+                            ${post.guardDisplayName || post.guardName || 'Не назначен'}
+                            ${isAssignedToMe ? ' <span style="color:#64ffda;">(Вы)</span>' : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // === ОБНОВЛЕНИЕ СТАТИСТИКИ ===
+        function updateUserStats() {
+            if (!currentUser) return;
+            const user = allUsers.find(u => u.id === currentUser.uid);
+            if (!user) return;
+            
+            const rate = user.rate || 0;
+            const shifts = shiftsMap[currentUser.uid] || {};
+            let regularCount = 0, extraCount = 0, pendingAmount = 0;
+            
+            Object.values(shifts).forEach(shift => {
+                if (shift.type === 'regular' && shift.done && !shift.paid) {
+                    regularCount++;
+                    pendingAmount += rate;
+                } else if (shift.type === 'extra' && shift.done && !shift.paid) {
+                    extraCount++;
+                    pendingAmount += rate + 100;
+                }
+            });
+            
+            const pendingTable = app.getElement('pending-payments');
+            const pendingTotal = app.getElement('pending-total');
+            
+            if (pendingTable) {
+                if (regularCount === 0 && extraCount === 0) {
+                    pendingTable.innerHTML = '<tr><td colspan="4">Нет ожидающих выплат</td></tr>';
+                } else {
+                    pendingTable.innerHTML = '';
+                    if (regularCount > 0) {
+                        pendingTable.innerHTML += `
+                            <tr>
+                                <td>Обычные смены</td>
+                                <td>${regularCount}</td>
+                                <td>${rate} ₽</td>
+                                <td>${regularCount * rate} ₽</td>
+                            </tr>
+                        `;
+                    }
+                    if (extraCount > 0) {
+                        pendingTable.innerHTML += `
+                            <tr>
+                                <td>Подработки</td>
+                                <td>${extraCount}</td>
+                                <td>${rate + 100} ₽</td>
+                                <td>${extraCount * (rate + 100)} ₽</td>
+                            </tr>
+                        `;
+                    }
+                }
+            }
+            
+            if (pendingTotal) pendingTotal.textContent = `${pendingAmount} ₽`;
+            
+            // Данные пользователя
+            const userName = app.getElement('user-full-name');
+            const userPosition = app.getElement('user-position');
+            const userRate = app.getElement('user-rate');
+            const userEmail = app.getElement('user-email');
+            
+            if (userName) userName.textContent = user.lastName && user.firstName ? 
+                `${user.lastName} ${user.firstName}` : user.fullName || user.email || 'Имя не указано';
+            if (userPosition) userPosition.textContent = user.role === 'admin' ? 'Администратор' : 'Охранник';
+            if (userRate) userRate.textContent = `${rate} ₽`;
+            if (userEmail) userEmail.textContent = user.email;
+        }
         
         // === ВЫПЛАТЫ АДМИНА ===
         async function loadPaymentsArchive() {
@@ -1733,8 +1844,6 @@
                     const data = doc.data();
                     const date = data.createdAt?.toDate ? 
                         data.createdAt.toDate().toLocaleDateString('ru-RU') : 'Дата неизвестна';
-                    
-                    // Находим пользователя для получения ставки
                     const user = allUsers.find(u => u.id === data.userId);
                     const rate = user ? user.rate : 0;
                     
@@ -1761,51 +1870,32 @@
         
         // === РАСЧЕТ ВЫПЛАТ АДМИНА ===
         app.safeAddEventListener('calculate-payment-btn-admin', 'click', async () => {
-            const paymentUser = app.getElement('payment-user-admin');
-            const periodFrom = app.getElement('period-from-admin');
-            const periodTo = app.getElement('period-to-admin');
-            const bonusAmount = app.getElement('bonus-amount-admin');
-            const penaltyAmount = app.getElement('penalty-amount-admin');
-            const bonusNote = app.getElement('bonus-note-admin');
+            const userId = app.getElement('payment-user-admin')?.value;
+            const fromDate = app.getElement('period-from-admin')?.value;
+            const toDate = app.getElement('period-to-admin')?.value;
+            const bonus = parseInt(app.getElement('bonus-amount-admin')?.value) || 0;
+            const penalty = parseInt(app.getElement('penalty-amount-admin')?.value) || 0;
+            const note = app.getElement('bonus-note-admin')?.value;
             
-            if (!paymentUser || !periodFrom || !periodTo || !bonusAmount || !penaltyAmount || !bonusNote) return;
-            
-            const userId = paymentUser.value;
-            const fromDate = periodFrom.value;
-            const toDate = periodTo.value;
-            const bonus = parseInt(bonusAmount.value) || 0;
-            const penalty = parseInt(penaltyAmount.value) || 0;
-            const note = bonusNote.value;
-            
-            if (!userId || !fromDate || !toDate) {
-                alert('Заполните все поля');
-                return;
-            }
+            if (!userId || !fromDate || !toDate) return alert('Заполните все поля');
             
             const user = allUsers.find(u => u.id === userId);
-            if (!user) {
-                alert('Охранник не найден');
-                return;
-            }
+            if (!user) return alert('Охранник не найден');
             
             const rate = user.rate || 0;
             
             try {
-                // Получаем смены за период
                 const shifts = await db.collection('shifts')
                     .where('userId', '==', userId)
                     .where('date', '>=', fromDate)
                     .where('date', '<=', toDate)
                     .get();
                 
-                let regularCount = 0;
-                let extraCount = 0;
-                let totalAmount = 0;
+                let regularCount = 0, extraCount = 0, totalAmount = 0;
                 const batch = db.batch();
                 
                 shifts.forEach(doc => {
                     const data = doc.data();
-                    // Считаем только отработанные и неоплаченные
                     if (data.done && !data.paid) {
                         if (data.type === 'regular') {
                             regularCount++;
@@ -1814,8 +1904,6 @@
                             extraCount++;
                             totalAmount += rate + 100;
                         }
-                        
-                        // Помечаем как оплаченные
                         batch.update(doc.ref, { 
                             paid: true,
                             paidAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1828,38 +1916,25 @@
                     return;
                 }
                 
-                // Добавляем премию/удержание
                 const finalAmount = totalAmount + bonus - penalty;
-                
-                // Создаём запись о выплате
                 const paymentRef = db.collection('salary_payments').doc();
                 await paymentRef.set({
-                    userId: userId,
-                    userName: user.displayName || user.email,
-                    periodFrom: fromDate,
-                    periodTo: toDate,
-                    regularShifts: regularCount,
-                    extraShifts: extraCount,
-                    baseAmount: totalAmount,
-                    bonus: bonus,
-                    penalty: penalty,
-                    bonusNote: note,
+                    userId, userName: user.displayName || user.email,
+                    periodFrom: fromDate, periodTo: toDate,
+                    regularShifts: regularCount, extraShifts: extraCount,
+                    baseAmount: totalAmount, bonus, penalty, bonusNote: note,
                     totalAmount: finalAmount,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     adminId: currentUser.uid
                 });
                 
-                // Применяем обновления смен
                 await batch.commit();
                 
-                // Обновляем данные
-                await loadUsers();
-                
-                // Очищаем поля
-                paymentUser.value = '';
-                bonusAmount.value = '0';
-                penaltyAmount.value = '0';
-                bonusNote.value = '';
+                // Очистка полей
+                app.getElement('payment-user-admin').value = '';
+                app.getElement('bonus-amount-admin').value = '0';
+                app.getElement('penalty-amount-admin').value = '0';
+                app.getElement('bonus-note-admin').value = '';
                 
                 const resultDiv = app.getElement('calculation-result-admin');
                 if (resultDiv) {
@@ -1877,9 +1952,7 @@
                     `;
                 }
                 
-                // Обновляем архив выплат
                 await loadPaymentsArchive();
-                
                 alert(`Выплата на сумму ${finalAmount} ₽ создана для ${user.displayName}`);
                 
             } catch (error) {
@@ -1887,175 +1960,9 @@
             }
         });
         
-        // === КАЛЕНДАРЬ ПОЛЬЗОВАТЕЛЯ С ВЫБОРОМ МЕСЯЦА ===
-        async function loadUserShiftsForMonth() {
-            if (!currentUser) return;
-            
-            try {
-                const month = parseInt(app.getElement('user-selected-month')?.value || userViewMonth);
-                const year = parseInt(app.getElement('user-selected-year')?.value || userViewYear);
-                
-                // Получаем смены за выбранный месяц
-                const firstDay = new Date(year, month, 1);
-                const lastDay = new Date(year, month + 1, 0);
-                const startDate = firstDay.toISOString().split('T')[0];
-                const endDate = lastDay.toISOString().split('T')[0];
-                
-                const snapshot = await db.collection('shifts')
-                    .where('userId', '==', currentUser.uid)
-                    .where('date', '>=', startDate)
-                    .where('date', '<=', endDate)
-                    .get();
-                
-                // Сбрасываем данные для этого пользователя
-                if (!shiftsMap[currentUser.uid]) {
-                    shiftsMap[currentUser.uid] = {};
-                }
-                
-                // Очищаем только смены за этот месяц
-                Object.keys(shiftsMap[currentUser.uid]).forEach(date => {
-                    if (date >= startDate && date <= endDate) {
-                        delete shiftsMap[currentUser.uid][date];
-                    }
-                });
-                
-                // Загружаем новые смены
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    shiftsMap[currentUser.uid][data.date] = {
-                        type: data.type,
-                        done: data.done || false,
-                        paid: data.paid || false
-                    };
-                });
-                
-                renderUserCalendar(month, year);
-                updateUserStats();
-                
-            } catch (error) {
-                console.error('Ошибка загрузки смен для пользователя:', error);
-                alert('Ошибка загрузки смен: ' + error.message);
-            }
-        }
-        
-        function renderUserCalendar(month, year) {
-            const container = app.getElement('user-calendar');
-            if (!container || !currentUser) return;
-            
-            const today = new Date();
-            const currentDate = new Date(year, month, today.getDate());
-            
-            // Заголовки дней
-            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            let html = '';
-            
-            days.forEach(day => {
-                html += `<div class="calendar-header">${day}</div>`;
-            });
-            
-            // Дни месяца
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const totalDays = lastDay.getDate();
-            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-            
-            // Пустые клетки
-            for (let i = 0; i < startDay; i++) {
-                html += `<div class="calendar-day"></div>`;
-            }
-            
-            // Дни месяца
-            for (let day = 1; day <= totalDays; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const userShifts = shiftsMap[currentUser.uid] || {};
-                const shift = userShifts[dateStr];
-                
-                let shiftClass = '';
-                if (shift) {
-                    if (shift.type === 'regular') {
-                        if (shift.paid) shiftClass = 'shift-paid';
-                        else if (shift.done) shiftClass = 'shift-done';
-                        else shiftClass = 'shift-regular';
-                    } else if (shift.type === 'extra') {
-                        if (shift.paid) shiftClass = 'shift-paid-extra';
-                        else if (shift.done) shiftClass = 'shift-done-extra';
-                        else shiftClass = 'shift-extra';
-                    } else if (shift.type === 'dayoff') {
-                        shiftClass = 'shift-dayoff';
-                    } else if (shift.type === 'problem') {
-                        shiftClass = 'shift-problem';
-                    }
-                }
-                
-                const isToday = today.getDate() === day && 
-                               today.getMonth() === month && 
-                               today.getFullYear() === year;
-                
-                html += `
-                    <div class="calendar-day" data-date="${dateStr}" style="${isToday ? 'border: 2px solid #64ffda;' : ''}">
-                        <div class="day-number" style="${isToday ? 'color: #64ffda; font-size: 1.1rem;' : ''}">${day}</div>
-                        ${shift ? `<div class="shift-marker ${shiftClass}"></div>` : ''}
-                    </div>
-                `;
-            }
-            
-            // Дополняем до 35 клеток (5 строк)
-            const totalCells = 35;
-            const filledCells = startDay + totalDays;
-            for (let i = filledCells; i < totalCells; i++) {
-                html += `<div class="calendar-day"></div>`;
-            }
-            
-            container.innerHTML = html;
-        }
-        
-        // Обработчики для выбора месяца в кабинете пользователя
-        app.safeAddEventListener('prev-month', 'click', function() {
-            let month = parseInt(app.getElement('user-selected-month').value);
-            let year = parseInt(app.getElement('user-selected-year').value);
-            
-            month--;
-            if (month < 0) {
-                month = 11;
-                year--;
-            }
-            
-            app.getElement('user-selected-month').value = month;
-            app.getElement('user-selected-year').value = year;
-            loadUserShiftsForMonth();
-        });
-        
-        app.safeAddEventListener('next-month', 'click', function() {
-            let month = parseInt(app.getElement('user-selected-month').value);
-            let year = parseInt(app.getElement('user-selected-year').value);
-            
-            month++;
-            if (month > 11) {
-                month = 0;
-                year++;
-            }
-            
-            app.getElement('user-selected-month').value = month;
-            app.getElement('user-selected-year').value = year;
-            loadUserShiftsForMonth();
-        });
-        
-        app.safeAddEventListener('load-user-shifts', 'click', function() {
-            loadUserShiftsForMonth();
-        });
-        
-        app.safeAddEventListener('user-selected-month', 'change', function() {
-            loadUserShiftsForMonth();
-        });
-        
-        app.safeAddEventListener('user-selected-year', 'change', function() {
-            loadUserShiftsForMonth();
-        });
-        
         // === ИСТОРИЯ ВЫПЛАТ ПОЛЬЗОВАТЕЛЯ ===
         async function loadUserPaymentHistory() {
             if (!currentUser) return;
-            
             try {
                 const snapshot = await db.collection('salary_payments')
                     .where('userId', '==', currentUser.uid)
@@ -2100,175 +2007,42 @@
             }
         }
         
-        // === ОБНОВЛЕНИЕ СТАТИСТИКИ ===
-        function updateUserStats() {
-            if (!currentUser) return;
-            
-            const user = allUsers.find(u => u.id === currentUser.uid);
-            if (!user) return;
-            
-            const rate = user.rate || 0;
-            const shifts = shiftsMap[currentUser.uid] || {};
-            
-            let regularCount = 0;
-            let extraCount = 0;
-            let pendingAmount = 0;
-            let paidAmount = 0;
-            
-            Object.values(shifts).forEach(shift => {
-                if (shift.type === 'regular') {
-                    if (shift.done && !shift.paid) {
-                        regularCount++;
-                        pendingAmount += rate;
-                    } else if (shift.paid) {
-                        paidAmount += rate;
-                    }
-                } else if (shift.type === 'extra') {
-                    if (shift.done && !shift.paid) {
-                        extraCount++;
-                        pendingAmount += rate + 100;
-                    } else if (shift.paid) {
-                        paidAmount += rate + 100;
-                    }
-                }
-            });
-            
-            // Обновляем ожидаемые выплаты
-            const pendingTable = app.getElement('pending-payments');
-            const pendingTotal = app.getElement('pending-total');
-            
-            if (pendingTable) {
-                if (regularCount === 0 && extraCount === 0) {
-                    pendingTable.innerHTML = '<tr><td colspan="4">Нет ожидающих выплат</td></tr>';
-                } else {
-                    pendingTable.innerHTML = '';
-                    if (regularCount > 0) {
-                        pendingTable.innerHTML += `
-                            <tr>
-                                <td>Обычные смены</td>
-                                <td>${regularCount}</td>
-                                <td>${rate} ₽</td>
-                                <td>${regularCount * rate} ₽</td>
-                            </tr>
-                        `;
-                    }
-                    if (extraCount > 0) {
-                        pendingTable.innerHTML += `
-                            <tr>
-                                <td>Подработки</td>
-                                <td>${extraCount}</td>
-                                <td>${rate + 100} ₽</td>
-                                <td>${extraCount * (rate + 100)} ₽</td>
-                            </tr>
-                        `;
-                    }
-                }
-            }
-            
-            if (pendingTotal) pendingTotal.textContent = `${pendingAmount} ₽`;
-            
-            // Данные пользователя
-            const userName = app.getElement('user-full-name');
-            const userPosition = app.getElement('user-position');
-            const userRate = app.getElement('user-rate');
-            const userEmail = app.getElement('user-email');
-            
-            if (userName) {
-                // Форматируем имя для отображения: Фамилия Имя
-                if (user.lastName && user.firstName) {
-                    userName.textContent = `${user.lastName} ${user.firstName}`;
-                } else {
-                    userName.textContent = user.fullName || user.email || 'Имя не указано';
-                }
-            }
-            if (userPosition) userPosition.textContent = user.role === 'admin' ? 'Администратор' : 'Охранник';
-            if (userRate) userRate.textContent = `${rate} ₽`;
-            if (userEmail) userEmail.textContent = user.email;
-        }
-        
         // === ИНИЦИАЛИЗАЦИЯ ===
         function init() {
-            // Табы
             initTabs();
             
             // Навигация
-            app.safeAddEventListener('nav-home', 'click', (e) => {
-                e.preventDefault();
-                app.showSection('welcome-section');
+            ['nav-home', 'nav-login', 'nav-admin', 'nav-user'].forEach(id => {
+                app.safeAddEventListener(id, 'click', (e) => {
+                    e.preventDefault();
+                    app.showSection(id.replace('nav-', ''));
+                });
             });
-            app.safeAddEventListener('nav-login', 'click', (e) => {
-                e.preventDefault();
-                app.showSection('login-section');
-            });
-            app.safeAddEventListener('nav-admin', 'click', (e) => {
-                e.preventDefault();
-                app.showSection('admin-section');
-            });
-            app.safeAddEventListener('nav-user', 'click', (e) => {
-                e.preventDefault();
-                app.showSection('user-section');
-            });
-            app.safeAddEventListener('nav-logout', 'click', () => {
-                auth.signOut();
-            });
-            
-            // Кнопка "Вход в систему" на главной
+            app.safeAddEventListener('nav-logout', 'click', () => auth.signOut());
             app.safeAddEventListener('go-to-login', 'click', (e) => {
                 e.preventDefault();
                 app.showSection('login-section');
             });
             
-            // Управление календарем админа
-            const monthSelect = app.getElement('selected-month');
-            const yearInput = app.getElement('selected-year');
-            
-            if (monthSelect) {
-                monthSelect.value = currentMonth;
-                monthSelect.addEventListener('change', async () => {
-                    if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
-                        await loadAllShiftsForAdmin();
-                    }
-                });
-            }
-            if (yearInput) {
-                yearInput.value = currentYear;
-                yearInput.addEventListener('change', async () => {
-                    if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
-                        await loadAllShiftsForAdmin();
-                    }
-                });
-            }
-            
-            // Управление календарем пользователя
-            const userMonthSelect = app.getElement('user-selected-month');
-            const userYearInput = app.getElement('user-selected-year');
-            
-            if (userMonthSelect) {
-                userMonthSelect.value = currentMonth;
-            }
-            if (userYearInput) {
-                userYearInput.value = currentYear;
-            }
-            
-            // Начальные даты для периода
+            // Установка начальных дат
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            app.getElement('selected-month').value = currentMonth;
+            app.getElement('selected-year').value = currentYear;
+            app.getElement('user-selected-month').value = currentMonth;
+            app.getElement('user-selected-year').value = currentYear;
+            
             const periodFrom = app.getElement('period-from-admin');
             const periodTo = app.getElement('period-to-admin');
-            
             if (periodFrom) periodFrom.valueAsDate = firstDay;
             if (periodTo) periodTo.valueAsDate = today;
             
-            // Начальная дата для постов (сегодня)
             const postsDate = app.getElement('posts-date');
             const userPostsDate = app.getElement('user-posts-date');
             if (postsDate) postsDate.valueAsDate = today;
             if (userPostsDate) userPostsDate.valueAsDate = today;
             
-            // Инициализация кнопок скролла таблицы
-            initTableScrollButtons();
-            
-            // Начальная секция
             app.showSection('welcome-section');
         }
         
@@ -2284,12 +2058,9 @@
                 
                 if (isAdmin) {
                     app.showSection('admin-section');
-                    // Загружаем смены для админа
                     await loadAllShiftsForAdmin();
-                    // Загружаем архив выплат
                     loadPaymentsArchive();
                 } else {
-                    // Загружаем смены для пользователя и обновляем календарь
                     await loadUserShiftsForMonth();
                     updateUserStats();
                     loadUserPaymentHistory();
