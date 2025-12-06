@@ -1752,10 +1752,15 @@
                 }
             };
     
-            reader.readAsText(file, 'UTF-8');
+            reader.readAsText(file);
         });
 
         async function processCSV(csvText, month, year) {
+    // Убираем BOM символ если есть
+            if (csvText.charCodeAt(0) === 0xFEFF) {
+                csvText = csvText.substring(1);
+            }
+    
             const lines = csvText.split('\n').filter(line => line.trim() !== '');
             if (lines.length < 2) {
                 throw new Error('CSV файл пустой или имеет неправильный формат');
