@@ -1116,32 +1116,40 @@
         });
         
         async function loadPostsForDate(date, isAdminView = false) {
-            try {
-                const snapshot = await db.collection('posts')
-                    .where('date', '==', date)
-                    .orderBy('time')
-                    .get();
-                
-                postsData = [];
-                snapshot.forEach(doc => {
-                    postsData.push({ id: doc.id, ...doc.data() });
-                });
-                
-                if (isAdminView) {
-                    renderAdminPostsTable(date);
-                } else {
-                    renderUserPostsTable(date);
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки постов:', error);
-                if (isAdminView) {
-                    const container = app.getElement('posts-admin-container');
-                    if (container) {
-                        container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
-                    }
-                }
+    try {
+        const snapshot = await db.collection('posts')
+            .where('date', '==', date)
+            .get();
+        
+        postsData = [];
+        snapshot.forEach(doc => {
+            postsData.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // СОРТИРУЕМ ПО ПОРЯДКОВОМУ НОМЕРУ, ЕСЛИ ЕСТЬ, ИНАЧЕ ПО ВРЕМЕНИ
+        postsData.sort((a, b) => {
+            if (a.order !== undefined && b.order !== undefined) {
+                return a.order - b.order; // Сортировка по порядку из шаблона
+            }
+            // Если нет поля order, сортируем по времени
+            return (a.time || '').localeCompare(b.time || '');
+        });
+        
+        if (isAdminView) {
+            renderAdminPostsTable(date);
+        } else {
+            renderUserPostsTable(date);
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки постов:', error);
+        if (isAdminView) {
+            const container = app.getElement('posts-admin-container');
+            if (container) {
+                container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
             }
         }
+    }
+}
         
         function renderAdminPostsTable(date) {
             const container = app.getElement('posts-admin-container');
@@ -1248,21 +1256,30 @@
         }
         
         async function addNewPostRowToTable(date) {
-            try {
-                const postRef = await db.collection('posts').add({
-                    date: date,
-                    post: 'Новый пост',
-                    guardId: '',
-                    guardName: '',
-                    time: '08:00',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                await loadPostsForDate(date, true);
-            } catch (error) {
-                alert('Ошибка создания поста: ' + error.message);
+    try {
+        // Находим максимальный order для этой даты
+        let maxOrder = 0;
+        postsData.forEach(post => {
+            if (post.order !== undefined && post.order > maxOrder) {
+                maxOrder = post.order;
             }
-        }
+        });
+        
+        const postRef = await db.collection('posts').add({
+            date: date,
+            post: 'Новый пост',
+            guardId: '',
+            guardName: '',
+            time: '08:00',
+            order: maxOrder + 1, // ДОБАВЛЯЕМ ПОРЯДОК
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        await loadPostsForDate(date, true);
+    } catch (error) {
+        alert('Ошибка создания поста: ' + error.message);
+    }
+}
         
         async function savePostRow(row, date) {
             const postId = row.getAttribute('data-id');
@@ -1360,29 +1377,39 @@
         }
         
         async function createPostsFromTemplate(date) {
-            try {
-                // Добавляем посты из шаблона
-                const batch = db.batch();
-                defaultPosts.forEach(post => {
-                    const postRef = db.collection('posts').doc();
-                    batch.set(postRef, {
-                        date: date,
-                        post: post.post,
-                        guardId: '',
-                        guardName: '',
-                        time: post.time,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                });
-                
-                await batch.commit();
-                alert('Посты созданы из шаблона!');
-                await loadPostsForDate(date, true);
-                
-            } catch (error) {
-                alert('Ошибка создания постов: ' + error.message);
-            }
-        }
+    try {
+        // Удаляем старые посты на эту дату
+        const oldPosts = await db.collection('posts')
+            .where('date', '==', date)
+            .get();
+        
+        const batch = db.batch();
+        oldPosts.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        
+        // Добавляем новые посты из шаблона В ТОЧНОМ ПОРЯДКЕ
+        defaultPosts.forEach((post, index) => {
+            const postRef = db.collection('posts').doc();
+            batch.set(postRef, {
+                date: date,
+                post: post.post,
+                guardId: '',
+                guardName: '',
+                time: post.time,
+                order: index, // ДОБАВЛЯЕМ ПОРЯДКОВЫЙ НОМЕР
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+        
+        await batch.commit();
+        alert('Шаблон постов создан!');
+        await loadPostsForDate(date, true);
+        
+    } catch (error) {
+        alert('Ошибка создания шаблона: ' + error.message);
+    }
+}
         
         // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
         app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
