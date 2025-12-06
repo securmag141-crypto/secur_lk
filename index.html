@@ -1111,6 +1111,16 @@
             safeAddEventListener: function(id, event, handler) {
                 const el = this.getElement(id);
                 if (el) el.addEventListener(event, handler);
+            },
+            
+            showMessage: function(elementId, text, isError = false) {
+                const el = this.getElement(elementId);
+                if (el) {
+                    el.textContent = text;
+                    el.className = `message ${isError ? 'error' : 'success'}`;
+                    el.classList.remove('hidden');
+                    setTimeout(() => el.classList.add('hidden'), 5000);
+                }
             }
         };
         
@@ -1340,7 +1350,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
                 const dayOfWeek = date.getDay();
-                const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Ср'];
                 
                 daysHtml += `<th style="${dayOfWeek === 0 || dayOfWeek === 6 ? 'color: #ff6b6b;' : ''}">
                     ${day}<br><small style="font-size: 0.7rem; color: #8892b0;">${dayNames[dayOfWeek]}</small>
@@ -1669,31 +1679,121 @@
         app.safeAddEventListener('user-selected-month', 'change', () => loadUserShiftsForMonth());
         app.safeAddEventListener('user-selected-year', 'change', () => loadUserShiftsForMonth());
         
-        // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
-        app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
-            const dateInput = app.getElement('user-posts-date');
-            if (!dateInput || !dateInput.value) return alert('Выберите дату');
-            await loadPostsForDate(dateInput.value, false);
+        // === ШАБЛОН ПОСТОВ ===
+        function renderPostsTemplate() {
+            const container = app.getElement('posts-template');
+            if (!container) return;
+            
+            let html = '';
+            defaultPosts.forEach((item, index) => {
+                html += `
+                    <tr>
+                        <td>${item.number}</td>
+                        <td>${item.post}</td>
+                        <td>${item.time}</td>
+                        <td>
+                            <button class="btn-small edit-template-btn" data-index="${index}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-small btn-danger delete-template-btn" data-index="${index}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            document.querySelectorAll('.edit-template-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    editTemplatePost(index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-template-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteTemplatePost(index);
+                });
+            });
+        }
+        
+        function editTemplatePost(index) {
+            const post = defaultPosts[index];
+            const newNumber = prompt('Измените номер поста:', post.number);
+            if (newNumber !== null) {
+                const newPost = prompt('Измените название поста:', post.post);
+                if (newPost !== null) {
+                    const newTime = prompt('Измените время (формат ЧЧ:ММ):', post.time);
+                    if (newTime !== null) {
+                        defaultPosts[index] = { number: newNumber, post: newPost, time: newTime };
+                        renderPostsTemplate();
+                        alert('Шаблон обновлен!');
+                    }
+                }
+            }
+        }
+        
+        function deleteTemplatePost(index) {
+            if (confirm('Удалить этот пост из шаблона?')) {
+                defaultPosts.splice(index, 1);
+                renderPostsTemplate();
+                alert('Пост удален из шаблона!');
+            }
+        }
+        
+        // === ЗАГРУЗКА ПОСТОВ ПО ДАТЕ ===
+        app.safeAddEventListener('load-posts-btn', 'click', async function() {
+            const dateInput = app.getElement('posts-date');
+            if (!dateInput || !dateInput.value) {
+                alert('Выберите дату');
+                return;
+            }
+            
+            await loadPostsForDate(dateInput.value, true);
         });
         
-        async function loadPostsForDate(date, isAdminView) {
+        app.safeAddEventListener('create-template-btn', 'click', async function() {
+            const dateInput = app.getElement('posts-date');
+            if (!dateInput || !dateInput.value) {
+                alert('Выберите дату');
+                return;
+            }
+            
+            if (!confirm(`Создать шаблон постов для даты ${dateInput.value}?`)) return;
+            
+            await createPostsFromTemplate(dateInput.value);
+        });
+        
+        async function loadPostsForDate(date, isAdminView = false) {
             try {
-                const snapshot = await db.collection('posts').where('date', '==', date).get();
+                const snapshot = await db.collection('posts')
+                    .where('date', '==', date)
+                    .get();
+                
                 postsData = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     let guardDisplayName = data.guardName || '';
                     if (guardDisplayName) {
                         const nameParts = guardDisplayName.split(' ');
-                        if (nameParts.length >= 2) guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
+                        if (nameParts.length >= 2) {
+                            guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
+                        }
                     }
-                    postsData.push({ id: doc.id, ...data, guardDisplayName });
+                    
+                    postsData.push({ 
+                        id: doc.id, 
+                        ...data,
+                        guardDisplayName: guardDisplayName
+                    });
                 });
                 
                 postsData.sort((a, b) => (a.order || 999) - (b.order || 999));
                 
-                if (isAdminView) renderAdminPostsTable(date);
-                else renderUserPostsTable(date);
+                if (isAdminView) {
+                    renderAdminPostsTable(date);
+                } else {
+                    renderUserPostsTable(date);
+                }
             } catch (error) {
                 console.error('Ошибка загрузки постов:', error);
                 if (isAdminView) {
@@ -1703,20 +1803,322 @@
             }
         }
         
-        function renderUserPostsTable(date) {
-            const container = app.getElement('posts-user-container');
+        function renderAdminPostsTable(date) {
+            const container = app.getElement('posts-admin-container');
             if (!container) return;
             
             if (postsData.length === 0) {
-                container.innerHTML = `<div class="message"><p>Нет постов на выбранную дату ${date}</p></div>`;
+                container.innerHTML = `
+                    <div class="message">
+                        <p>Нет постов на дату ${date}</p>
+                        <button id="create-posts-btn" class="btn-success" style="margin-top: 10px;"><i class="fas fa-plus"></i> Создать из шаблона</button>
+                    </div>
+                `;
+                
+                app.safeAddEventListener('create-posts-btn', 'click', async function() {
+                    await createPostsFromTemplate(date);
+                });
                 return;
             }
             
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('ru-RU');
             
-            // Все посты, которые видны пользователю (включая назначенные другим)
-            const userPosts = postsData; // Показываем все посты на эту дату
+            let html = `
+                <h3>Посты на дату: ${formattedDate}</h3>
+                <div class="table-responsive">
+                    <table class="posts-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Пост</th>
+                                <th>Время</th>
+                                <th>Охранник</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            postsData.forEach((post) => {
+                html += `
+                    <tr class="post-row" data-id="${post.id}">
+                        <td>
+                            <input type="text" value="${post.number || ''}" class="number-input" placeholder="№" style="width: 60px;">
+                        </td>
+                        <td>
+                            <input type="text" value="${post.post || ''}" class="post-input" placeholder="Название поста" style="width: 100%;">
+                        </td>
+                        <td>
+                            <input type="time" value="${post.time || '08:00'}" class="time-input">
+                        </td>
+                        <td>
+                            ${renderUserSelectForPosts(post.guardId)}
+                        </td>
+                        <td class="post-controls">
+                            <button class="btn-success save-post-btn btn-small"><i class="fas fa-save"></i></button>
+                            <button class="btn-danger delete-post-btn btn-small"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <button id="add-new-post-btn" class="btn-secondary"><i class="fas fa-plus"></i> Добавить новую строку</button>
+                    <button id="save-all-posts-btn" class="btn-success" style="margin-left: 10px;"><i class="fas fa-save"></i> Сохранить все</button>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            app.safeAddEventListener('add-new-post-btn', 'click', function() {
+                addNewPostRowToTable(date);
+            });
+            
+            app.safeAddEventListener('save-all-posts-btn', 'click', function() {
+                saveAllPosts(date);
+            });
+            
+            document.querySelectorAll('.save-post-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.post-row');
+                    savePostRow(row, date);
+                });
+            });
+            
+            document.querySelectorAll('.delete-post-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.post-row');
+                    deletePostRow(row, date);
+                });
+            });
+        }
+        
+        function renderUserSelectForPosts(selectedId = '') {
+            let html = `<select class="guard-select" style="width: 100%;">`;
+            html += `<option value="">Не назначен</option>`;
+            allUsers.forEach(user => {
+                if (user.role !== 'admin') {
+                    html += `<option value="${user.id}" ${user.id === selectedId ? 'selected' : ''}>${user.displayName}</option>`;
+                }
+            });
+            html += `</select>`;
+            return html;
+        }
+        
+        async function createPostsFromTemplate(date) {
+            try {
+                const oldPosts = await db.collection('posts')
+                    .where('date', '==', date)
+                    .get();
+                
+                const batch = db.batch();
+                oldPosts.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                for (let i = 0; i < defaultPosts.length; i++) {
+                    const post = defaultPosts[i];
+                    const postRef = db.collection('posts').doc();
+                    
+                    const order = i + 1;
+                    
+                    batch.set(postRef, {
+                        date: date,
+                        number: post.number,
+                        post: post.post,
+                        guardId: '',
+                        guardName: '',
+                        time: post.time,
+                        order: order,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                await batch.commit();
+                alert('Шаблон постов создан в правильном порядке!');
+                await loadPostsForDate(date, true);
+                
+            } catch (error) {
+                alert('Ошибка создания шаблона: ' + error.message);
+            }
+        }
+        
+        async function addNewPostRowToTable(date) {
+            try {
+                let maxOrder = 0;
+                postsData.forEach(post => {
+                    if (post.order !== undefined && post.order > maxOrder) {
+                        maxOrder = post.order;
+                    }
+                });
+                
+                const postRef = await db.collection('posts').add({
+                    date: date,
+                    number: '',
+                    post: 'Новый пост',
+                    guardId: '',
+                    guardName: '',
+                    time: '08:00',
+                    order: maxOrder + 1,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                await loadPostsForDate(date, true);
+            } catch (error) {
+                alert('Ошибка создания поста: ' + error.message);
+            }
+        }
+        
+        async function savePostRow(row, date) {
+            const postId = row.getAttribute('data-id');
+            const numberInput = row.querySelector('.number-input');
+            const postInput = row.querySelector('.post-input');
+            const guardSelect = row.querySelector('.guard-select');
+            const timeInput = row.querySelector('.time-input');
+            
+            if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) return;
+            
+            const number = numberInput.value.trim();
+            const post = postInput.value.trim();
+            const guardId = guardSelect.value;
+            const time = timeInput.value;
+            
+            if (!post) {
+                alert('Введите название поста');
+                return;
+            }
+            
+            const guard = allUsers.find(u => u.id === guardId);
+            let guardName = guard ? guard.displayName : '';
+            
+            if (guard && guard.lastName && guard.firstName) {
+                guardName = `${guard.lastName} ${guard.firstName}`;
+            }
+            
+            const existingPost = postsData.find(p => p.id === postId);
+            const order = existingPost ? existingPost.order : (postsData.length + 1);
+            
+            try {
+                await db.collection('posts').doc(postId).update({
+                    number: number,
+                    post: post,
+                    guardId: guardId,
+                    guardName: guardName,
+                    time: time,
+                    order: order,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('Пост сохранен!');
+            } catch (error) {
+                alert('Ошибка сохранения: ' + error.message);
+            }
+        }
+        
+        async function saveAllPosts(date) {
+            const rows = document.querySelectorAll('.post-row');
+            let hasErrors = false;
+            
+            for (const row of rows) {
+                const postId = row.getAttribute('data-id');
+                const numberInput = row.querySelector('.number-input');
+                const postInput = row.querySelector('.post-input');
+                const guardSelect = row.querySelector('.guard-select');
+                const timeInput = row.querySelector('.time-input');
+                
+                if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) continue;
+                
+                const number = numberInput.value.trim();
+                const post = postInput.value.trim();
+                const guardId = guardSelect.value;
+                const time = timeInput.value;
+                
+                if (!post) {
+                    alert('Заполните название поста во всех строках');
+                    hasErrors = true;
+                    break;
+                }
+                
+                const guard = allUsers.find(u => u.id === guardId);
+                let guardName = guard ? guard.displayName : '';
+                
+                if (guard && guard.lastName && guard.firstName) {
+                    guardName = `${guard.lastName} ${guard.firstName}`;
+                }
+                
+                const existingPost = postsData.find(p => p.id === postId);
+                const order = existingPost ? existingPost.order : (postsData.length + 1);
+                
+                try {
+                    await db.collection('posts').doc(postId).update({
+                        number: number,
+                        post: post,
+                        guardId: guardId,
+                        guardName: guardName,
+                        time: time,
+                        order: order,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    alert('Ошибка сохранения: ' + error.message);
+                    hasErrors = true;
+                    break;
+                }
+            }
+            
+            if (!hasErrors) {
+                alert('Все посты сохранены!');
+                await loadPostsForDate(date, true);
+            }
+        }
+        
+        async function deletePostRow(row, date) {
+            const postId = row.getAttribute('data-id');
+            if (!postId) return;
+            
+            if (!confirm('Удалить этот пост?')) return;
+            
+            try {
+                await db.collection('posts').doc(postId).delete();
+                await loadPostsForDate(date, true);
+            } catch (error) {
+                alert('Ошибка удаления: ' + error.message);
+            }
+        }
+        
+        // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
+        app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
+            const dateInput = app.getElement('user-posts-date');
+            if (!dateInput || !dateInput.value) {
+                alert('Выберите дату');
+                return;
+            }
+            
+            await loadPostsForDate(dateInput.value, false);
+        });
+        
+        function renderUserPostsTable(date) {
+            const container = app.getElement('posts-user-container');
+            if (!container) return;
+            
+            if (postsData.length === 0) {
+                container.innerHTML = `
+                    <div class="message">
+                        <p>Нет постов на выбранную дату ${date}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const dateObj = new Date(date);
+            const formattedDate = dateObj.toLocaleDateString('ru-RU');
+            
+            const userPosts = postsData;
             
             let html = `
                 <h3>Посты на дату: ${formattedDate}</h3>
@@ -1810,7 +2212,6 @@
             
             if (pendingTotal) pendingTotal.textContent = `${pendingAmount} ₽`;
             
-            // Данные пользователя
             const userName = app.getElement('user-full-name');
             const userPosition = app.getElement('user-position');
             const userRate = app.getElement('user-rate');
@@ -1930,7 +2331,6 @@
                 
                 await batch.commit();
                 
-                // Очистка полей
                 app.getElement('payment-user-admin').value = '';
                 app.getElement('bonus-amount-admin').value = '0';
                 app.getElement('penalty-amount-admin').value = '0';
@@ -2042,6 +2442,9 @@
             const userPostsDate = app.getElement('user-posts-date');
             if (postsDate) postsDate.valueAsDate = today;
             if (userPostsDate) userPostsDate.valueAsDate = today;
+            
+            // Рендер шаблона постов
+            renderPostsTemplate();
             
             app.showSection('welcome-section');
         }
