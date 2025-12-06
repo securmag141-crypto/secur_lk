@@ -47,6 +47,7 @@
         .btn-success:hover { background: #219653; }
         .btn-danger { background: #e74c3c; }
         .btn-danger:hover { background: #c0392b; }
+        .btn-small { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
         
         /* CALENDAR */
         .calendar-controls { display: flex; gap: 0.8rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
@@ -88,11 +89,6 @@
         .profile-label { font-size: 0.8rem; opacity: 0.8; }
         .profile-value { font-size: 1.1rem; font-weight: bold; }
         
-        /* STATS */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1rem 0; }
-        .stat-card { background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center; }
-        .stat-value { font-size: 1.8rem; font-weight: bold; }
-        
         /* POSTS TABLE */
         .posts-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
         .posts-table th, .posts-table td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #eee; }
@@ -101,12 +97,18 @@
         .post-row input, .post-row select { padding: 0.4rem; font-size: 0.85rem; }
         .table-responsive { overflow-x: auto; }
         
+        /* POSTS MANAGEMENT */
+        .posts-management { margin-top: 2rem; }
+        .posts-date-control { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+        .posts-date-control input { max-width: 200px; }
+        
         /* UTILS */
         .hidden { display: none !important; }
         .message { padding: 0.8rem; border-radius: 5px; margin: 0.8rem 0; font-size: 0.9rem; }
         .error { background: #ffeaea; color: #c0392b; border: 1px solid #ffcccc; }
         .success { background: #e8f6ef; color: #27ae60; border: 1px solid #abebc6; }
         .flex { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .text-right { text-align: right; }
         
         /* FOOTER */
         footer { text-align: center; padding: 1.5rem; color: #7f8c8d; border-top: 1px solid #eee; margin-top: 2rem; font-size: 0.9rem; }
@@ -123,6 +125,8 @@
             .tabs { overflow-x: scroll; -webkit-overflow-scrolling: touch; }
             .tab { padding: 0.6rem 1rem; font-size: 0.9rem; }
             .profile-info { grid-template-columns: 1fr; }
+            .posts-date-control { flex-direction: column; align-items: flex-start; }
+            .posts-date-control input { max-width: 100%; }
         }
         
         @media (max-width: 480px) {
@@ -176,107 +180,161 @@
 
         <!-- ADMIN SECTION -->
         <section id="admin-section" class="container hidden">
-            <div class="flex">
-                <!-- ЛЕВАЯ КОЛОНКА -->
-                <div style="flex: 1;">
-                    <h1><i class="fas fa-user-cog"></i> Админ-панель</h1>
+            <div class="tabs">
+                <button class="tab active" data-tab="shifts"><i class="fas fa-calendar-alt"></i> Смены</button>
+                <button class="tab" data-tab="payments"><i class="fas fa-money-bill-wave"></i> Выплаты</button>
+                <button class="tab" data-tab="posts-admin"><i class="fas fa-clipboard-list"></i> Постовая</button>
+            </div>
+            
+            <!-- ВКЛАДКА: СМЕНЫ -->
+            <div id="tab-shifts" class="tab-content active">
+                <div class="flex">
+                    <!-- ЛЕВАЯ КОЛОНКА -->
+                    <div style="flex: 1;">
+                        <h1><i class="fas fa-user-cog"></i> Админ-панель</h1>
+                        
+                        <h2><i class="fas fa-user-plus"></i> Новый охранник</h2>
+                        <div class="form-group">
+                            <input type="email" id="new-user-email" placeholder="Email охранника">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="new-user-password" placeholder="Пароль">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="new-user-name" placeholder="Имя и фамилия">
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="new-user-rate" placeholder="Ставка за смену" value="1500">
+                        </div>
+                        <button id="create-user-btn"><i class="fas fa-plus"></i> Создать охранника</button>
+                        
+                        <h2><i class="fas fa-users"></i> Все охранники</h2>
+                        <div id="users-container" class="user-list"></div>
+                    </div>
                     
-                    <h2><i class="fas fa-user-plus"></i> Новый охранник</h2>
-                    <div class="form-group">
-                        <input type="email" id="new-user-email" placeholder="Email охранника">
+                    <!-- ПРАВАЯ КОЛОНКА -->
+                    <div style="flex: 2;">
+                        <h2><i class="fas fa-calendar-alt"></i> Назначение смен</h2>
+                        
+                        <div class="calendar-controls">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Охранник:</label>
+                                <select id="selected-user"></select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Месяц:</label>
+                                <select id="selected-month">
+                                    <option value="0">Январь</option><option value="1">Февраль</option>
+                                    <option value="2">Март</option><option value="3">Апрель</option>
+                                    <option value="4">Май</option><option value="5">Июнь</option>
+                                    <option value="6">Июль</option><option value="7">Август</option>
+                                    <option value="8">Сентябрь</option><option value="9">Октябрь</option>
+                                    <option value="10">Ноябрь</option><option value="11">Декабрь</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Год:</label>
+                                <input type="number" id="selected-year" value="2024">
+                            </div>
+                        </div>
+                        
+                        <!-- ЦВЕТА СМЕН -->
+                        <div class="legend">
+                            <div class="legend-item"><div class="legend-color shift-regular"></div><span>Обычная</span></div>
+                            <div class="legend-item"><div class="legend-color shift-extra"></div><span>Подработка</span></div>
+                            <div class="legend-item"><div class="legend-color shift-done"></div><span>Отработано</span></div>
+                            <div class="legend-item"><div class="legend-color shift-done-extra"></div><span>Подработка отр.</span></div>
+                            <div class="legend-item"><div class="legend-color shift-paid"></div><span>Оплачено</span></div>
+                            <div class="legend-item"><div class="legend-color shift-paid-extra"></div><span>Подр. оплач.</span></div>
+                            <div class="legend-item"><div class="legend-color shift-dayoff"></div><span>Выходной</span></div>
+                            <div class="legend-item"><div class="legend-color shift-problem"></div><span>Проблема</span></div>
+                        </div>
+                        
+                        <!-- КАЛЕНДАРЬ (5 строк по 7 дней) -->
+                        <div id="admin-calendar" class="calendar-grid"></div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <button id="save-shifts-btn"><i class="fas fa-save"></i> Сохранить смены</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <input type="password" id="new-user-password" placeholder="Пароль">
-                    </div>
-                    <div class="form-group">
-                        <input type="text" id="new-user-name" placeholder="Имя и фамилия">
-                    </div>
-                    <div class="form-group">
-                        <input type="number" id="new-user-rate" placeholder="Ставка за смену" value="1500">
-                    </div>
-                    <button id="create-user-btn"><i class="fas fa-plus"></i> Создать охранника</button>
-                    
-                    <h2><i class="fas fa-users"></i> Все охранники</h2>
-                    <div id="users-container" class="user-list"></div>
                 </div>
+            </div>
+            
+            <!-- ВКЛАДКА: ВЫПЛАТЫ -->
+            <div id="tab-payments" class="tab-content">
+                <h2><i class="fas fa-money-bill-wave"></i> Управление выплатами</h2>
+                <div class="flex">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Охранник:</label>
+                        <select id="payment-user"></select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Период с:</label>
+                        <input type="date" id="period-from">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Период по:</label>
+                        <input type="date" id="period-to">
+                    </div>
+                </div>
+                <div class="flex">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Премия:</label>
+                        <input type="number" id="bonus-amount" placeholder="Сумма (+)" value="0">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Удержание:</label>
+                        <input type="number" id="penalty-amount" placeholder="Сумма (-)" value="0">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Примечание:</label>
+                        <textarea id="bonus-note" placeholder="Причина" rows="1"></textarea>
+                    </div>
+                </div>
+                <button id="calculate-payment-btn" class="btn-success"><i class="fas fa-calculator"></i> Рассчитать и выплатить</button>
+                <div id="calculation-result"></div>
+            </div>
+            
+            <!-- ВКЛАДКА: ПОСТОВАЯ (АДМИН) -->
+            <div id="tab-posts-admin" class="tab-content">
+                <h2><i class="fas fa-clipboard-list"></i> Управление постовой</h2>
                 
-                <!-- ПРАВАЯ КОЛОНКА -->
-                <div style="flex: 2;">
-                    <h2><i class="fas fa-calendar-alt"></i> Назначение смен</h2>
-                    
-                    <div class="calendar-controls">
-                        <div class="form-group" style="flex: 1;">
-                            <label>Охранник:</label>
-                            <select id="selected-user"></select>
+                <div class="posts-management">
+                    <!-- ВЫБОР ДАТЫ -->
+                    <div class="posts-date-control">
+                        <div class="form-group">
+                            <label>Выберите дату для постовой:</label>
+                            <input type="date" id="posts-date" value="">
                         </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Месяц:</label>
-                            <select id="selected-month">
-                                <option value="0">Январь</option><option value="1">Февраль</option>
-                                <option value="2">Март</option><option value="3">Апрель</option>
-                                <option value="4">Май</option><option value="5">Июнь</option>
-                                <option value="6">Июль</option><option value="7">Август</option>
-                                <option value="8">Сентябрь</option><option value="9">Октябрь</option>
-                                <option value="10">Ноябрь</option><option value="11">Декабрь</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Год:</label>
-                            <input type="number" id="selected-year" value="2024">
+                        <div>
+                            <button id="load-posts-btn" class="btn-success"><i class="fas fa-search"></i> Загрузить посты</button>
+                            <button id="create-template-btn" class="btn-secondary" style="margin-left: 10px;"><i class="fas fa-magic"></i> Создать шаблон</button>
                         </div>
                     </div>
                     
-                    <!-- ЦВЕТА СМЕН -->
-                    <div class="legend">
-                        <div class="legend-item"><div class="legend-color shift-regular"></div><span>Обычная</span></div>
-                        <div class="legend-item"><div class="legend-color shift-extra"></div><span>Подработка</span></div>
-                        <div class="legend-item"><div class="legend-color shift-done"></div><span>Отработано</span></div>
-                        <div class="legend-item"><div class="legend-color shift-done-extra"></div><span>Подработка отр.</span></div>
-                        <div class="legend-item"><div class="legend-color shift-paid"></div><span>Оплачено</span></div>
-                        <div class="legend-item"><div class="legend-color shift-paid-extra"></div><span>Подр. оплач.</span></div>
-                        <div class="legend-item"><div class="legend-color shift-dayoff"></div><span>Выходной</span></div>
-                        <div class="legend-item"><div class="legend-color shift-problem"></div><span>Проблема</span></div>
+                    <!-- ТАБЛИЦА ПОСТОВ -->
+                    <div id="posts-admin-container">
+                        <div class="message">
+                            <p>Выберите дату и загрузите посты или создайте новый шаблон</p>
+                        </div>
                     </div>
                     
-                    <!-- КАЛЕНДАРЬ (5 строк по 7 дней) -->
-                    <div id="admin-calendar" class="calendar-grid"></div>
-                    
-                    <div style="margin-top: 1rem;">
-                        <button id="save-shifts-btn"><i class="fas fa-save"></i> Сохранить смены</button>
+                    <!-- СПИСОК ШАБЛОНОВ -->
+                    <h3 style="margin-top: 2rem;"><i class="fas fa-list"></i> Предустановленные посты (шаблон)</h3>
+                    <div class="table-responsive">
+                        <table class="posts-table">
+                            <thead>
+                                <tr>
+                                    <th>Пост</th>
+                                    <th>Время</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="posts-template">
+                                <!-- Шаблон загрузится через JS -->
+                            </tbody>
+                        </table>
                     </div>
-                    
-                    <!-- УПРАВЛЕНИЕ ВЫПЛАТАМИ -->
-                    <h2 style="margin-top: 2rem;"><i class="fas fa-money-bill-wave"></i> Управление выплатами</h2>
-                    <div class="flex">
-                        <div class="form-group" style="flex: 1;">
-                            <label>Охранник:</label>
-                            <select id="payment-user"></select>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Период с:</label>
-                            <input type="date" id="period-from">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Период по:</label>
-                            <input type="date" id="period-to">
-                        </div>
-                    </div>
-                    <div class="flex">
-                        <div class="form-group" style="flex: 1;">
-                            <label>Премия:</label>
-                            <input type="number" id="bonus-amount" placeholder="Сумма (+)" value="0">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Удержание:</label>
-                            <input type="number" id="penalty-amount" placeholder="Сумма (-)" value="0">
-                        </div>
-                        <div class="form-group" style="flex: 2;">
-                            <label>Примечание:</label>
-                            <textarea id="bonus-note" placeholder="Причина" rows="1"></textarea>
-                        </div>
-                    </div>
-                    <button id="calculate-payment-btn" class="btn-success"><i class="fas fa-calculator"></i> Рассчитать и выплатить</button>
-                    <div id="calculation-result"></div>
                 </div>
             </div>
         </section>
@@ -328,9 +386,14 @@
             <!-- ВКЛАДКА: ПОСТОВАЯ -->
             <div id="tab-posts" class="tab-content">
                 <h2><i class="fas fa-clipboard-list"></i> Расписание постов</h2>
-                <div id="posts-container">
-                    <!-- Таблица будет загружена через JavaScript -->
-                    <div id="posts-loading">Загрузка расписания...</div>
+                <div id="posts-user-container">
+                    <div class="message">
+                        <p>Выберите дату для просмотра постов:</p>
+                        <div class="form-group" style="max-width: 200px; margin-top: 10px;">
+                            <input type="date" id="user-posts-date" value="">
+                        </div>
+                        <button id="load-user-posts-btn" class="btn-success" style="margin-top: 10px;"><i class="fas fa-search"></i> Загрузить</button>
+                    </div>
                 </div>
             </div>
             
@@ -448,12 +511,12 @@
                 const navUser = this.getElement('nav-user');
                 const navLogout = this.getElement('nav-logout');
                 
-               // Админ видит и "Админ" и "Кабинет"
-if (navHome) navHome.classList.toggle('hidden', isLoggedIn);
-if (navLogin) navLogin.classList.toggle('hidden', isLoggedIn);
-if (navAdmin) navAdmin.classList.toggle('hidden', !isAdmin);
-if (navUser) navUser.classList.toggle('hidden', !isLoggedIn); // Админ ТОЖЕ видит кабинет!
-if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
+                // Админ видит и "Админ" и "Кабинет"
+                if (navHome) navHome.classList.toggle('hidden', isLoggedIn);
+                if (navLogin) navLogin.classList.toggle('hidden', isLoggedIn);
+                if (navAdmin) navAdmin.classList.toggle('hidden', !isAdmin);
+                if (navUser) navUser.classList.toggle('hidden', !isLoggedIn); // Админ ТОЖЕ видит кабинет!
+                if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
             },
             
             safeAddEventListener: function(id, event, handler) {
@@ -482,6 +545,22 @@ if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
         let postsData = [];
         let isAdmin = false;
         
+        // === ПРЕДУСТАНОВЛЕННЫЕ ПОСТЫ (ШАБЛОН) ===
+        const defaultPosts = [
+            { post: "Старший смены", time: "06:00" },
+            { post: "Помощник ст.смены", time: "18:00" },
+            { post: "Оператор CCTV", time: "06:00" },
+            { post: "Оператор-аналитик ТСБ", time: "08:00" },
+            { post: "Оператор CCTV", time: "18:00" },
+            { post: "Служебный вход", time: "07:00" },
+            { post: "Выход без покупок", time: "07:15" },
+            { post: "КСО", time: "10:00" },
+            { post: "Приёмка", time: "07:00" },
+            { post: "Интернет", time: "07:30" },
+            { post: "Выезд со стройдвора", time: "07:15" },
+            { post: "Резерв", time: "08:00" }
+        ];
+        
         // === ТАБЫ ===
         function initTabs() {
             document.querySelectorAll('.tab').forEach(tab => {
@@ -496,11 +575,6 @@ if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
                     this.classList.add('active');
                     const content = document.getElementById(`tab-${tabId}`);
                     if (content) content.classList.add('active');
-                    
-                    // Если открыли вкладку "Постовая", загружаем данные
-                    if (tabId === 'posts') {
-                        loadPosts();
-                    }
                 });
             });
         }
@@ -930,127 +1004,240 @@ if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
             container.innerHTML = html;
         }
         
-        // === РАБОТА С ПОСТАМИ ===
-        async function loadPosts() {
-            try {
-                const snapshot = await db.collection('posts').orderBy('date').get();
-                postsData = [];
-                snapshot.forEach(doc => {
-                    postsData.push({ id: doc.id, ...doc.data() });
-                });
-                
-                renderPostsTable();
-            } catch (error) {
-                console.error('Ошибка загрузки постов:', error);
-            }
-        }
-        
-        function renderPostsTable() {
-            const container = app.getElement('posts-container');
+        // === ШАБЛОН ПОСТОВ ===
+        function renderPostsTemplate() {
+            const container = app.getElement('posts-template');
             if (!container) return;
             
-            if (postsData.length === 0) {
-                container.innerHTML = `
-                    <div class="message">
-                        <p>Расписание постов пустое</p>
-                        ${isAdmin ? '<button id="add-first-post" class="btn-success" style="margin-top: 10px;"><i class="fas fa-plus"></i> Добавить первый пост</button>' : ''}
-                    </div>
-                `;
-                if (isAdmin) {
-                    app.safeAddEventListener('add-first-post', 'click', addNewPostRow);
-                }
-                return;
-            }
-            
-            // Группируем по дате
-            const postsByDate = {};
-            postsData.forEach(post => {
-                if (!postsByDate[post.date]) {
-                    postsByDate[post.date] = [];
-                }
-                postsByDate[post.date].push(post);
-            });
-            
             let html = '';
-            
-            // Для каждой даты
-            Object.keys(postsByDate).sort().forEach(date => {
-                const posts = postsByDate[date];
-                const dateObj = new Date(date);
-                const formattedDate = dateObj.toLocaleDateString('ru-RU');
-                
+            defaultPosts.forEach((item, index) => {
                 html += `
-                    <div style="margin-bottom: 2rem;">
-                        <h3 style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>Дата: ${formattedDate}</span>
-                            ${isAdmin ? `<button class="btn-success add-post-btn" data-date="${date}" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;"><i class="fas fa-plus"></i> Добавить строку</button>` : ''}
-                        </h3>
-                        <div class="table-responsive">
-                            <table class="posts-table">
-                                <thead>
-                                    <tr>
-                                        <th>Пост</th>
-                                        <th>Охранник</th>
-                                        <th>Время</th>
-                                        ${isAdmin ? '<th>Действия</th>' : ''}
-                                    </tr>
-                                </thead>
-                                <tbody id="posts-body-${date.replace(/-/g, '')}">
-                                    ${posts.map((post, index) => `
-                                        <tr class="post-row" data-id="${post.id}">
-                                            <td>
-                                                ${isAdmin ? `<input type="text" value="${post.post || ''}" class="post-input" placeholder="Название поста">` : post.post || ''}
-                                            </td>
-                                            <td>
-                                                ${isAdmin ? renderUserSelect(post.guardId) : (post.guardName || 'Не назначен')}
-                                            </td>
-                                            <td>
-                                                ${isAdmin ? `<input type="time" value="${post.time || '08:00'}" class="time-input">` : (post.time || '08:00')}
-                                            </td>
-                                            ${isAdmin ? `
-                                            <td class="post-controls">
-                                                <button class="btn-success save-post-btn" style="padding: 0.3rem 0.6rem;"><i class="fas fa-save"></i></button>
-                                                <button class="btn-danger delete-post-btn" style="padding: 0.3rem 0.6rem;"><i class="fas fa-trash"></i></button>
-                                            </td>` : ''}
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <tr>
+                        <td>${item.post}</td>
+                        <td>${item.time}</td>
+                        <td>
+                            <button class="btn-small edit-template-btn" data-index="${index}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-small btn-danger delete-template-btn" data-index="${index}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
                 `;
             });
             
             container.innerHTML = html;
             
-            // Добавляем обработчики для админа
-            if (isAdmin) {
-                document.querySelectorAll('.add-post-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const date = this.getAttribute('data-date');
-                        addNewPostRow(date);
-                    });
+            // Добавляем обработчики для редактирования шаблона
+            document.querySelectorAll('.edit-template-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    editTemplatePost(index);
                 });
-                
-                document.querySelectorAll('.save-post-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const row = this.closest('.post-row');
-                        savePost(row);
-                    });
+            });
+            
+            document.querySelectorAll('.delete-template-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteTemplatePost(index);
                 });
-                
-                document.querySelectorAll('.delete-post-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const row = this.closest('.post-row');
-                        deletePost(row);
-                    });
-                });
+            });
+        }
+        
+        function editTemplatePost(index) {
+            const post = defaultPosts[index];
+            const newPost = prompt('Измените название поста:', post.post);
+            if (newPost !== null) {
+                const newTime = prompt('Измените время (формат ЧЧ:ММ):', post.time);
+                if (newTime !== null) {
+                    defaultPosts[index] = { post: newPost, time: newTime };
+                    renderPostsTemplate();
+                    alert('Шаблон обновлен!');
+                }
             }
         }
         
-        function renderUserSelect(selectedId = '') {
-            let html = `<select class="guard-select" style="width: 100%;">`;
-            html += `<option value="">Выберите охранника</option>`;
+        function deleteTemplatePost(index) {
+            if (confirm('Удалить этот пост из шаблона?')) {
+                defaultPosts.splice(index, 1);
+                renderPostsTemplate();
+                alert('Пост удален из шаблона!');
+            }
+        }
+        
+        // === ЗАГРУЗКА ПОСТОВ ПО ДАТЕ (АДМИН) ===
+        app.safeAddEventListener('load-posts-btn', 'click', async function() {
+            const dateInput = app.getElement('posts-date');
+            if (!dateInput || !dateInput.value) {
+                alert('Выберите дату');
+                return;
+            }
+            
+            await loadPostsForDate(dateInput.value, true);
+        });
+        
+        app.safeAddEventListener('create-template-btn', 'click', async function() {
+            const dateInput = app.getElement('posts-date');
+            if (!dateInput || !dateInput.value) {
+                alert('Выберите дату');
+                return;
+            }
+            
+            if (!confirm(`Создать шаблон постов для даты ${dateInput.value}?`)) return;
+            
+            try {
+                // Удаляем старые посты на эту дату
+                const oldPosts = await db.collection('posts')
+                    .where('date', '==', dateInput.value)
+                    .get();
+                
+                const batch = db.batch();
+                oldPosts.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Добавляем новые посты из шаблона
+                defaultPosts.forEach(post => {
+                    const postRef = db.collection('posts').doc();
+                    batch.set(postRef, {
+                        date: dateInput.value,
+                        post: post.post,
+                        guardId: '',
+                        guardName: '',
+                        time: post.time,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+                alert('Шаблон постов создан!');
+                await loadPostsForDate(dateInput.value, true);
+                
+            } catch (error) {
+                alert('Ошибка создания шаблона: ' + error.message);
+            }
+        });
+        
+        async function loadPostsForDate(date, isAdminView = false) {
+            try {
+                const snapshot = await db.collection('posts')
+                    .where('date', '==', date)
+                    .orderBy('time')
+                    .get();
+                
+                postsData = [];
+                snapshot.forEach(doc => {
+                    postsData.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if (isAdminView) {
+                    renderAdminPostsTable(date);
+                } else {
+                    renderUserPostsTable(date);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки постов:', error);
+                if (isAdminView) {
+                    const container = app.getElement('posts-admin-container');
+                    if (container) {
+                        container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
+                    }
+                }
+            }
+        }
+        
+        function renderAdminPostsTable(date) {
+            const container = app.getElement('posts-admin-container');
+            if (!container) return;
+            
+            if (postsData.length === 0) {
+                container.innerHTML = `
+                    <div class="message">
+                        <p>Нет постов на дату ${date}</p>
+                        <button id="create-posts-btn" class="btn-success" style="margin-top: 10px;"><i class="fas fa-plus"></i> Создать из шаблона</button>
+                    </div>
+                `;
+                
+                app.safeAddEventListener('create-posts-btn', 'click', async function() {
+                    await createPostsFromTemplate(date);
+                });
+                return;
+            }
+            
+            const dateObj = new Date(date);
+            const formattedDate = dateObj.toLocaleDateString('ru-RU');
+            
+            let html = `
+                <h3>Посты на дату: ${formattedDate}</h3>
+                <div class="table-responsive">
+                    <table class="posts-table">
+                        <thead>
+                            <tr>
+                                <th>Пост</th>
+                                <th>Время</th>
+                                <th>Охранник</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            postsData.forEach((post) => {
+                html += `
+                    <tr class="post-row" data-id="${post.id}">
+                        <td>
+                            <input type="text" value="${post.post || ''}" class="post-input" placeholder="Название поста" style="width: 100%;">
+                        </td>
+                        <td>
+                            <input type="time" value="${post.time || '08:00'}" class="time-input">
+                        </td>
+                        <td>
+                            ${renderUserSelect(post.guardId, true)}
+                        </td>
+                        <td class="post-controls">
+                            <button class="btn-success save-post-btn btn-small"><i class="fas fa-save"></i></button>
+                            <button class="btn-danger delete-post-btn btn-small"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <button id="add-new-post-btn" class="btn-secondary"><i class="fas fa-plus"></i> Добавить новую строку</button>
+                    <button id="save-all-posts-btn" class="btn-success" style="margin-left: 10px;"><i class="fas fa-save"></i> Сохранить все</button>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // Обработчики событий
+            app.safeAddEventListener('add-new-post-btn', 'click', function() {
+                addNewPostRowToTable(date);
+            });
+            
+            app.safeAddEventListener('save-all-posts-btn', 'click', function() {
+                saveAllPosts(date);
+            });
+            
+            document.querySelectorAll('.save-post-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.post-row');
+                    savePostRow(row, date);
+                });
+            });
+            
+            document.querySelectorAll('.delete-post-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.post-row');
+                    deletePostRow(row, date);
+                });
+            });
+        }
+        
+        function renderUserSelect(selectedId = '', isAdmin = false) {
+            let html = `<select class="guard-select" style="width: 100%;" ${!isAdmin ? 'disabled' : ''}>`;
+            html += `<option value="">Не назначен</option>`;
             allUsers.forEach(user => {
                 if (user.role !== 'admin') {
                     html += `<option value="${user.id}" ${user.id === selectedId ? 'selected' : ''}>${user.fullName || user.email}</option>`;
@@ -1060,35 +1247,24 @@ if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
             return html;
         }
         
-        async function addNewPostRow(date = null) {
-    if (!date) {
-        const today = new Date();
-        date = today.toISOString().split('T')[0]; // Формат YYYY-MM-DD
-    }
-    
-    // Если date - это объект события (клик), берем сегодняшнюю дату
-    if (typeof date === 'object' && !(date instanceof String)) {
-        const today = new Date();
-        date = today.toISOString().split('T')[0];
-    }
-    
-    try {
-        const postRef = await db.collection('posts').add({
-            date: date,
-            post: '',
-            guardId: '',
-            guardName: '',
-            time: '08:00',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        async function addNewPostRowToTable(date) {
+            try {
+                const postRef = await db.collection('posts').add({
+                    date: date,
+                    post: 'Новый пост',
+                    guardId: '',
+                    guardName: '',
+                    time: '08:00',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                await loadPostsForDate(date, true);
+            } catch (error) {
+                alert('Ошибка создания поста: ' + error.message);
+            }
+        }
         
-        await loadPosts(); // Перезагружаем таблицу
-    } catch (error) {
-        alert('Ошибка создания поста: ' + error.message);
-    }
-}
-        
-        async function savePost(row) {
+        async function savePostRow(row, date) {
             const postId = row.getAttribute('data-id');
             const postInput = row.querySelector('.post-input');
             const guardSelect = row.querySelector('.guard-select');
@@ -1118,13 +1294,58 @@ if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
                 });
                 
                 alert('Пост сохранен!');
-                await loadPosts(); // Перезагружаем
             } catch (error) {
                 alert('Ошибка сохранения: ' + error.message);
             }
         }
         
-        async function deletePost(row) {
+        async function saveAllPosts(date) {
+            const rows = document.querySelectorAll('.post-row');
+            let hasErrors = false;
+            
+            for (const row of rows) {
+                const postId = row.getAttribute('data-id');
+                const postInput = row.querySelector('.post-input');
+                const guardSelect = row.querySelector('.guard-select');
+                const timeInput = row.querySelector('.time-input');
+                
+                if (!postId || !postInput || !guardSelect || !timeInput) continue;
+                
+                const post = postInput.value.trim();
+                const guardId = guardSelect.value;
+                const time = timeInput.value;
+                
+                if (!post) {
+                    alert('Заполните название поста во всех строках');
+                    hasErrors = true;
+                    break;
+                }
+                
+                const guard = allUsers.find(u => u.id === guardId);
+                const guardName = guard ? guard.fullName : '';
+                
+                try {
+                    await db.collection('posts').doc(postId).update({
+                        post: post,
+                        guardId: guardId,
+                        guardName: guardName,
+                        time: time,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    alert('Ошибка сохранения: ' + error.message);
+                    hasErrors = true;
+                    break;
+                }
+            }
+            
+            if (!hasErrors) {
+                alert('Все посты сохранены!');
+                await loadPostsForDate(date, true);
+            }
+        }
+        
+        async function deletePostRow(row, date) {
             const postId = row.getAttribute('data-id');
             if (!postId) return;
             
@@ -1132,10 +1353,95 @@ if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
             
             try {
                 await db.collection('posts').doc(postId).delete();
-                await loadPosts(); // Перезагружаем
+                await loadPostsForDate(date, true);
             } catch (error) {
                 alert('Ошибка удаления: ' + error.message);
             }
+        }
+        
+        async function createPostsFromTemplate(date) {
+            try {
+                // Добавляем посты из шаблона
+                const batch = db.batch();
+                defaultPosts.forEach(post => {
+                    const postRef = db.collection('posts').doc();
+                    batch.set(postRef, {
+                        date: date,
+                        post: post.post,
+                        guardId: '',
+                        guardName: '',
+                        time: post.time,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+                alert('Посты созданы из шаблона!');
+                await loadPostsForDate(date, true);
+                
+            } catch (error) {
+                alert('Ошибка создания постов: ' + error.message);
+            }
+        }
+        
+        // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
+        app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
+            const dateInput = app.getElement('user-posts-date');
+            if (!dateInput || !dateInput.value) {
+                alert('Выберите дату');
+                return;
+            }
+            
+            await loadPostsForDate(dateInput.value, false);
+        });
+        
+        function renderUserPostsTable(date) {
+            const container = app.getElement('posts-user-container');
+            if (!container) return;
+            
+            if (postsData.length === 0) {
+                container.innerHTML = `
+                    <div class="message">
+                        <p>Нет постов на выбранную дату ${date}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const dateObj = new Date(date);
+            const formattedDate = dateObj.toLocaleDateString('ru-RU');
+            
+            let html = `
+                <h3>Посты на дату: ${formattedDate}</h3>
+                <div class="table-responsive">
+                    <table class="posts-table">
+                        <thead>
+                            <tr>
+                                <th>Пост</th>
+                                <th>Время</th>
+                                <th>Охранник</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            postsData.forEach((post) => {
+                html += `
+                    <tr>
+                        <td>${post.post || ''}</td>
+                        <td>${post.time || ''}</td>
+                        <td>${post.guardName || 'Не назначен'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = html;
         }
         
         // === ОБНОВЛЕНИЕ СТАТИСТИКИ ===
@@ -1438,6 +1744,15 @@ if (navLogout) navLogout.classList.toggle('hidden', !isLoggedIn);
             
             if (periodFrom) periodFrom.valueAsDate = firstDay;
             if (periodTo) periodTo.valueAsDate = today;
+            
+            // Начальная дата для постов (сегодня)
+            const postsDate = app.getElement('posts-date');
+            const userPostsDate = app.getElement('user-posts-date');
+            if (postsDate) postsDate.valueAsDate = today;
+            if (userPostsDate) userPostsDate.valueAsDate = today;
+            
+            // Загружаем шаблон постов
+            renderPostsTemplate();
             
             // Начальная секция
             app.showSection('welcome-section');
