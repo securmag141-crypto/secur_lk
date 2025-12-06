@@ -832,12 +832,15 @@
                                 <input type="file" id="csv-file" accept=".csv">
                             </div>
                         </div>
-                        <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                       <div style="margin-top: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
                             <button id="import-csv-btn" class="btn-success">
                                 <i class="fas fa-upload"></i> Импортировать CSV
                             </button>
                             <button id="download-template-btn" class="btn-secondary">
                                 <i class="fas fa-download"></i> Скачать шаблон
+                            </button>
+                            <button id="export-csv-btn" class="btn-secondary">
+                                <i class="fas fa-file-export"></i> Экспорт CSV
                             </button>
                         </div>
                         <div id="csv-result" class="message hidden" style="margin-top: 1rem;"></div>
@@ -1953,6 +1956,77 @@
             link.click();
             document.body.removeChild(link);
         });
+
+        async function generateCSVExport(month, year) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = firstDay.toISOString().split('T')[0];
+    const endDate = lastDay.toISOString().split('T')[0];
+    
+    // Загружаем смены за месяц
+    const snapshot = await db.collection('shifts')
+        .where('date', '>=', startDate)
+        .where('date', '<=', endDate)
+        .get();
+    
+    // Группируем смены по сотрудникам
+    const shiftsByUser = {};
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        if (!shiftsByUser[data.userId]) {
+            shiftsByUser[data.userId] = {};
+        }
+        shiftsByUser[data.userId][data.date] = {
+            type: data.type,
+            done: data.done,
+            paid: data.paid
+        };
+    });
+    
+    // Создаем CSV
+    let csvContent = 'Sotrudnik'; // Заголовок на латинице
+    const daysInMonth = lastDay.getDate();
+    
+    // Заголовки дней
+    for (let day = 1; day <= daysInMonth; day++) {
+        csvContent += `,${day}`;
+    }
+    csvContent += '\n';
+    
+    // Данные по каждому сотруднику
+    const employees = allUsers.filter(u => u.role !== 'admin');
+    
+    employees.forEach(employee => {
+        // Имя в латинице
+        const name = employee.displayName || employee.fullName || `${employee.lastName} ${employee.firstName}`;
+        const nameLatin = cyrillicToLatin(name);
+        csvContent += nameLatin;
+        
+        const userShifts = shiftsByUser[employee.id] || {};
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const shift = userShifts[dateStr];
+            
+            let symbol = ' ';
+            if (shift) {
+                // Только * и # как в импорте
+                if (shift.type === 'regular') {
+                    symbol = '*'; // основная смена
+                } else if (shift.type === 'extra') {
+                    symbol = '#'; // подработка
+                }
+                // Выходные, проблемные и другие - пропускаем (пусто)
+            }
+            
+            csvContent += `,${symbol}`;
+        }
+        
+        csvContent += '\n';
+    });
+    
+    return csvContent;
+}
         // === ЗАГРУЗКА СМЕН ПО КНОПКЕ ===
         app.safeAddEventListener('load-all-shifts-btn', 'click', async () => {
             await loadAllShiftsForAdmin();
