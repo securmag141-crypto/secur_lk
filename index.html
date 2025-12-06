@@ -1844,31 +1844,32 @@
             return result;
         }
 
-        function findEmployeeByName(name) {
-            const searchName = name.toLowerCase().trim();
+       function findEmployeeByName(name) {
+    // Приводим к нижнему регистру и латинице
+            const searchName = cyrillicToLatin(name.toLowerCase().trim());
     
             return allUsers.find(user => {
                 if (user.role === 'admin') return false;
         
-        // Проверяем разные варианты имени
-                const displayName = (user.displayName || '').toLowerCase();
-                const fullName = (user.fullName || '').toLowerCase();
-                const lastName = (user.lastName || '').toLowerCase();
-                const firstName = (user.firstName || '').toLowerCase();
+        // Все имена переводим в латиницу для сравнения
+                const displayNameLatin = cyrillicToLatin((user.displayName || '').toLowerCase());
+                const fullNameLatin = cyrillicToLatin((user.fullName || '').toLowerCase());
+                const lastNameLatin = cyrillicToLatin((user.lastName || '').toLowerCase());
+                const firstNameLatin = cyrillicToLatin((user.firstName || '').toLowerCase());
         
-        // Ищем совпадение в любом формате
-                if (displayName === searchName || fullName === searchName) {
+        // Ищем совпадение в латинице
+                if (displayNameLatin === searchName || fullNameLatin === searchName) {
                     return true;
                 }
         
         // Ищем частичное совпадение
-                if (displayName.includes(searchName) || searchName.includes(displayName)) {
+                if (displayNameLatin.includes(searchName) || searchName.includes(displayNameLatin)) {
                     return true;
                 }
         
-        // Проверяем формат "Фамилия Имя"
-                const fullNameReverse = `${firstName} ${lastName}`.toLowerCase();
-                if (fullNameReverse === searchName || searchName.includes(fullNameReverse)) {
+        // Проверяем формат "Фамилия Имя" в латинице
+                const fullNameReverseLatin = `${firstNameLatin} ${lastNameLatin}`;
+                if (fullNameReverseLatin === searchName || searchName.includes(fullNameReverseLatin)) {
                     return true;
                 }
         
@@ -1876,7 +1877,26 @@
             });
         }
 
-// === СКАЧАТЬ ШАБЛОН CSV ===
+// Функция перевода кириллицы в латиницу
+        function cyrillicToLatin(text) {
+            const cyr = {
+                'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh',
+                'з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o',
+                'п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'ts',
+                'ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu',
+                'я':'ya',
+                'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'YO','Ж':'ZH',
+                'З':'Z','И':'I','Й':'Y','К':'K','Л':'L','М':'M','Н':'N','О':'O',
+                'П':'P','Р':'R','С':'S','Т':'T','У':'U','Ф':'F','Х':'H','Ц':'TS',
+                'Ч':'CH','Ш':'SH','Щ':'SHCH','Ъ':'','Ы':'Y','Ь':'','Э':'E','Ю':'YU',
+                'Я':'YA'
+            };
+    
+            return text.split('').map(char => cyr[char] || char).join('');
+        }
+        
+        // === СКАЧАТЬ ШАБЛОН CSV ===
+        
         app.safeAddEventListener('download-template-btn', 'click', function() {
             const month = parseInt(app.getElement('csv-month').value);
             const year = parseInt(app.getElement('csv-year').value);
@@ -1893,11 +1913,12 @@
     
     // Добавляем реальных сотрудников
             const employees = allUsers.filter(u => u.role !== 'admin');
-    
+
             if (employees.length > 0) {
                 employees.forEach(employee => {
                     const name = employee.displayName || employee.fullName || `${employee.lastName} ${employee.firstName}`;
-                    csvContent += name;
+                    const nameLatin = cyrillicToLatin(name); // ← переводим в латиницу
+                    csvContent += nameLatin; // ← используем латиницу
             
                     for (let day = 1; day <= 31; day++) {
                 // Оставляем пустые ячейки для заполнения
