@@ -176,26 +176,98 @@
         }
         
         /* ТАБЛИЦА СМЕН АДМИНА - ИСПРАВЛЕНА */
+        .shifts-admin-container {
+            position: relative;
+            margin-top: 1rem;
+        }
+        .table-scroll-controls {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            background: rgba(17, 34, 64, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.3s;
+            border: 1px solid #233554;
+        }
+        .table-scroll-controls:hover {
+            background: rgba(100, 255, 218, 0.2);
+        }
+        .scroll-left {
+            left: 0;
+            border-radius: 8px 0 0 8px;
+        }
+        .scroll-right {
+            right: 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .table-scroll-controls i {
+            font-size: 1.5rem;
+            color: #64ffda;
+        }
         .shifts-admin-table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-top: 1rem; 
             font-size: 0.9rem;
             background: #0a192f;
             border-radius: 8px;
             overflow: hidden;
-            table-layout: auto;
-            min-width: 1000px;
+            table-layout: fixed;
         }
         .shifts-admin-table th, 
         .shifts-admin-table td { 
             padding: 0.5rem; 
             text-align: center; 
             border: 1px solid #233554; 
-            min-width: 45px;
             height: 50px;
             vertical-align: middle;
             box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        /* Колонка № */
+        .shifts-admin-table th:nth-child(1),
+        .shifts-admin-table td:nth-child(1) {
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
+            position: sticky;
+            left: 0;
+            z-index: 15;
+            background: #112240;
+        }
+        .shifts-admin-table td:nth-child(1) {
+            background: #0a192f;
+            font-weight: bold;
+            color: #64ffda;
+        }
+        /* Колонка Сотрудник */
+        .shifts-admin-table th:nth-child(2),
+        .shifts-admin-table td:nth-child(2) {
+            width: 200px;
+            min-width: 200px;
+            max-width: 200px;
+            position: sticky;
+            left: 50px;
+            z-index: 15;
+            background: #112240;
+            text-align: left;
+            padding-left: 15px;
+        }
+        .shifts-admin-table td:nth-child(2) {
+            background: #0a192f;
+        }
+        /* Колонки дней (начиная с 3-й) */
+        .shifts-admin-table th:nth-child(n+3),
+        .shifts-admin-table td:nth-child(n+3) {
+            width: 45px;
+            min-width: 45px;
+            max-width: 45px;
         }
         .shifts-admin-table th { 
             background: #112240; 
@@ -205,58 +277,22 @@
             top: 0;
             z-index: 10;
         }
-        .shifts-admin-table th:first-child {
-            min-width: 50px;
-            position: sticky;
-            left: 0;
-            z-index: 15;
-            background: #112240;
-        }
-        .shifts-admin-table td:first-child {
-            min-width: 50px;
-            position: sticky;
-            left: 0;
-            z-index: 14;
-            background: #0a192f;
-            font-weight: bold;
-            color: #64ffda;
-        }
-        .shifts-admin-table th:nth-child(2) {
-            min-width: 200px;
-            max-width: 200px;
-            width: 200px;
-            position: sticky;
-            left: 50px;
-            z-index: 15;
-            background: #112240;
-        }
-        .shifts-admin-table td:nth-child(2) {
-            min-width: 200px;
-            max-width: 200px;
-            width: 200px;
-            position: sticky;
-            left: 50px;
-            z-index: 14;
-            background: #0a192f;
-            text-align: left;
-            padding-left: 15px;
-        }
         .shifts-admin-table tr:nth-child(even) {
             background: rgba(17, 34, 64, 0.5);
         }
-        .shifts-admin-table tr:nth-child(even) td:first-child,
+        .shifts-admin-table tr:nth-child(even) td:nth-child(1),
         .shifts-admin-table tr:nth-child(even) td:nth-child(2) {
             background: rgba(17, 34, 64, 0.8);
         }
         .shifts-admin-table tr:hover {
             background: rgba(100, 255, 218, 0.05);
         }
-        .shifts-admin-table tr:hover td:first-child,
+        .shifts-admin-table tr:hover td:nth-child(1),
         .shifts-admin-table tr:hover td:nth-child(2) {
             background: rgba(100, 255, 218, 0.08);
         }
         .shifts-cell { 
-            min-width: 40px; 
+            width: 100%;
             height: 40px; 
             cursor: pointer; 
             border-radius: 4px;
@@ -332,21 +368,27 @@
         .table-responsive { 
             overflow-x: auto;
             overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
             border-radius: 8px;
             border: 1px solid #233554;
             max-width: 100%;
             display: block;
+            scrollbar-width: thin;
+            scrollbar-color: #64ffda #0a192f;
         }
         .table-responsive::-webkit-scrollbar {
-            height: 8px;
+            width: 10px;
+            height: 10px;
         }
         .table-responsive::-webkit-scrollbar-track {
             background: #0a192f;
+            border-radius: 5px;
         }
         .table-responsive::-webkit-scrollbar-thumb {
             background: #64ffda;
-            border-radius: 4px;
+            border-radius: 5px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #52d9c8;
         }
         
         /* POSTS MANAGEMENT */
@@ -539,18 +581,8 @@
             .calendar-day { min-height: 70px; padding: 0.4rem; }
             .calendar-header { padding: 0.6rem; font-size: 0.8rem; }
             .shift-marker { height: 10px; }
-            .shifts-admin-table th:first-child,
-            .shifts-admin-table td:first-child {
-                position: sticky !important;
-                left: 0 !important;
-            }
-            .shifts-admin-table th:nth-child(2),
-            .shifts-admin-table td:nth-child(2) {
-                position: sticky !important;
-                left: 50px !important;
-            }
-            .table-responsive {
-                overflow-x: auto !important;
+            .table-scroll-controls {
+                display: none;
             }
         }
         
@@ -608,7 +640,7 @@
         <section id="admin-section" class="container hidden">
             <div class="tabs">
                 <button class="tab active" data-tab="shifts-admin"><i class="fas fa-calendar-alt"></i> Смены</button>
-                <button class="tab" data-tab="payments"><i class="fas fa-money-bill-wave"></i> Выплаты</button>
+                <button class="tab" data-tab="payments-admin"><i class="fas fa-money-bill-wave"></i> Выплаты</button>
                 <button class="tab" data-tab="posts-admin"><i class="fas fa-clipboard-list"></i> Постовая</button>
                 <button class="tab" data-tab="users-admin"><i class="fas fa-users"></i> Сотрудники</button>
             </div>
@@ -651,59 +683,96 @@
                     <div class="legend-item"><div class="legend-color shift-problem"></div><span>Проблема</span></div>
                 </div>
                 
-                <!-- ТАБЛИЦА СМЕН АДМИНА -->
-                <div class="table-responsive">
-                    <table class="shifts-admin-table" id="admin-shifts-table">
-                        <thead>
-                            <tr>
-                                <th rowspan="2">№</th>
-                                <th rowspan="2">Сотрудник</th>
-                                <th colspan="31" id="table-month-year">Январь 2024</th>
-                            </tr>
-                            <tr id="days-header">
-                                <!-- Дни месяца будут добавлены через JS -->
-                            </tr>
-                        </thead>
-                        <tbody id="shifts-table-body">
-                            <!-- Данные будут добавлены через JS -->
-                        </tbody>
-                    </table>
+                <!-- ТАБЛИЦА СМЕН АДМИНА С КНОПКАМИ СКРОЛЛА -->
+                <div class="shifts-admin-container">
+                    <div class="table-scroll-controls scroll-left" id="scroll-left-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="shifts-admin-table" id="admin-shifts-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">№</th>
+                                    <th rowspan="2">Сотрудник</th>
+                                    <th colspan="31" id="table-month-year">Январь 2024</th>
+                                </tr>
+                                <tr id="days-header">
+                                    <!-- Дни месяца будут добавлены через JS -->
+                                </tr>
+                            </thead>
+                            <tbody id="shifts-table-body">
+                                <!-- Данные будут добавлены через JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-scroll-controls scroll-right" id="scroll-right-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
                 </div>
             </div>
             
-            <!-- ВКЛАДКА: ВЫПЛАТЫ -->
-            <div id="tab-payments" class="tab-content">
+            <!-- ВКЛАДКА: ВЫПЛАТЫ АДМИНА -->
+            <div id="tab-payments-admin" class="tab-content">
                 <h2><i class="fas fa-money-bill-wave"></i> Управление выплатами</h2>
-                <div class="flex">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Охранник:</label>
-                        <select id="payment-user"></select>
+                
+                <!-- ФОРМА ДЛЯ СОЗДАНИЯ ВЫПЛАТЫ -->
+                <div class="container" style="margin-bottom: 2rem;">
+                    <h3><i class="fas fa-plus-circle"></i> Создать выплату</h3>
+                    <div class="flex">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Охранник:</label>
+                            <select id="payment-user-admin"></select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Период с:</label>
+                            <input type="date" id="period-from-admin">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Период по:</label>
+                            <input type="date" id="period-to-admin">
+                        </div>
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Период с:</label>
-                        <input type="date" id="period-from">
+                    <div class="flex">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Премия:</label>
+                            <input type="number" id="bonus-amount-admin" placeholder="Сумма (+)" value="0">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Удержание:</label>
+                            <input type="number" id="penalty-amount-admin" placeholder="Сумма (-)" value="0">
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label>Примечание:</label>
+                            <textarea id="bonus-note-admin" placeholder="Причина" rows="1"></textarea>
+                        </div>
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Период по:</label>
-                        <input type="date" id="period-to">
-                    </div>
+                    <button id="calculate-payment-btn-admin" class="btn-success"><i class="fas fa-calculator"></i> Рассчитать и выплатить</button>
+                    <div id="calculation-result-admin"></div>
                 </div>
-                <div class="flex">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Премия:</label>
-                        <input type="number" id="bonus-amount" placeholder="Сумма (+)" value="0">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Удержание:</label>
-                        <input type="number" id="penalty-amount" placeholder="Сумма (-)" value="0">
-                    </div>
-                    <div class="form-group" style="flex: 2;">
-                        <label>Примечание:</label>
-                        <textarea id="bonus-note" placeholder="Причина" rows="1"></textarea>
-                    </div>
+                
+                <!-- АРХИВ ВЫПЛАТ -->
+                <h3><i class="fas fa-history"></i> Архив выплат</h3>
+                <div class="table-responsive">
+                    <table class="posts-table">
+                        <thead>
+                            <tr>
+                                <th>Дата выплаты</th>
+                                <th>Период</th>
+                                <th>Сотрудник</th>
+                                <th>Обычные</th>
+                                <th>Подработки</th>
+                                <th>Ставка</th>
+                                <th>Премия</th>
+                                <th>Удержание</th>
+                                <th>Примечание</th>
+                                <th>К выплате</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-archive-admin">
+                            <tr><td colspan="10">Нет выплат</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-                <button id="calculate-payment-btn" class="btn-success"><i class="fas fa-calculator"></i> Рассчитать и выплатить</button>
-                <div id="calculation-result"></div>
             </div>
             
             <!-- ВКЛАДКА: ПОСТОВАЯ (АДМИН) -->
@@ -810,7 +879,7 @@
             <div class="tabs">
                 <button class="tab active" data-tab="shifts"><i class="fas fa-calendar-alt"></i> Смены</button>
                 <button class="tab" data-tab="posts"><i class="fas fa-clipboard-list"></i> Постовая</button>
-                <button class="tab" data-tab="payments"><i class="fas fa-money-bill-wave"></i> Выплаты</button>
+                <button class="tab" data-tab="payments-user"><i class="fas fa-money-bill-wave"></i> Выплаты</button>
             </div>
             
             <!-- ВКЛАДКА: СМЕНЫ -->
@@ -867,52 +936,54 @@
                 </div>
             </div>
             
-            <!-- ВКЛАДКА: ВЫПЛАТЫ -->
-            <div id="tab-payments" class="tab-content">
+            <!-- ВКЛАДКА: ВЫПЛАТЫ ПОЛЬЗОВАТЕЛЯ -->
+            <div id="tab-payments-user" class="tab-content">
                 <h2><i class="fas fa-money-bill-wave"></i> Выплаты</h2>
                 
                 <!-- ОЖИДАЕМЫЕ ВЫПЛАТЫ -->
                 <h3><i class="fas fa-clock"></i> Ожидаемые выплаты</h3>
-                <div class="table-responsive">
-                    <table class="posts-table">
-                        <thead>
-                            <tr>
-                                <th>Тип смены</th>
-                                <th>Количество</th>
-                                <th>Ставка</th>
-                                <th>Сумма</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pending-payments">
-                            <tr><td colspan="4">Нет ожидающих выплат</td></tr>
-                        </tbody>
-                        <tfoot>
-                            <tr style="font-weight: bold; color: #64ffda;">
-                                <td colspan="3">Итого к выплате:</td>
-                                <td id="pending-total">0 ₽</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                <div id="pending-payments-container" class="container" style="margin-bottom: 2rem;">
+                    <div class="table-responsive">
+                        <table class="posts-table">
+                            <thead>
+                                <tr>
+                                    <th>Тип смены</th>
+                                    <th>Количество</th>
+                                    <th>Ставка</th>
+                                    <th>Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-payments">
+                                <tr><td colspan="4">Нет ожидающих выплат</td></tr>
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-weight: bold; color: #64ffda;">
+                                    <td colspan="3">Итого к выплате:</td>
+                                    <td id="pending-total">0 ₽</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
                 
                 <!-- ИСТОРИЯ ВЫПЛАТ -->
-                <h3 style="margin-top: 2rem;"><i class="fas fa-history"></i> История выплат</h3>
+                <h3><i class="fas fa-history"></i> История выплат</h3>
                 <div class="table-responsive">
                     <table class="posts-table">
                         <thead>
                             <tr>
-                                <th>Дата</th>
+                                <th>Дата выплаты</th>
                                 <th>Период</th>
                                 <th>Обычные</th>
                                 <th>Подработки</th>
-                                <th>Сумма</th>
+                                <th>Ставка</th>
                                 <th>Премия</th>
                                 <th>Удержание</th>
                                 <th>Примечание</th>
-                                <th>Итого</th>
+                                <th>К выплате</th>
                             </tr>
                         </thead>
-                        <tbody id="payments-history">
+                        <tbody id="payments-history-user">
                             <tr><td colspan="9">Нет выплат</td></tr>
                         </tbody>
                     </table>
@@ -1048,6 +1119,16 @@
                     this.classList.add('active');
                     const content = document.getElementById(`tab-${tabId}`);
                     if (content) content.classList.add('active');
+                    
+                    // Если открыли вкладку выплат админа, загружаем архив
+                    if (tabId === 'payments-admin' && isAdmin) {
+                        loadPaymentsArchive();
+                    }
+                    // Если открыли вкладку выплат пользователя, обновляем данные
+                    if (tabId === 'payments-user' && currentUser) {
+                        updateUserStats();
+                        loadUserPaymentHistory();
+                    }
                 });
             });
         }
@@ -1125,17 +1206,16 @@
                     `).join('');
                 }
                 
-                // Селект выбора пользователя для выплат
-                const paymentSelect = app.getElement('payment-user');
-                
-                if (paymentSelect) {
-                    paymentSelect.innerHTML = '<option value="">Выберите охранника</option>';
+                // Селект выбора пользователя для выплат админа
+                const paymentSelectAdmin = app.getElement('payment-user-admin');
+                if (paymentSelectAdmin) {
+                    paymentSelectAdmin.innerHTML = '<option value="">Выберите охранника</option>';
                     allUsers.forEach(user => {
                         if (user.role !== 'admin') {
                             const option = document.createElement('option');
                             option.value = user.id;
                             option.textContent = `${user.displayName} (${user.rate || 0} ₽)`;
-                            paymentSelect.appendChild(option);
+                            paymentSelectAdmin.appendChild(option);
                         }
                     });
                 }
@@ -1365,6 +1445,31 @@
             });
         }
         
+        // === КНОПКИ СКРОЛЛА ТАБЛИЦЫ ===
+        function initTableScrollButtons() {
+            const scrollLeftBtn = app.getElement('scroll-left-btn');
+            const scrollRightBtn = app.getElement('scroll-right-btn');
+            const tableContainer = document.querySelector('.table-responsive');
+            
+            if (scrollLeftBtn && tableContainer) {
+                scrollLeftBtn.addEventListener('click', function() {
+                    tableContainer.scrollBy({
+                        left: -200,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+            
+            if (scrollRightBtn && tableContainer) {
+                scrollRightBtn.addEventListener('click', function() {
+                    tableContainer.scrollBy({
+                        left: 200,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        }
+        
         // === ОБРАБОТКА КЛИКА ПО ЯЧЕЙКЕ СМЕНЫ ===
         function handleShiftCellClick(cell) {
             const userId = cell.getAttribute('data-user-id');
@@ -1540,6 +1645,181 @@
             }
         });
         
+        // === ВЫПЛАТЫ АДМИНА ===
+        async function loadPaymentsArchive() {
+            try {
+                const snapshot = await db.collection('salary_payments')
+                    .orderBy('createdAt', 'desc')
+                    .limit(50)
+                    .get();
+                
+                const container = app.getElement('payments-archive-admin');
+                if (!container) return;
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<tr><td colspan="10">Нет выплат</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.createdAt?.toDate ? 
+                        data.createdAt.toDate().toLocaleDateString('ru-RU') : 'Дата неизвестна';
+                    
+                    // Находим пользователя для получения ставки
+                    const user = allUsers.find(u => u.id === data.userId);
+                    const rate = user ? user.rate : 0;
+                    
+                    html += `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${data.periodFrom}<br>${data.periodTo}</td>
+                            <td>${data.userName || 'Неизвестно'}</td>
+                            <td>${data.regularShifts || 0}</td>
+                            <td>${data.extraShifts || 0}</td>
+                            <td>${rate} ₽</td>
+                            <td>${data.bonus || 0} ₽</td>
+                            <td>${data.penalty || 0} ₽</td>
+                            <td>${data.bonusNote || ''}</td>
+                            <td><strong>${data.totalAmount || 0} ₽</strong></td>
+                        </tr>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки архива выплат:', error);
+            }
+        }
+        
+        // === РАСЧЕТ ВЫПЛАТ АДМИНА ===
+        app.safeAddEventListener('calculate-payment-btn-admin', 'click', async () => {
+            const paymentUser = app.getElement('payment-user-admin');
+            const periodFrom = app.getElement('period-from-admin');
+            const periodTo = app.getElement('period-to-admin');
+            const bonusAmount = app.getElement('bonus-amount-admin');
+            const penaltyAmount = app.getElement('penalty-amount-admin');
+            const bonusNote = app.getElement('bonus-note-admin');
+            
+            if (!paymentUser || !periodFrom || !periodTo || !bonusAmount || !penaltyAmount || !bonusNote) return;
+            
+            const userId = paymentUser.value;
+            const fromDate = periodFrom.value;
+            const toDate = periodTo.value;
+            const bonus = parseInt(bonusAmount.value) || 0;
+            const penalty = parseInt(penaltyAmount.value) || 0;
+            const note = bonusNote.value;
+            
+            if (!userId || !fromDate || !toDate) {
+                alert('Заполните все поля');
+                return;
+            }
+            
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) {
+                alert('Охранник не найден');
+                return;
+            }
+            
+            const rate = user.rate || 0;
+            
+            try {
+                // Получаем смены за период
+                const shifts = await db.collection('shifts')
+                    .where('userId', '==', userId)
+                    .where('date', '>=', fromDate)
+                    .where('date', '<=', toDate)
+                    .get();
+                
+                let regularCount = 0;
+                let extraCount = 0;
+                let totalAmount = 0;
+                const batch = db.batch();
+                
+                shifts.forEach(doc => {
+                    const data = doc.data();
+                    // Считаем только отработанные и неоплаченные
+                    if (data.done && !data.paid) {
+                        if (data.type === 'regular') {
+                            regularCount++;
+                            totalAmount += rate;
+                        } else if (data.type === 'extra') {
+                            extraCount++;
+                            totalAmount += rate + 100;
+                        }
+                        
+                        // Помечаем как оплаченные
+                        batch.update(doc.ref, { 
+                            paid: true,
+                            paidAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                });
+                
+                if (regularCount === 0 && extraCount === 0) {
+                    alert('Нет смен для выплаты в выбранном периоде');
+                    return;
+                }
+                
+                // Добавляем премию/удержание
+                const finalAmount = totalAmount + bonus - penalty;
+                
+                // Создаём запись о выплате
+                const paymentRef = db.collection('salary_payments').doc();
+                await paymentRef.set({
+                    userId: userId,
+                    userName: user.displayName || user.email,
+                    periodFrom: fromDate,
+                    periodTo: toDate,
+                    regularShifts: regularCount,
+                    extraShifts: extraCount,
+                    baseAmount: totalAmount,
+                    bonus: bonus,
+                    penalty: penalty,
+                    bonusNote: note,
+                    totalAmount: finalAmount,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    adminId: currentUser.uid
+                });
+                
+                // Применяем обновления смен
+                await batch.commit();
+                
+                // Обновляем данные
+                await loadUsers();
+                
+                // Очищаем поля
+                paymentUser.value = '';
+                bonusAmount.value = '0';
+                penaltyAmount.value = '0';
+                bonusNote.value = '';
+                
+                const resultDiv = app.getElement('calculation-result-admin');
+                if (resultDiv) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>Выплата создана!</strong><br>
+                            Охранник: ${user.displayName || user.email}<br>
+                            Период: ${fromDate} - ${toDate}<br>
+                            Обычных: ${regularCount} × ${rate} ₽ = ${regularCount * rate} ₽<br>
+                            Подработок: ${extraCount} × ${rate + 100} ₽ = ${extraCount * (rate + 100)} ₽<br>
+                            Премия: +${bonus} ₽<br>
+                            Удержание: -${penalty} ₽<br>
+                            <strong>Итого: ${finalAmount} ₽</strong>
+                        </div>
+                    `;
+                }
+                
+                // Обновляем архив выплат
+                await loadPaymentsArchive();
+                
+                alert(`Выплата на сумму ${finalAmount} ₽ создана для ${user.displayName}`);
+                
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        });
+        
         // === КАЛЕНДАРЬ ПОЛЬЗОВАТЕЛЯ С ВЫБОРОМ МЕСЯЦА ===
         async function loadUserShiftsForMonth() {
             if (!currentUser) return;
@@ -1705,493 +1985,52 @@
             loadUserShiftsForMonth();
         });
         
-        // === ШАБЛОН ПОСТОВ ===
-        function renderPostsTemplate() {
-            const container = app.getElement('posts-template');
-            if (!container) return;
+        // === ИСТОРИЯ ВЫПЛАТ ПОЛЬЗОВАТЕЛЯ ===
+        async function loadUserPaymentHistory() {
+            if (!currentUser) return;
             
-            let html = '';
-            defaultPosts.forEach((item, index) => {
-                html += `
-                    <tr>
-                        <td>${item.number}</td>
-                        <td>${item.post}</td>
-                        <td>${item.time}</td>
-                        <td>
-                            <button class="btn-small edit-template-btn" data-index="${index}"><i class="fas fa-edit"></i></button>
-                            <button class="btn-small btn-danger delete-template-btn" data-index="${index}"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            container.innerHTML = html;
-            
-            // Добавляем обработчики для редактирования шаблона
-            document.querySelectorAll('.edit-template-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    editTemplatePost(index);
-                });
-            });
-            
-            document.querySelectorAll('.delete-template-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    deleteTemplatePost(index);
-                });
-            });
-        }
-        
-        function editTemplatePost(index) {
-            const post = defaultPosts[index];
-            const newNumber = prompt('Измените номер поста:', post.number);
-            if (newNumber !== null) {
-                const newPost = prompt('Измените название поста:', post.post);
-                if (newPost !== null) {
-                    const newTime = prompt('Измените время (формат ЧЧ:ММ):', post.time);
-                    if (newTime !== null) {
-                        defaultPosts[index] = { number: newNumber, post: newPost, time: newTime };
-                        renderPostsTemplate();
-                        alert('Шаблон обновлен!');
-                    }
-                }
-            }
-        }
-        
-        function deleteTemplatePost(index) {
-            if (confirm('Удалить этот пост из шаблона?')) {
-                defaultPosts.splice(index, 1);
-                renderPostsTemplate();
-                alert('Пост удален из шаблона!');
-            }
-        }
-        
-        // === ЗАГРУЗКА ПОСТОВ ПО ДАТЕ ===
-        app.safeAddEventListener('load-posts-btn', 'click', async function() {
-            const dateInput = app.getElement('posts-date');
-            if (!dateInput || !dateInput.value) {
-                alert('Выберите дату');
-                return;
-            }
-            
-            await loadPostsForDate(dateInput.value, true);
-        });
-        
-        app.safeAddEventListener('create-template-btn', 'click', async function() {
-            const dateInput = app.getElement('posts-date');
-            if (!dateInput || !dateInput.value) {
-                alert('Выберите дату');
-                return;
-            }
-            
-            if (!confirm(`Создать шаблон постов для даты ${dateInput.value}?`)) return;
-            
-            await createPostsFromTemplate(dateInput.value);
-        });
-        
-        async function loadPostsForDate(date, isAdminView = false) {
             try {
-                const snapshot = await db.collection('posts')
-                    .where('date', '==', date)
+                const snapshot = await db.collection('salary_payments')
+                    .where('userId', '==', currentUser.uid)
+                    .orderBy('createdAt', 'desc')
+                    .limit(20)
                     .get();
                 
-                postsData = [];
+                const container = app.getElement('payments-history-user');
+                if (!container) return;
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<tr><td colspan="9">Нет выплат</td></tr>';
+                    return;
+                }
+                
+                const user = allUsers.find(u => u.id === currentUser.uid);
+                const rate = user ? user.rate : 0;
+                
+                let html = '';
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    // Форматируем имя охранника: Фамилия Имя
-                    let guardDisplayName = data.guardName || '';
-                    if (guardDisplayName) {
-                        const nameParts = guardDisplayName.split(' ');
-                        if (nameParts.length >= 2) {
-                            // Меняем порядок: Фамилия Имя
-                            guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
-                        }
-                    }
+                    const date = data.createdAt?.toDate ? 
+                        data.createdAt.toDate().toLocaleDateString('ru-RU') : 'Дата неизвестна';
                     
-                    postsData.push({ 
-                        id: doc.id, 
-                        ...data,
-                        guardDisplayName: guardDisplayName
-                    });
+                    html += `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${data.periodFrom}<br>${data.periodTo}</td>
+                            <td>${data.regularShifts || 0}</td>
+                            <td>${data.extraShifts || 0}</td>
+                            <td>${rate} ₽</td>
+                            <td>${data.bonus || 0} ₽</td>
+                            <td>${data.penalty || 0} ₽</td>
+                            <td>${data.bonusNote || ''}</td>
+                            <td><strong>${data.totalAmount || 0} ₽</strong></td>
+                        </tr>
+                    `;
                 });
-                
-                // СОРТИРУЕМ ПО ПОЛЮ order
-                postsData.sort((a, b) => {
-                    const orderA = a.order || 999;
-                    const orderB = b.order || 999;
-                    return orderA - orderB;
-                });
-                
-                if (isAdminView) {
-                    renderAdminPostsTable(date);
-                } else {
-                    renderUserPostsTable(date);
-                }
+                container.innerHTML = html;
             } catch (error) {
-                console.error('Ошибка загрузки постов:', error);
-                if (isAdminView) {
-                    const container = app.getElement('posts-admin-container');
-                    if (container) {
-                        container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
-                    }
-                }
+                console.error('Ошибка загрузки истории выплат:', error);
             }
-        }
-        
-        function renderAdminPostsTable(date) {
-            const container = app.getElement('posts-admin-container');
-            if (!container) return;
-            
-            if (postsData.length === 0) {
-                container.innerHTML = `
-                    <div class="message">
-                        <p>Нет постов на дату ${date}</p>
-                        <button id="create-posts-btn" class="btn-success" style="margin-top: 10px;"><i class="fas fa-plus"></i> Создать из шаблона</button>
-                    </div>
-                `;
-                
-                app.safeAddEventListener('create-posts-btn', 'click', async function() {
-                    await createPostsFromTemplate(date);
-                });
-                return;
-            }
-            
-            const dateObj = new Date(date);
-            const formattedDate = dateObj.toLocaleDateString('ru-RU');
-            
-            let html = `
-                <h3>Посты на дату: ${formattedDate}</h3>
-                <div class="table-responsive">
-                    <table class="posts-table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Пост</th>
-                                <th>Время</th>
-                                <th>Охранник</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            postsData.forEach((post) => {
-                html += `
-                    <tr class="post-row" data-id="${post.id}">
-                        <td>
-                            <input type="text" value="${post.number || ''}" class="number-input" placeholder="№" style="width: 60px;">
-                        </td>
-                        <td>
-                            <input type="text" value="${post.post || ''}" class="post-input" placeholder="Название поста" style="width: 100%;">
-                        </td>
-                        <td>
-                            <input type="time" value="${post.time || '08:00'}" class="time-input">
-                        </td>
-                        <td>
-                            ${renderUserSelectForPosts(post.guardId)}
-                        </td>
-                        <td class="post-controls">
-                            <button class="btn-success save-post-btn btn-small"><i class="fas fa-save"></i></button>
-                            <button class="btn-danger delete-post-btn btn-small"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-                <div style="margin-top: 1rem;">
-                    <button id="add-new-post-btn" class="btn-secondary"><i class="fas fa-plus"></i> Добавить новую строку</button>
-                    <button id="save-all-posts-btn" class="btn-success" style="margin-left: 10px;"><i class="fas fa-save"></i> Сохранить все</button>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-            
-            // Обработчики событий
-            app.safeAddEventListener('add-new-post-btn', 'click', function() {
-                addNewPostRowToTable(date);
-            });
-            
-            app.safeAddEventListener('save-all-posts-btn', 'click', function() {
-                saveAllPosts(date);
-            });
-            
-            document.querySelectorAll('.save-post-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const row = this.closest('.post-row');
-                    savePostRow(row, date);
-                });
-            });
-            
-            document.querySelectorAll('.delete-post-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const row = this.closest('.post-row');
-                    deletePostRow(row, date);
-                });
-            });
-        }
-        
-        function renderUserSelectForPosts(selectedId = '') {
-            let html = `<select class="guard-select" style="width: 100%;">`;
-            html += `<option value="">Не назначен</option>`;
-            allUsers.forEach(user => {
-                if (user.role !== 'admin') {
-                    html += `<option value="${user.id}" ${user.id === selectedId ? 'selected' : ''}>${user.displayName}</option>`;
-                }
-            });
-            html += `</select>`;
-            return html;
-        }
-        
-        async function createPostsFromTemplate(date) {
-            try {
-                // Удаляем старые посты на эту дату
-                const oldPosts = await db.collection('posts')
-                    .where('date', '==', date)
-                    .get();
-                
-                const batch = db.batch();
-                oldPosts.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
-                
-                // Добавляем новые посты из шаблона в ТОЧНОМ ПОРЯДКЕ
-                for (let i = 0; i < defaultPosts.length; i++) {
-                    const post = defaultPosts[i];
-                    const postRef = db.collection('posts').doc();
-                    
-                    const order = i + 1;
-                    
-                    batch.set(postRef, {
-                        date: date,
-                        number: post.number,
-                        post: post.post,
-                        guardId: '',
-                        guardName: '',
-                        time: post.time,
-                        order: order,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                
-                await batch.commit();
-                alert('Шаблон постов создан в правильном порядке!');
-                await loadPostsForDate(date, true);
-                
-            } catch (error) {
-                alert('Ошибка создания шаблона: ' + error.message);
-            }
-        }
-        
-        async function addNewPostRowToTable(date) {
-            try {
-                let maxOrder = 0;
-                postsData.forEach(post => {
-                    if (post.order !== undefined && post.order > maxOrder) {
-                        maxOrder = post.order;
-                    }
-                });
-                
-                const postRef = await db.collection('posts').add({
-                    date: date,
-                    number: '',
-                    post: 'Новый пост',
-                    guardId: '',
-                    guardName: '',
-                    time: '08:00',
-                    order: maxOrder + 1,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                await loadPostsForDate(date, true);
-            } catch (error) {
-                alert('Ошибка создания поста: ' + error.message);
-            }
-        }
-        
-        async function savePostRow(row, date) {
-            const postId = row.getAttribute('data-id');
-            const numberInput = row.querySelector('.number-input');
-            const postInput = row.querySelector('.post-input');
-            const guardSelect = row.querySelector('.guard-select');
-            const timeInput = row.querySelector('.time-input');
-            
-            if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) return;
-            
-            const number = numberInput.value.trim();
-            const post = postInput.value.trim();
-            const guardId = guardSelect.value;
-            const time = timeInput.value;
-            
-            if (!post) {
-                alert('Введите название поста');
-                return;
-            }
-            
-            const guard = allUsers.find(u => u.id === guardId);
-            let guardName = guard ? guard.displayName : '';
-            
-            // Форматируем для хранения: Фамилия Имя
-            if (guard && guard.lastName && guard.firstName) {
-                guardName = `${guard.lastName} ${guard.firstName}`;
-            }
-            
-            const existingPost = postsData.find(p => p.id === postId);
-            const order = existingPost ? existingPost.order : (postsData.length + 1);
-            
-            try {
-                await db.collection('posts').doc(postId).update({
-                    number: number,
-                    post: post,
-                    guardId: guardId,
-                    guardName: guardName,
-                    time: time,
-                    order: order,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                alert('Пост сохранен!');
-            } catch (error) {
-                alert('Ошибка сохранения: ' + error.message);
-            }
-        }
-        
-        async function saveAllPosts(date) {
-            const rows = document.querySelectorAll('.post-row');
-            let hasErrors = false;
-            
-            for (const row of rows) {
-                const postId = row.getAttribute('data-id');
-                const numberInput = row.querySelector('.number-input');
-                const postInput = row.querySelector('.post-input');
-                const guardSelect = row.querySelector('.guard-select');
-                const timeInput = row.querySelector('.time-input');
-                
-                if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) continue;
-                
-                const number = numberInput.value.trim();
-                const post = postInput.value.trim();
-                const guardId = guardSelect.value;
-                const time = timeInput.value;
-                
-                if (!post) {
-                    alert('Заполните название поста во всех строках');
-                    hasErrors = true;
-                    break;
-                }
-                
-                const guard = allUsers.find(u => u.id === guardId);
-                let guardName = guard ? guard.displayName : '';
-                
-                // Форматируем для хранения: Фамилия Имя
-                if (guard && guard.lastName && guard.firstName) {
-                    guardName = `${guard.lastName} ${guard.firstName}`;
-                }
-                
-                const existingPost = postsData.find(p => p.id === postId);
-                const order = existingPost ? existingPost.order : (postsData.length + 1);
-                
-                try {
-                    await db.collection('posts').doc(postId).update({
-                        number: number,
-                        post: post,
-                        guardId: guardId,
-                        guardName: guardName,
-                        time: time,
-                        order: order,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    alert('Ошибка сохранения: ' + error.message);
-                    hasErrors = true;
-                    break;
-                }
-            }
-            
-            if (!hasErrors) {
-                alert('Все посты сохранены!');
-                await loadPostsForDate(date, true);
-            }
-        }
-        
-        async function deletePostRow(row, date) {
-            const postId = row.getAttribute('data-id');
-            if (!postId) return;
-            
-            if (!confirm('Удалить этот пост?')) return;
-            
-            try {
-                await db.collection('posts').doc(postId).delete();
-                await loadPostsForDate(date, true);
-            } catch (error) {
-                alert('Ошибка удаления: ' + error.message);
-            }
-        }
-        
-        // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
-        app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
-            const dateInput = app.getElement('user-posts-date');
-            if (!dateInput || !dateInput.value) {
-                alert('Выберите дату');
-                return;
-            }
-            
-            await loadPostsForDate(dateInput.value, false);
-        });
-        
-        function renderUserPostsTable(date) {
-            const container = app.getElement('posts-user-container');
-            if (!container) return;
-            
-            if (postsData.length === 0) {
-                container.innerHTML = `
-                    <div class="message">
-                        <p>Нет постов на выбранную дату ${date}</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const dateObj = new Date(date);
-            const formattedDate = dateObj.toLocaleDateString('ru-RU');
-            
-            let html = `
-                <h3>Посты на дату: ${formattedDate}</h3>
-                <div class="table-responsive">
-                    <table class="posts-table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Пост</th>
-                                <th>Время</th>
-                                <th>Охранник</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            postsData.forEach((post) => {
-                html += `
-                    <tr>
-                        <td>${post.number || ''}</td>
-                        <td>${post.post || ''}</td>
-                        <td>${post.time || ''}</td>
-                        <td>${post.guardDisplayName || post.guardName || 'Не назначен'}</td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            container.innerHTML = html;
         }
         
         // === ОБНОВЛЕНИЕ СТАТИСТИКИ ===
@@ -2280,171 +2119,6 @@
             if (userEmail) userEmail.textContent = user.email;
         }
         
-        // === РАСЧЕТ ВЫПЛАТ ===
-        app.safeAddEventListener('calculate-payment-btn', 'click', async () => {
-            const paymentUser = app.getElement('payment-user');
-            const periodFrom = app.getElement('period-from');
-            const periodTo = app.getElement('period-to');
-            const bonusAmount = app.getElement('bonus-amount');
-            const penaltyAmount = app.getElement('penalty-amount');
-            const bonusNote = app.getElement('bonus-note');
-            
-            if (!paymentUser || !periodFrom || !periodTo || !bonusAmount || !penaltyAmount || !bonusNote) return;
-            
-            const userId = paymentUser.value;
-            const fromDate = periodFrom.value;
-            const toDate = periodTo.value;
-            const bonus = parseInt(bonusAmount.value) || 0;
-            const penalty = parseInt(penaltyAmount.value) || 0;
-            const note = bonusNote.value;
-            
-            if (!userId || !fromDate || !toDate) {
-                alert('Заполните все поля');
-                return;
-            }
-            
-            const user = allUsers.find(u => u.id === userId);
-            if (!user) return;
-            
-            const rate = user.rate || 0;
-            
-            try {
-                // Получаем смены за период
-                const shifts = await db.collection('shifts')
-                    .where('userId', '==', userId)
-                    .where('date', '>=', fromDate)
-                    .where('date', '<=', toDate)
-                    .get();
-                
-                let regularCount = 0;
-                let extraCount = 0;
-                let totalAmount = 0;
-                const batch = db.batch();
-                
-                shifts.forEach(doc => {
-                    const data = doc.data();
-                    // Считаем только отработанные и неоплаченные
-                    if (data.done && !data.paid) {
-                        if (data.type === 'regular') {
-                            regularCount++;
-                            totalAmount += rate;
-                        } else if (data.type === 'extra') {
-                            extraCount++;
-                            totalAmount += rate + 100;
-                        }
-                        
-                        // Помечаем как оплаченные
-                        batch.update(doc.ref, { 
-                            paid: true,
-                            paidAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                });
-                
-                if (regularCount === 0 && extraCount === 0) {
-                    alert('Нет смен для выплаты в выбранном периоде');
-                    return;
-                }
-                
-                // Добавляем премию/удержание
-                const finalAmount = totalAmount + bonus - penalty;
-                
-                // Создаём запись о выплате
-                const paymentRef = db.collection('salary_payments').doc();
-                await paymentRef.set({
-                    userId: userId,
-                    userName: user.displayName || user.email,
-                    periodFrom: fromDate,
-                    periodTo: toDate,
-                    regularShifts: regularCount,
-                    extraShifts: extraCount,
-                    baseAmount: totalAmount,
-                    bonus: bonus,
-                    penalty: penalty,
-                    bonusNote: note,
-                    totalAmount: finalAmount,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    adminId: currentUser.uid
-                });
-                
-                // Применяем обновления смен
-                await batch.commit();
-                
-                // Обновляем данные
-                await loadUsers();
-                if (userId === currentUser?.uid) {
-                    updateUserStats();
-                    loadPaymentHistory(userId);
-                }
-                
-                // Очищаем поля
-                bonusAmount.value = '0';
-                penaltyAmount.value = '0';
-                bonusNote.value = '';
-                
-                const resultDiv = app.getElement('calculation-result');
-                if (resultDiv) {
-                    resultDiv.innerHTML = `
-                        <div class="success">
-                            <strong>Выплата создана!</strong><br>
-                            Охранник: ${user.displayName || user.email}<br>
-                            Период: ${fromDate} - ${toDate}<br>
-                            Обычных: ${regularCount} × ${rate} ₽ = ${regularCount * rate} ₽<br>
-                            Подработок: ${extraCount} × ${rate + 100} ₽ = ${extraCount * (rate + 100)} ₽<br>
-                            Премия: +${bonus} ₽<br>
-                            Удержание: -${penalty} ₽<br>
-                            <strong>Итого: ${finalAmount} ₽</strong>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                alert('Ошибка: ' + error.message);
-            }
-        });
-        
-        // === ИСТОРИЯ ВЫПЛАТ ===
-        async function loadPaymentHistory(userId) {
-            try {
-                const snapshot = await db.collection('salary_payments')
-                    .where('userId', '==', userId)
-                    .orderBy('createdAt', 'desc')
-                    .limit(20)
-                    .get();
-                
-                const container = app.getElement('payments-history');
-                if (!container) return;
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '<tr><td colspan="9">Нет выплат</td></tr>';
-                    return;
-                }
-                
-                let html = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Дата неизвестна';
-                    
-                    html += `
-                        <tr>
-                            <td>${date}</td>
-                            <td>${data.periodFrom}<br>${data.periodTo}</td>
-                            <td>${data.regularShifts || 0}</td>
-                            <td>${data.extraShifts || 0}</td>
-                            <td>${data.baseAmount || 0} ₽</td>
-                            <td>${data.bonus || 0} ₽</td>
-                            <td>${data.penalty || 0} ₽</td>
-                            <td>${data.bonusNote || ''}</td>
-                            <td><strong>${data.totalAmount || 0} ₽</strong></td>
-                        </tr>
-                    `;
-                });
-                container.innerHTML = html;
-            } catch (error) {
-                console.error('Ошибка загрузки истории выплат:', error);
-            }
-        }
-        
         // === ИНИЦИАЛИЗАЦИЯ ===
         function init() {
             // Табы
@@ -2512,8 +2186,8 @@
             // Начальные даты для периода
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            const periodFrom = app.getElement('period-from');
-            const periodTo = app.getElement('period-to');
+            const periodFrom = app.getElement('period-from-admin');
+            const periodTo = app.getElement('period-to-admin');
             
             if (periodFrom) periodFrom.valueAsDate = firstDay;
             if (periodTo) periodTo.valueAsDate = today;
@@ -2524,8 +2198,8 @@
             if (postsDate) postsDate.valueAsDate = today;
             if (userPostsDate) userPostsDate.valueAsDate = today;
             
-            // Загружаем шаблон постов
-            renderPostsTemplate();
+            // Инициализация кнопок скролла таблицы
+            initTableScrollButtons();
             
             // Начальная секция
             app.showSection('welcome-section');
@@ -2545,11 +2219,13 @@
                     app.showSection('admin-section');
                     // Загружаем смены для админа
                     await loadAllShiftsForAdmin();
+                    // Загружаем архив выплат
+                    loadPaymentsArchive();
                 } else {
                     // Загружаем смены для пользователя и обновляем календарь
                     await loadUserShiftsForMonth();
                     updateUserStats();
-                    loadPaymentHistory(user.uid);
+                    loadUserPaymentHistory();
                     app.showSection('user-section');
                 }
                 
