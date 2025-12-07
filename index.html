@@ -6,14 +6,11 @@
     <title>Личный кабинет Охранника</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; background: #0a192f; color: #e6f1ff; line-height: 1.6; }
         
-        /* HEADER */
         header { 
             background: linear-gradient(135deg, #0a192f, #112240); 
             color: #64ffda; 
@@ -50,7 +47,6 @@
             transform: translateY(-2px);
         }
         
-        /* MAIN */
         main { max-width: 1400px; margin: 1.5rem auto; padding: 0 1rem; }
         .container { 
             background: #112240; 
@@ -83,7 +79,6 @@
             font-size: 1.1rem; 
         }
         
-        /* TABS */
         .tabs { 
             display: flex; 
             border-bottom: 2px solid #233554; 
@@ -110,7 +105,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        /* FORMS */
         .form-group { margin-bottom: 1.2rem; }
         label { 
             display: block; 
@@ -175,7 +169,6 @@
             font-size: 0.85rem; 
         }
         
-        /* ТАБЛИЦА СМЕН АДМИНА - ИСПРАВЛЕНА */
         .shifts-admin-container {
             position: relative;
             margin-top: 1rem;
@@ -233,7 +226,6 @@
             top: 0;
             z-index: 10;
         }
-        /* Колонка № - 50px */
         .shifts-admin-table th:nth-child(1),
         .shifts-admin-table td:nth-child(1) {
             width: 50px;
@@ -249,7 +241,6 @@
             font-weight: bold;
             color: #64ffda;
         }
-        /* Колонка Сотрудник - 200px */
         .shifts-admin-table th:nth-child(2),
         .shifts-admin-table td:nth-child(2) {
             width: 200px;
@@ -265,7 +256,6 @@
         .shifts-admin-table td:nth-child(2) {
             background: #0a192f;
         }
-        /* ВСЕ КОЛОНКИ ДНЕЙ - 50px */
         .shifts-admin-table th:nth-child(n+3),
         .shifts-admin-table td:nth-child(n+3) {
             width: 50px !important;
@@ -322,7 +312,6 @@
             display: block;
         }
         
-        /* ЦВЕТА СМЕН */
         .shift-regular { background: #27ae60; }
         .shift-extra { background: #a3e4d7; }
         .shift-dayoff { background: #3498db; }
@@ -332,7 +321,6 @@
         .shift-done-extra { background: #95a5a6; color: white; }
         .shift-paid-extra { background: #e84393; color: white; }
         
-        /* КОНТРОЛЫ ДЛЯ ТАБЛИЦЫ СМЕН */
         .shifts-controls { 
             display: flex; 
             gap: 1rem; 
@@ -350,7 +338,6 @@
             min-width: 150px; 
         }
         
-        /* POSTS TABLE */
         .posts-table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -406,7 +393,6 @@
             background: #52d9c8;
         }
         
-        /* POSTS MANAGEMENT */
         .posts-management { margin-top: 2rem; }
         .posts-date-control { 
             display: flex; 
@@ -425,7 +411,6 @@
             color: #e6f1ff;
         }
         
-        /* USER PROFILE */
         .user-profile { 
             background: linear-gradient(135deg, #112240, #0a192f); 
             color: #e6f1ff; 
@@ -457,7 +442,6 @@
             color: #64ffda;
         }
         
-        /* CALENDAR (для пользователя) */
         .calendar-controls {
             display: flex;
             justify-content: space-between;
@@ -517,7 +501,6 @@
             cursor: pointer;
         }
         
-        /* SHIFT LEGEND */
         .legend { 
             display: flex; 
             flex-wrap: wrap; 
@@ -542,7 +525,6 @@
             border: 1px solid #233554;
         }
         
-        /* UTILS */
         .hidden { display: none !important; }
         .message { 
             padding: 1rem; 
@@ -568,7 +550,6 @@
         }
         .text-right { text-align: right; }
         
-        /* FOOTER */
         footer { 
             text-align: center; 
             padding: 1.8rem; 
@@ -579,7 +560,6 @@
             background: #0a192f;
         }
                     
-        /* MOBILE */
         @media (max-width: 768px) {
             header { flex-direction: column; gap: 1rem; padding: 1rem; }
             nav ul { width: 100%; justify-content: center; }
@@ -593,7 +573,6 @@
             .shifts-controls select,
             .shifts-controls input { min-width: 100%; }
     
-            /* Календарь пользователя */
             .calendar-controls {
                 flex-direction: column;
                 gap: 1rem;
@@ -657,7 +636,6 @@
             }
             nav a { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
     
-            /* Календарь пользователя - очень маленькие экраны */
             .calendar-controls {
                 padding: 0.6rem;
                 gap: 0.8rem;
@@ -683,7 +661,6 @@
     </style>
 </head>
 <body>
-    <!-- HEADER -->
     <header>
         <div class="logo">
             <i class="fas fa-shield-alt"></i>
@@ -700,16 +677,13 @@
         </nav>
     </header>
 
-    <!-- MAIN CONTENT -->
     <main>
-        <!-- WELCOME SECTION -->
         <section id="welcome-section" class="container">
             <h1><i class="fas fa-shield-alt"></i> Система планирования смен</h1>
             <p style="color: #a8b2d1; font-size: 1.1rem;">Администраторы назначают смены, сотрудники просматривают свои графики работы.</p>
             <button id="go-to-login" onclick="app.showSection('login-section')"><i class="fas fa-sign-in-alt"></i> Вход в систему</button>
         </section>
 
-        <!-- LOGIN SECTION -->
         <section id="login-section" class="container hidden">
             <h1><i class="fas fa-sign-in-alt"></i> Авторизация</h1>
             <div class="form-group">
@@ -724,7 +698,6 @@
             <div id="login-message" class="message hidden"></div>
         </section>
 
-        <!-- ADMIN SECTION -->
         <section id="admin-section" class="container hidden">
             <div class="tabs">
                 <button class="tab active" data-tab="shifts-admin"><i class="fas fa-calendar-alt"></i> Смены</button>
@@ -733,7 +706,6 @@
                 <button class="tab" data-tab="users-admin"><i class="fas fa-users"></i> Сотрудники</button>
             </div>
             
-            <!-- ВКЛАДКА: СМЕНЫ (АДМИН) -->
             <div id="tab-shifts-admin" class="tab-content active">
                 <h1><i class="fas fa-user-cog"></i> Административная панель</h1>
                 
@@ -760,7 +732,6 @@
                     </div>
                 </div>
                 
-                <!-- CSV ИМПОРТ -->
                 <div class="csv-import" style="margin-top: 1.5rem; padding: 1rem; background: #0a192f; border-radius: 8px; border: 1px solid #233554;">
                     <h3 style="color: #64ffda; margin-bottom: 1rem; border-bottom: 1px solid #233554; padding-bottom: 0.5rem;">
                         <i class="fas fa-file-csv"></i> Импорт CSV
@@ -806,7 +777,6 @@
                     <div id="csv-result" class="message hidden" style="margin-top: 1rem;"></div>
                 </div>
                 
-                <!-- ЦВЕТА СМЕН -->
                 <div class="legend">
                     <div class="legend-item"><div class="legend-color shift-regular"></div><span>Обычная</span></div>
                     <div class="legend-item"><div class="legend-color shift-extra"></div><span>Подработка</span></div>
@@ -818,7 +788,6 @@
                     <div class="legend-item"><div class="legend-color shift-problem"></div><span>Проблема</span></div>
                 </div>
                 
-                <!-- ТАБЛИЦА СМЕН АДМИНА С КНОПКАМИ СКРОЛЛА -->
                 <div class="shifts-admin-container">
                     <div class="table-scroll-controls scroll-left" id="scroll-left-btn">
                         <i class="fas fa-chevron-left"></i>
@@ -830,13 +799,12 @@
                                     <th rowspan="2">№</th>
                                     <th rowspan="2">Сотрудник</th>
                                     <th colspan="31" id="table-month-year">Январь 2024</th>
+                                    <th rowspan="2" style="width: 50px; min-width: 50px; background: transparent;"></th>
                                 </tr>
                                 <tr id="days-header">
-                                    <!-- Дни месяца будут добавлены через JS -->
                                 </tr>
                             </thead>
                             <tbody id="shifts-table-body">
-                                <!-- Данные будут добавлены через JS -->
                             </tbody>
                         </table>
                     </div>
@@ -846,11 +814,9 @@
                 </div>
             </div>
             
-            <!-- ВКЛАДКА: ВЫПЛАТЫ АДМИНА -->
             <div id="tab-payments-admin" class="tab-content">
                 <h2><i class="fas fa-money-bill-wave"></i> Управление выплатами</h2>
                 
-                <!-- ФОРМА ДЛЯ СОЗДАНИЯ ВЫПЛАТЫ -->
                 <div class="container" style="margin-bottom: 2rem;">
                     <h3><i class="fas fa-plus-circle"></i> Создать выплату</h3>
                     <div class="flex">
@@ -885,7 +851,6 @@
                     <div id="calculation-result-admin"></div>
                 </div>
                 
-                <!-- АРХИВ ВЫПЛАТ -->
                 <h3><i class="fas fa-history"></i> Архив выплат</h3>
                 <div class="table-responsive">
                     <table class="posts-table">
@@ -910,12 +875,10 @@
                 </div>
             </div>
             
-            <!-- ВКЛАДКА: ПОСТОВАЯ (АДМИН) -->
             <div id="tab-posts-admin" class="tab-content">
                 <h2><i class="fas fa-clipboard-list"></i> Управление постовой</h2>
                 
                 <div class="posts-management">
-                    <!-- ВЫБОР ДАТЫ -->
                     <div class="posts-date-control">
                         <div class="form-group">
                             <label>Выберите дату для постовой:</label>
@@ -927,14 +890,12 @@
                         </div>
                     </div>
                     
-                    <!-- ТАБЛИЦА ПОСТОВ -->
                     <div id="posts-admin-container">
                         <div class="message">
                             <p>Выберите дату и загрузите посты или создайте новый шаблон</p>
                         </div>
                     </div>
                     
-                    <!-- СПИСОК ШАБЛОНОВ -->
                     <h3 style="margin-top: 2rem;"><i class="fas fa-list"></i> Предустановленные посты (шаблон)</h3>
                     <div class="table-responsive">
                         <table class="posts-table">
@@ -947,14 +908,12 @@
                                 </tr>
                             </thead>
                             <tbody id="posts-template">
-                                <!-- Шаблон загрузится через JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
             
-            <!-- ВКЛАДКА: СОТРУДНИКИ -->
             <div id="tab-users-admin" class="tab-content">
                 <h2><i class="fas fa-users"></i> Управление сотрудниками</h2>
                 
@@ -982,16 +941,13 @@
                     <div style="flex: 2;">
                         <h3><i class="fas fa-users"></i> Все охранники</h3>
                         <div id="users-container" class="user-list" style="max-height: 400px; overflow-y: auto; padding: 1rem; background: #0a192f; border-radius: 8px; border: 1px solid #233554;">
-                            <!-- Список сотрудников загрузится через JS -->
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- USER SECTION -->
         <section id="user-section" class="container hidden">
-            <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
             <div class="user-profile">
                 <h1><i class="fas fa-user"></i> <span id="user-full-name">Фамилия Имя</span></h1>
                 <div class="profile-info">
@@ -1010,18 +966,15 @@
                 </div>
             </div>
             
-            <!-- ВКЛАДКИ ПОЛЬЗОВАТЕЛЯ -->
             <div class="tabs">
                 <button class="tab active" data-tab="shifts"><i class="fas fa-calendar-alt"></i> Смены</button>
                 <button class="tab" data-tab="posts"><i class="fas fa-clipboard-list"></i> Постовая</button>
                 <button class="tab" data-tab="payments-user"><i class="fas fa-money-bill-wave"></i> Выплаты</button>
             </div>
             
-            <!-- ВКЛАДКА: СМЕНЫ -->
             <div id="tab-shifts" class="tab-content active">
                 <h2><i class="fas fa-calendar-alt"></i> Мой график смен</h2>
                 
-                <!-- КОНТРОЛЫ ВЫБОРА МЕСЯЦА -->
                 <div class="calendar-controls">
                     <div class="month-navigation">
                         <button id="prev-month" class="btn-secondary"><i class="fas fa-chevron-left"></i> Предыдущий</button>
@@ -1041,7 +994,6 @@
                     <button id="load-user-shifts" class="btn-success"><i class="fas fa-sync-alt"></i> Обновить</button>
                 </div>
                 
-                <!-- ЛЕГЕНДА -->
                 <div class="legend">
                     <div class="legend-item"><div class="legend-color shift-regular"></div><span>Обычная</span></div>
                     <div class="legend-item"><div class="legend-color shift-extra"></div><span>Подработка</span></div>
@@ -1053,11 +1005,9 @@
                     <div class="legend-item"><div class="legend-color shift-problem"></div><span>Проблема</span></div>
                 </div>
                 
-                <!-- КАЛЕНДАРЬ -->
                 <div id="user-calendar" class="calendar-grid"></div>
             </div>
             
-            <!-- ВКЛАДКА: ПОСТОВАЯ -->
             <div id="tab-posts" class="tab-content">
                 <h2><i class="fas fa-clipboard-list"></i> Расписание постов</h2>
                 <div id="posts-user-container">
@@ -1071,11 +1021,9 @@
                 </div>
             </div>
             
-            <!-- ВКЛАДКА: ВЫПЛАТЫ ПОЛЬЗОВАТЕЛЯ -->
             <div id="tab-payments-user" class="tab-content">
                 <h2><i class="fas fa-money-bill-wave"></i> Выплаты</h2>
                 
-                <!-- ОЖИДАЕМЫЕ ВЫПЛАТЫ -->
                 <h3><i class="fas fa-clock"></i> Ожидаемые выплаты</h3>
                 <div id="pending-payments-container" class="container" style="margin-bottom: 2rem;">
                     <div class="table-responsive">
@@ -1101,7 +1049,6 @@
                     </div>
                 </div>
                 
-                <!-- ИСТОРИЯ ВЫПЛАТ -->
                 <h3><i class="fas fa-history"></i> История выплат</h3>
                 <div class="table-responsive">
                     <table class="posts-table">
@@ -1127,28 +1074,18 @@
         </section>
     </main>
 
-    <!-- FOOTER -->
     <footer>
-        <p>© 2024 Личный кабинет Охранника. Работает на Firebase.</p>
+        <p>© 2024 Личный кабинет Охранника. Работает на Supabase.</p>
         <p style="margin-top: 10px; font-size: 0.8rem; color: #495670;"><i class="fas fa-shield-alt"></i> Безопасность и надежность</p>
     </footer>
 
-    <!-- FIREBASE & APP -->
     <script>
-        // === FIREBASE CONFIG ===
-        const firebaseConfig = {
-            apiKey: "AIzaSyAy60J96o9uzaEx96NQVSFVBNCRxn4NFWY",
-            authDomain: "ssss-7ac80.firebaseapp.com",
-            projectId: "ssss-7ac80",
-            storageBucket: "ssss-7ac80.firebasestorage.app",
-            messagingSenderId: "185019094690",
-            appId: "1:185019094690:web:f75df54462ed848acd29fb"
-        };
+        // === SUPABASE CONFIG ===
+        const SUPABASE_URL = 'https://aosyccruswwkblifqiwx.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_JfOEYEmQZtZHWuR0U70x8A_xVq9EqTW';
         
-        // === ИНИЦИАЛИЗАЦИЯ ===
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // === ИНИЦИАЛИЗАЦИЯ SUPABASE ===
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // === БЕЗОПАСНЫЕ УТИЛИТЫ ===
         const app = {
@@ -1173,7 +1110,7 @@
             
             updateNavigation: function() {
                 const isLoggedIn = !!currentUser;
-                const isAdmin = currentUser && allUsers.find(u => u.id === currentUser.uid && u.role === 'admin');
+                const isAdmin = currentUser && allUsers.find(u => u.id === currentUser.id && u.role === 'admin');
                 
                 ['nav-home', 'nav-login', 'nav-admin', 'nav-user', 'nav-logout'].forEach((id, i) => {
                     const el = this.getElement(id);
@@ -1214,6 +1151,7 @@
         let postsData = [];
         let isAdmin = false;
         let adminShiftsData = {};
+        let currentAdminShifts = {};
         
         // === ПРЕДУСТАНОВЛЕННЫЕ ПОСТЫ ===
         const defaultPosts = [
@@ -1247,10 +1185,6 @@
                         updateUserStats();
                         loadUserPaymentHistory();
                     }
-                    if (tabId === 'posts' && currentUser) {
-                        const dateInput = app.getElement('user-posts-date');
-                        if (dateInput.value) loadPostsForDate(dateInput.value, false);
-                    }
                 });
             });
         }
@@ -1261,40 +1195,102 @@
             const password = app.getElement('login-password')?.value;
             if (!email || !password) return alert('Введите email и пароль');
             try {
-                await auth.signInWithEmailAndPassword(email, password);
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                currentUser = data.user;
+                await checkUserRole();
+                
             } catch (error) {
                 alert('Ошибка: ' + error.message);
             }
         });
         
+        // === ПРОВЕРКА РОЛИ ПОЛЬЗОВАТЕЛЯ ===
+        async function checkUserRole() {
+            if (!currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                
+                if (!data) {
+                    const { error: insertError } = await supabase
+                        .from('users')
+                        .insert([
+                            {
+                                id: currentUser.id,
+                                email: currentUser.email,
+                                role: 'user',
+                                full_name: currentUser.email.split('@')[0],
+                                rate: 1500
+                            }
+                        ]);
+                    
+                    if (insertError) throw insertError;
+                    
+                    isAdmin = false;
+                } else {
+                    isAdmin = data.role === 'admin';
+                    currentUser = { ...currentUser, ...data };
+                }
+                
+                await loadUsers();
+                
+                if (isAdmin) {
+                    app.showSection('admin-section');
+                    await loadAllShiftsForAdmin();
+                    loadPaymentsArchive();
+                } else {
+                    await loadUserAllShiftsOnLogin();
+                    updateUserStats();
+                    loadUserPaymentHistory();
+                    app.showSection('user-section');
+                }
+                
+                app.updateNavigation();
+                
+            } catch (error) {
+                alert('Ошибка проверки роли: ' + error.message);
+            }
+        }
+        
         // === ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ===
         async function loadUsers() {
             try {
-                const snapshot = await db.collection('users').get();
-                allUsers = [];
-                snapshot.forEach(doc => {
-                    const userData = doc.data();
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .order('full_name');
+                
+                if (error) throw error;
+                
+                allUsers = data || [];
+                
+                allUsers.forEach(user => {
                     let lastName = '', firstName = '';
-                    if (userData.fullName) {
-                        const nameParts = userData.fullName.split(' ');
+                    if (user.full_name) {
+                        const nameParts = user.full_name.split(' ');
                         if (nameParts.length >= 2) {
                             lastName = nameParts[0];
                             firstName = nameParts.slice(1).join(' ');
                         } else {
-                            firstName = userData.fullName;
+                            firstName = user.full_name;
                         }
                     }
-                    allUsers.push({ 
-                        id: doc.id, 
-                        ...userData,
-                        lastName, firstName,
-                        displayName: lastName ? `${lastName} ${firstName}` : (userData.fullName || userData.email)
-                    });
+                    user.lastName = lastName;
+                    user.firstName = firstName;
+                    user.displayName = lastName ? `${lastName} ${firstName}` : (user.full_name || user.email);
                 });
                 
-                allUsers.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
-                
-                // Список пользователей
                 const container = app.getElement('users-container');
                 if (container) {
                     container.innerHTML = allUsers.map(user => `
@@ -1306,7 +1302,6 @@
                     `).join('');
                 }
                 
-                // Селект для выплат админа
                 const paymentSelect = app.getElement('payment-user-admin');
                 if (paymentSelect) {
                     paymentSelect.innerHTML = '<option value="">Выберите охранника</option>';
@@ -1344,11 +1339,28 @@
             
             const fullName = `${lastName} ${firstName}`;
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                await db.collection('users').doc(userCredential.user.uid).set({
-                    email, role: 'user', fullName, lastName, firstName, rate,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password
                 });
+                
+                if (authError) throw authError;
+                
+                const { error: dbError } = await supabase
+                    .from('users')
+                    .insert([
+                        {
+                            id: authData.user.id,
+                            email,
+                            role: 'user',
+                            full_name: fullName,
+                            last_name: lastName,
+                            first_name: firstName,
+                            rate
+                        }
+                    ]);
+                
+                if (dbError) throw dbError;
                 
                 ['new-user-email', 'new-user-password', 'new-user-lastname', 'new-user-firstname'].forEach(id => {
                     const el = app.getElement(id);
@@ -1373,33 +1385,38 @@
                 const startDate = firstDay.toISOString().split('T')[0];
                 const endDate = lastDay.toISOString().split('T')[0];
                 
-                const snapshot = await db.collection('shifts')
-                    .where('date', '>=', startDate)
-                    .where('date', '<=', endDate)
-                    .get();
+                const { data, error } = await supabase
+                    .from('shifts')
+                    .select('*')
+                    .gte('date', startDate)
+                    .lte('date', endDate);
+                
+                if (error) throw error;
                 
                 adminShiftsData = {};
                 shiftsMap = {};
+                currentAdminShifts = {};
                 
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const userId = data.userId;
-                    const date = data.date;
+                data.forEach(shift => {
+                    const userId = shift.user_id;
+                    const date = shift.date;
                     
                     if (!adminShiftsData[userId]) adminShiftsData[userId] = {};
                     if (!shiftsMap[userId]) shiftsMap[userId] = {};
                     
                     adminShiftsData[userId][date] = {
-                        type: data.type,
-                        done: data.done || false,
-                        paid: data.paid || false,
-                        shiftId: doc.id
+                        type: shift.type,
+                        done: shift.done || false,
+                        paid: shift.paid || false,
+                        shiftId: shift.id
                     };
                     
+                    currentAdminShifts[shift.id] = { ...shift };
+                    
                     shiftsMap[userId][date] = {
-                        type: data.type,
-                        done: data.done || false,
-                        paid: data.paid || false
+                        type: shift.type,
+                        done: shift.done || false,
+                        paid: shift.paid || false
                     };
                 });
                 
@@ -1436,7 +1453,6 @@
                 </th>`;
             }
             
-            // Добавляем пустые ячейки для выравнивания до 31
             for (let day = daysInMonth + 1; day <= 31; day++) {
                 daysHtml += `<th style="color: #8892b0; opacity: 0.3;"><br><small style="font-size: 0.7rem; color: #8892b0;"></small></th>`;
             }
@@ -1507,17 +1523,17 @@
                         </td>`;
                 }
                 
-                // Добавляем пустые ячейки для выравнивания до 31
                 for (let day = daysInMonth + 1; day <= 31; day++) {
                     tableHtml += `<td style="opacity: 0.3;"></td>`;
                 }
+                
+                tableHtml += `<td style="width: 50px; min-width: 50px; background: transparent;"></td>`;
                 
                 tableHtml += `</tr>`;
             });
             
             tableBody.innerHTML = tableHtml;
             
-            // Обработка кликов по ячейкам смен
             tableBody.querySelectorAll('.shifts-cell').forEach(cell => {
                 cell.addEventListener('click', function(e) {
                     if (!e.target.classList.contains('delete-shift-btn')) {
@@ -1526,7 +1542,6 @@
                 });
             });
             
-            // Обработка кликов по кнопкам удаления
             tableBody.querySelectorAll('.delete-shift-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1535,7 +1550,6 @@
                 });
             });
             
-            // Инициализация кнопок скролла
             const scrollLeftBtn = app.getElement('scroll-left-btn');
             const scrollRightBtn = app.getElement('scroll-right-btn');
             const tableContainer = document.querySelector('.table-responsive');
@@ -1562,17 +1576,21 @@
             if (!confirm('Удалить эту смену?')) return;
             
             try {
-                await db.collection('shifts').doc(shiftId).delete();
+                const { error } = await supabase
+                    .from('shifts')
+                    .delete()
+                    .eq('id', shiftId);
                 
-                // Обновляем локальные данные
+                if (error) throw error;
+                
                 if (adminShiftsData[userId] && adminShiftsData[userId][date]) {
                     delete adminShiftsData[userId][date];
                 }
                 if (shiftsMap[userId] && shiftsMap[userId][date]) {
                     delete shiftsMap[userId][date];
                 }
+                delete currentAdminShifts[shiftId];
                 
-                // Обновляем ячейку
                 cell.className = 'shifts-cell';
                 cell.setAttribute('data-shift-type', '');
                 cell.setAttribute('data-done', 'false');
@@ -1659,50 +1677,52 @@
             try {
                 const month = parseInt(app.getElement('selected-month')?.value || currentMonth);
                 const year = parseInt(app.getElement('selected-year')?.value || currentYear);
-                const batch = db.batch();
-                let changesCount = 0;
                 
-                // Сначала удаляем все смены за месяц
                 const firstDay = new Date(year, month, 1);
                 const lastDay = new Date(year, month + 1, 0);
                 const startDate = firstDay.toISOString().split('T')[0];
                 const endDate = lastDay.toISOString().split('T')[0];
                 
-                const existingShifts = await db.collection('shifts')
-                    .where('date', '>=', startDate)
-                    .where('date', '<=', endDate)
-                    .get();
+                const { error: deleteError } = await supabase
+                    .from('shifts')
+                    .delete()
+                    .gte('date', startDate)
+                    .lte('date', endDate);
                 
-                existingShifts.forEach(doc => {
-                    batch.delete(doc.ref);
-                    changesCount++;
-                });
+                if (deleteError) throw deleteError;
                 
-                // Затем добавляем новые смены
+                const shiftsToInsert = [];
+                
                 for (const userId in adminShiftsData) {
                     const userShifts = adminShiftsData[userId];
                     
                     for (const [date, shift] of Object.entries(userShifts)) {
-                        // Проверяем, что дата находится в выбранном месяце
                         const shiftDate = new Date(date);
                         if (shiftDate.getMonth() === month && shiftDate.getFullYear() === year) {
-                            const shiftRef = db.collection('shifts').doc();
-                            batch.set(shiftRef, {
-                                userId,
+                            shiftsToInsert.push({
+                                user_id: userId,
                                 date,
                                 type: shift.type,
                                 done: shift.done || false,
                                 paid: shift.paid || false,
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
                             });
-                            changesCount++;
                         }
                     }
                 }
                 
-                await batch.commit();
-                alert(`Смены сохранены успешно! Изменено: ${changesCount} записей.`);
+                if (shiftsToInsert.length > 0) {
+                    const { error: insertError } = await supabase
+                        .from('shifts')
+                        .insert(shiftsToInsert);
+                    
+                    if (insertError) throw insertError;
+                }
+                
+                alert(`Смены сохранены успешно! Изменено: ${shiftsToInsert.length} записей.`);
+                
+                await loadAllShiftsForAdmin();
                 
             } catch (error) {
                 alert('Ошибка сохранения смен: ' + error.message);
@@ -1713,38 +1733,41 @@
         app.safeAddEventListener('mark-done-past', 'click', async () => {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const todayStr = today.toISOString().split('T')[0]; // ИЗМЕНЕНИЕ: до СЕГОДНЯ
-
-            const batch = db.batch();
-            let updatedRegular = 0;
-            let updatedExtra = 0;
+            const todayStr = today.toISOString().split('T')[0];
 
             try {
-        // 1. Получить ВСЕ смены до сегодня
-                const snapshot = await db.collection('shifts')
-                    .where('date', '<', todayStr) // ИЗМЕНЕНИЕ: строго меньше сегодня
-                    .get();
-    
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-    
-            // Фильтруем вручную в коде:
-                    if (data.paid === true) return;      // Пропускаем оплаченные
-                    if (data.done === true) return;      // Пропускаем уже отработанные
-                    if (data.type !== 'regular' && data.type !== 'extra') return; // Только основные/подработки
-    
-                    batch.update(doc.ref, {
-                        done: true,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-    
-                    if (data.type === 'regular') updatedRegular++;
-                    if (data.type === 'extra') updatedExtra++;
-                });
-    
-                await batch.commit();
-                alert(`Отмечено: ${updatedRegular} основных, ${updatedExtra} подработок (до ${todayStr})`);
-    
+                const { data, error } = await supabase
+                    .from('shifts')
+                    .select('*')
+                    .lt('date', todayStr)
+                    .eq('done', false)
+                    .eq('paid', false)
+                    .in('type', ['regular', 'extra']);
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    alert('Нет смен для отметки как отработанные');
+                    return;
+                }
+                
+                const updates = data.map(shift => ({
+                    id: shift.id,
+                    done: true,
+                    updated_at: new Date().toISOString()
+                }));
+                
+                for (const update of updates) {
+                    const { error: updateError } = await supabase
+                        .from('shifts')
+                        .update({ done: true, updated_at: new Date().toISOString() })
+                        .eq('id', update.id);
+                    
+                    if (updateError) throw updateError;
+                }
+                
+                alert(`Отмечено как отработанные: ${updates.length} смен(ы) до ${todayStr}`);
+                
                 if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
                     await loadAllShiftsForAdmin();
                 }
@@ -1774,7 +1797,6 @@
                     const text = e.target.result;
                     const result = await processCSV(text, month, year);
             
-                    // Показываем результат
                     if (resultDiv) {
                         resultDiv.innerHTML = `
                             <div class="success">
@@ -1788,7 +1810,6 @@
                         resultDiv.classList.remove('hidden');
                     }
             
-                    // Обновляем таблицу
                     if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
                         await loadAllShiftsForAdmin();
                     }
@@ -1806,7 +1827,6 @@
         });
 
         async function processCSV(csvText, month, year) {
-            // Убираем BOM символ если есть
             if (csvText.charCodeAt(0) === 0xFEFF) {
                 csvText = csvText.substring(1);
             }
@@ -1816,14 +1836,12 @@
                 throw new Error('CSV файл пустой или имеет неправильный формат');
             }
     
-            // Читаем заголовки (дни месяца)
             const delimiter = lines[0].includes(';') ? ';' : ',';
             const headers = lines[0].split(delimiter).map(h => h.trim());
             if (headers[0] !== 'Сотрудник' && headers[0] !== 'Sotrudnik') {
                 throw new Error('Первая колонка должна называться "Сотрудник" или "Sotrudnik"');
             }
     
-            const batch = db.batch();
             const result = {
                 employeesProcessed: 0,
                 shiftsCreated: 0,
@@ -1832,14 +1850,14 @@
                 notFoundNames: []
             };
     
-            // Обрабатываем каждую строку (начиная со второй)
+            const shiftsToInsert = [];
+    
             for (let i = 1; i < lines.length; i++) {
                 const cells = lines[i].split(delimiter).map(c => c.trim());
                 const employeeName = cells[0];
         
                 if (!employeeName) continue;
         
-                // Ищем сотрудника в системе
                 const employee = findEmployeeByName(employeeName);
         
                 if (!employee) {
@@ -1849,14 +1867,12 @@
         
                 result.employeesProcessed++;
         
-                // Обрабатываем дни (колонки 1..31)
                 for (let day = 1; day <= 31; day++) {
                     if (day >= cells.length) break;
             
                     const symbol = cells[day];
                     let shiftType = null;
             
-                    // Определяем тип смены по символу
                     if (symbol === '*') {
                         shiftType = 'regular';
                         result.regularShifts++;
@@ -1864,61 +1880,56 @@
                         shiftType = 'extra';
                         result.extraShifts++;
                     } else {
-                        continue; // Пропускаем пустые или другие символы
+                        continue;
                     }
             
-                    // Формируем дату
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             
-                    // Создаем или обновляем смену
-                    const shiftRef = db.collection('shifts').doc();
-                    batch.set(shiftRef, {
-                        userId: employee.id,
+                    shiftsToInsert.push({
+                        user_id: employee.id,
                         date: dateStr,
                         type: shiftType,
                         done: false,
                         paid: false,
                         imported: true,
-                        importedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        imported_at: new Date().toISOString(),
+                        created_at: new Date().toISOString()
                     });
             
                     result.shiftsCreated++;
                 }
             }
     
-            // Сохраняем все изменения
-            if (result.shiftsCreated > 0) {
-                await batch.commit();
+            if (shiftsToInsert.length > 0) {
+                const { error } = await supabase
+                    .from('shifts')
+                    .insert(shiftsToInsert);
+                
+                if (error) throw error;
             }
     
             return result;
         }
 
         function findEmployeeByName(name) {
-            // Приводим к нижнему регистру и латинице
             const searchName = cyrillicToLatin(name.toLowerCase().trim());
     
             return allUsers.find(user => {
                 if (user.role === 'admin') return false;
         
-                // Все имена переводим в латиницу для сравнения
                 const displayNameLatin = cyrillicToLatin((user.displayName || '').toLowerCase());
-                const fullNameLatin = cyrillicToLatin((user.fullName || '').toLowerCase());
-                const lastNameLatin = cyrillicToLatin((user.lastName || '').toLowerCase());
-                const firstNameLatin = cyrillicToLatin((user.firstName || '').toLowerCase());
+                const fullNameLatin = cyrillicToLatin((user.full_name || '').toLowerCase());
+                const lastNameLatin = cyrillicToLatin((user.last_name || '').toLowerCase());
+                const firstNameLatin = cyrillicToLatin((user.first_name || '').toLowerCase());
         
-                // Ищем совпадение в латинице
                 if (displayNameLatin === searchName || fullNameLatin === searchName) {
                     return true;
                 }
         
-                // Ищем частичное совпадение
                 if (displayNameLatin.includes(searchName) || searchName.includes(displayNameLatin)) {
                     return true;
                 }
         
-                // Проверяем формат "Фамилия Имя" в латинице
                 const fullNameReverseLatin = `${firstNameLatin} ${lastNameLatin}`;
                 if (fullNameReverseLatin === searchName || searchName.includes(fullNameReverseLatin)) {
                     return true;
@@ -1928,7 +1939,6 @@
             });
         }
 
-        // Функция перевода кириллицы в латиницу
         function cyrillicToLatin(text) {
             const cyr = {
                 'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh',
@@ -1954,7 +1964,6 @@
             try {
                 const csvContent = await generateCSVExport(month, year);
         
-                // Создаем и скачиваем файл
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
@@ -1983,42 +1992,38 @@
             const startDate = firstDay.toISOString().split('T')[0];
             const endDate = lastDay.toISOString().split('T')[0];
     
-            // Загружаем смены за месяц
-            const snapshot = await db.collection('shifts')
-                .where('date', '>=', startDate)
-                .where('date', '<=', endDate)
-                .get();
+            const { data, error } = await supabase
+                .from('shifts')
+                .select('*')
+                .gte('date', startDate)
+                .lte('date', endDate);
+            
+            if (error) throw error;
     
-            // Группируем смены по сотрудникам
             const shiftsByUser = {};
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (!shiftsByUser[data.userId]) {
-                    shiftsByUser[data.userId] = {};
+            data.forEach(shift => {
+                if (!shiftsByUser[shift.user_id]) {
+                    shiftsByUser[shift.user_id] = {};
                 }
-                shiftsByUser[data.userId][data.date] = {
-                    type: data.type,
-                    done: data.done,
-                    paid: data.paid
+                shiftsByUser[shift.user_id][shift.date] = {
+                    type: shift.type,
+                    done: shift.done,
+                    paid: shift.paid
                 };
             });
     
-            // Создаем CSV
-            let csvContent = 'Sotrudnik'; // Заголовок на латинице
+            let csvContent = 'Sotrudnik';
             const daysInMonth = lastDay.getDate();
     
-            // Заголовки дней
             for (let day = 1; day <= daysInMonth; day++) {
                 csvContent += `,${day}`;
             }
             csvContent += '\n';
     
-            // Данные по каждому сотруднику
             const employees = allUsers.filter(u => u.role !== 'admin');
     
             employees.forEach(employee => {
-                // Имя в латинице
-                const name = employee.displayName || employee.fullName || `${employee.lastName} ${employee.firstName}`;
+                const name = employee.displayName || employee.full_name || `${employee.last_name} ${employee.first_name}`;
                 const nameLatin = cyrillicToLatin(name);
                 csvContent += nameLatin;
         
@@ -2030,13 +2035,11 @@
             
                     let symbol = ' ';
                     if (shift) {
-                        // Только * и # как в импорте
                         if (shift.type === 'regular') {
-                            symbol = '*'; // основная смена
+                            symbol = '*';
                         } else if (shift.type === 'extra') {
-                            symbol = '#'; // подработка
+                            symbol = '#';
                         }
-                        // Выходные, проблемные и другие - пропускаем (пусто)
                     }
             
                     csvContent += `,${symbol}`;
@@ -2067,28 +2070,28 @@
             if (!currentUser) return;
             try {
                 const now = new Date();
-                // Загружаем смены на 7 месяцев: 3 назад, текущий, 3 вперед
                 const startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
                 const endDate = new Date(now.getFullYear(), now.getMonth() + 4, 0);
                 
-                const snapshot = await db.collection('shifts')
-                    .where('userId', '==', currentUser.uid)
-                    .where('date', '>=', startDate.toISOString().split('T')[0])
-                    .where('date', '<=', endDate.toISOString().split('T')[0])
-                    .get();
+                const { data, error } = await supabase
+                    .from('shifts')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .gte('date', startDate.toISOString().split('T')[0])
+                    .lte('date', endDate.toISOString().split('T')[0]);
                 
-                if (!shiftsMap[currentUser.uid]) shiftsMap[currentUser.uid] = {};
+                if (error) throw error;
                 
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    shiftsMap[currentUser.uid][data.date] = {
-                        type: data.type,
-                        done: data.done || false,
-                        paid: data.paid || false
+                if (!shiftsMap[currentUser.id]) shiftsMap[currentUser.id] = {};
+                
+                data.forEach(shift => {
+                    shiftsMap[currentUser.id][shift.date] = {
+                        type: shift.type,
+                        done: shift.done || false,
+                        paid: shift.paid || false
                     };
                 });
                 
-                // Обновляем календарь текущего месяца
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
                 renderUserCalendar(currentMonth, currentYear);
@@ -2105,32 +2108,32 @@
                 const month = parseInt(app.getElement('user-selected-month')?.value || userViewMonth);
                 const year = parseInt(app.getElement('user-selected-year')?.value || userViewYear);
                 
-                // Загружаем смены на 7 месяцев для полноты отображения
                 const startDate = new Date(year, month - 3, 1);
                 const endDate = new Date(year, month + 4, 0);
                 
-                const snapshot = await db.collection('shifts')
-                    .where('userId', '==', currentUser.uid)
-                    .where('date', '>=', startDate.toISOString().split('T')[0])
-                    .where('date', '<=', endDate.toISOString().split('T')[0])
-                    .get();
+                const { data, error } = await supabase
+                    .from('shifts')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .gte('date', startDate.toISOString().split('T')[0])
+                    .lte('date', endDate.toISOString().split('T')[0]);
                 
-                if (!shiftsMap[currentUser.uid]) shiftsMap[currentUser.uid] = {};
+                if (error) throw error;
                 
-                // Очищаем только диапазон 7 месяцев
-                Object.keys(shiftsMap[currentUser.uid]).forEach(date => {
+                if (!shiftsMap[currentUser.id]) shiftsMap[currentUser.id] = {};
+                
+                Object.keys(shiftsMap[currentUser.id]).forEach(date => {
                     if (date >= startDate.toISOString().split('T')[0] && 
                         date <= endDate.toISOString().split('T')[0]) {
-                        delete shiftsMap[currentUser.uid][date];
+                        delete shiftsMap[currentUser.id][date];
                     }
                 });
                 
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    shiftsMap[currentUser.uid][data.date] = {
-                        type: data.type,
-                        done: data.done || false,
-                        paid: data.paid || false
+                data.forEach(shift => {
+                    shiftsMap[currentUser.id][shift.date] = {
+                        type: shift.type,
+                        done: shift.done || false,
+                        paid: shift.paid || false
                     };
                 });
                 
@@ -2143,6 +2146,7 @@
             }
         }
         
+        // === РЕНДЕР КАЛЕНДАРЯ ПОЛЬЗОВАТЕЛЯ ===
         function renderUserCalendar(month, year) {
             const container = app.getElement('user-calendar');
             if (!container || !currentUser) return;
@@ -2160,7 +2164,7 @@
             
             for (let day = 1; day <= totalDays; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const shift = shiftsMap[currentUser.uid] ? shiftsMap[currentUser.uid][dateStr] : null;
+                const shift = shiftsMap[currentUser.id] ? shiftsMap[currentUser.id][dateStr] : null;
                 let shiftClass = '';
                 
                 if (shift) {
@@ -2193,7 +2197,7 @@
             container.innerHTML = html;
         }
         
-        // КНОПКИ НАВИГАЦИИ МЕСЯЦА
+        // === КНОПКИ НАВИГАЦИИ МЕСЯЦА ===
         app.safeAddEventListener('prev-month', 'click', function() {
             let month = parseInt(app.getElement('user-selected-month').value);
             let year = parseInt(app.getElement('user-selected-year').value);
@@ -2304,34 +2308,29 @@
         
         async function loadPostsForDate(date, isAdminView = false) {
             try {
-                const snapshot = await db.collection('posts')
-                    .where('date', '==', date)
-                    .get();
+                const { data, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .eq('date', date)
+                    .order('order');
                 
-                postsData = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    let guardDisplayName = data.guardName || '';
+                if (error) throw error;
+                
+                postsData = data || [];
+                
+                postsData.forEach(post => {
+                    let guardDisplayName = post.guard_name || '';
                     if (guardDisplayName) {
                         const nameParts = guardDisplayName.split(' ');
                         if (nameParts.length >= 2) {
                             guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
                         }
                     }
-                    
-                    postsData.push({ 
-                        id: doc.id, 
-                        ...data,
-                        guardDisplayName: guardDisplayName
-                    });
+                    post.guardDisplayName = guardDisplayName;
                 });
-                
-                postsData.sort((a, b) => (a.order || 999) - (b.order || 999));
                 
                 if (isAdminView) {
                     renderAdminPostsTable(date);
-                } else {
-                    renderUserPostsTable(date);
                 }
             } catch (error) {
                 console.error('Ошибка загрузки постов:', error);
@@ -2342,6 +2341,7 @@
             }
         }
         
+        // === РЕНДЕР ТАБЛИЦЫ ПОСТОВ АДМИНА ===
         function renderAdminPostsTable(date) {
             const container = app.getElement('posts-admin-container');
             if (!container) return;
@@ -2392,7 +2392,7 @@
                             <input type="time" value="${post.time || '08:00'}" class="time-input">
                         </td>
                         <td>
-                            ${renderUserSelectForPosts(post.guardId)}
+                            ${renderUserSelectForPosts(post.guard_id)}
                         </td>
                         <td class="post-controls">
                             <button class="btn-success save-post-btn btn-small"><i class="fas fa-save"></i></button>
@@ -2451,34 +2451,36 @@
         
         async function createPostsFromTemplate(date) {
             try {
-                const oldPosts = await db.collection('posts')
-                    .where('date', '==', date)
-                    .get();
+                const { error: deleteError } = await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('date', date);
                 
-                const batch = db.batch();
-                oldPosts.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
+                if (deleteError) throw deleteError;
+                
+                const postsToInsert = [];
                 
                 for (let i = 0; i < defaultPosts.length; i++) {
                     const post = defaultPosts[i];
-                    const postRef = db.collection('posts').doc();
                     
-                    const order = i + 1;
-                    
-                    batch.set(postRef, {
+                    postsToInsert.push({
                         date: date,
                         number: post.number,
                         post: post.post,
-                        guardId: '',
-                        guardName: '',
+                        guard_id: '',
+                        guard_name: '',
                         time: post.time,
-                        order: order,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        order: i + 1,
+                        created_at: new Date().toISOString()
                     });
                 }
                 
-                await batch.commit();
+                const { error: insertError } = await supabase
+                    .from('posts')
+                    .insert(postsToInsert);
+                
+                if (insertError) throw insertError;
+                
                 alert('Шаблон постов создан в правильном порядке!');
                 await loadPostsForDate(date, true);
                 
@@ -2496,16 +2498,22 @@
                     }
                 });
                 
-                const postRef = await db.collection('posts').add({
-                    date: date,
-                    number: '',
-                    post: 'Новый пост',
-                    guardId: '',
-                    guardName: '',
-                    time: '08:00',
-                    order: maxOrder + 1,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                const { error } = await supabase
+                    .from('posts')
+                    .insert([
+                        {
+                            date: date,
+                            number: '',
+                            post: 'Новый пост',
+                            guard_id: '',
+                            guard_name: '',
+                            time: '08:00',
+                            order: maxOrder + 1,
+                            created_at: new Date().toISOString()
+                        }
+                    ]);
+                
+                if (error) throw error;
                 
                 await loadPostsForDate(date, true);
             } catch (error) {
@@ -2535,23 +2543,28 @@
             const guard = allUsers.find(u => u.id === guardId);
             let guardName = guard ? guard.displayName : '';
             
-            if (guard && guard.lastName && guard.firstName) {
-                guardName = `${guard.lastName} ${guard.firstName}`;
+            if (guard && guard.last_name && guard.first_name) {
+                guardName = `${guard.last_name} ${guard.first_name}`;
             }
             
             const existingPost = postsData.find(p => p.id === postId);
             const order = existingPost ? existingPost.order : (postsData.length + 1);
             
             try {
-                await db.collection('posts').doc(postId).update({
-                    number: number,
-                    post: post,
-                    guardId: guardId,
-                    guardName: guardName,
-                    time: time,
-                    order: order,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                const { error } = await supabase
+                    .from('posts')
+                    .update({
+                        number: number,
+                        post: post,
+                        guard_id: guardId,
+                        guard_name: guardName,
+                        time: time,
+                        order: order,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', postId);
+                
+                if (error) throw error;
                 
                 alert('Пост сохранен!');
             } catch (error) {
@@ -2586,23 +2599,28 @@
                 const guard = allUsers.find(u => u.id === guardId);
                 let guardName = guard ? guard.displayName : '';
                 
-                if (guard && guard.lastName && guard.firstName) {
-                    guardName = `${guard.lastName} ${guard.firstName}`;
+                if (guard && guard.last_name && guard.first_name) {
+                    guardName = `${guard.last_name} ${guard.first_name}`;
                 }
                 
                 const existingPost = postsData.find(p => p.id === postId);
                 const order = existingPost ? existingPost.order : (postsData.length + 1);
                 
                 try {
-                    await db.collection('posts').doc(postId).update({
-                        number: number,
-                        post: post,
-                        guardId: guardId,
-                        guardName: guardName,
-                        time: time,
-                        order: order,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    const { error } = await supabase
+                        .from('posts')
+                        .update({
+                            number: number,
+                            post: post,
+                            guard_id: guardId,
+                            guard_name: guardName,
+                            time: time,
+                            order: order,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', postId);
+                    
+                    if (error) throw error;
                 } catch (error) {
                     alert('Ошибка сохранения: ' + error.message);
                     hasErrors = true;
@@ -2623,14 +2641,20 @@
             if (!confirm('Удалить этот пост?')) return;
             
             try {
-                await db.collection('posts').doc(postId).delete();
+                const { error } = await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('id', postId);
+                
+                if (error) throw error;
+                
                 await loadPostsForDate(date, true);
             } catch (error) {
                 alert('Ошибка удаления: ' + error.message);
             }
         }
         
-        // === ПОСТОВАЯ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
+        // === ЗАГРУЗКА ПОСТОВ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
         app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
             const dateInput = app.getElement('user-posts-date');
             if (!dateInput || !dateInput.value) {
@@ -2638,8 +2662,40 @@
                 return;
             }
             
-            await loadPostsForDate(dateInput.value, false);
+            await loadPostsForUserDate(dateInput.value);
         });
+        
+        async function loadPostsForUserDate(date) {
+            try {
+                const { data, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .eq('date', date)
+                    .order('order');
+                
+                if (error) throw error;
+                
+                postsData = data || [];
+                
+                postsData.forEach(post => {
+                    let guardDisplayName = post.guard_name || '';
+                    if (guardDisplayName) {
+                        const nameParts = guardDisplayName.split(' ');
+                        if (nameParts.length >= 2) {
+                            guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
+                        }
+                    }
+                    post.guardDisplayName = guardDisplayName;
+                });
+                
+                renderUserPostsTable(date);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки постов:', error);
+                const container = app.getElement('posts-user-container');
+                if (container) container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
+            }
+        }
         
         function renderUserPostsTable(date) {
             const container = app.getElement('posts-user-container');
@@ -2649,6 +2705,7 @@
                 container.innerHTML = `
                     <div class="message">
                         <p>Нет постов на выбранную дату ${date}</p>
+                        <p>Выберите другую дату или обратитесь к администратору</p>
                     </div>
                 `;
                 return;
@@ -2656,8 +2713,6 @@
             
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('ru-RU');
-            
-            const userPosts = postsData;
             
             let html = `
                 <h3>Посты на дату: ${formattedDate}</h3>
@@ -2674,15 +2729,15 @@
                         <tbody>
             `;
             
-            userPosts.forEach((post) => {
-                const isAssignedToMe = post.guardId === currentUser?.uid;
+            postsData.forEach((post) => {
+                const isAssignedToMe = post.guard_id === currentUser?.id;
                 html += `
                     <tr>
                         <td>${post.number || ''}</td>
                         <td><strong>${post.post || ''}</strong></td>
                         <td>${post.time || ''}</td>
                         <td>
-                            ${post.guardDisplayName || post.guardName || 'Не назначен'}
+                            ${post.guardDisplayName || post.guard_name || 'Не назначен'}
                             ${isAssignedToMe ? ' <span style="color:#64ffda;">(Вы)</span>' : ''}
                         </td>
                     </tr>
@@ -2701,11 +2756,11 @@
         // === ОБНОВЛЕНИЕ СТАТИСТИКИ ===
         function updateUserStats() {
             if (!currentUser) return;
-            const user = allUsers.find(u => u.id === currentUser.uid);
+            const user = allUsers.find(u => u.id === currentUser.id);
             if (!user) return;
             
             const rate = user.rate || 0;
-            const shifts = shiftsMap[currentUser.uid] || {};
+            const shifts = shiftsMap[currentUser.id] || {};
             let regularCount = 0, extraCount = 0, pendingAmount = 0;
             
             Object.values(shifts).forEach(shift => {
@@ -2756,49 +2811,49 @@
             const userRate = app.getElement('user-rate');
             const userEmail = app.getElement('user-email');
             
-            if (userName) userName.textContent = user.lastName && user.firstName ? 
-                `${user.lastName} ${user.firstName}` : user.fullName || user.email || 'Имя не указано';
+            if (userName) userName.textContent = user.displayName || user.email || 'Имя не указано';
             if (userPosition) userPosition.textContent = user.role === 'admin' ? 'Администратор' : 'Охранник';
             if (userRate) userRate.textContent = `${rate} ₽`;
             if (userEmail) userEmail.textContent = user.email;
         }
         
-        // === ВЫПЛАТЫ АДМИНА ===
+        // === АРХИВ ВЫПЛАТ АДМИНА ===
         async function loadPaymentsArchive() {
             try {
-                const snapshot = await db.collection('salary_payments')
-                    .orderBy('createdAt', 'desc')
-                    .limit(50)
-                    .get();
+                const { data, error } = await supabase
+                    .from('salary_payments')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                
+                if (error) throw error;
                 
                 const container = app.getElement('payments-archive-admin');
                 if (!container) return;
                 
-                if (snapshot.empty) {
+                if (!data || data.length === 0) {
                     container.innerHTML = '<tr><td colspan="10">Нет выплат</td></tr>';
                     return;
                 }
                 
                 let html = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.createdAt?.toDate ? 
-                        data.createdAt.toDate().toLocaleDateString('ru-RU') : 'Дата неизвестна';
-                    const user = allUsers.find(u => u.id === data.userId);
+                data.forEach(payment => {
+                    const date = payment.created_at ? new Date(payment.created_at).toLocaleDateString('ru-RU') : 'Дата неизвестна';
+                    const user = allUsers.find(u => u.id === payment.user_id);
                     const rate = user ? user.rate : 0;
                     
                     html += `
                         <tr>
                             <td>${date}</td>
-                            <td>${data.periodFrom}<br>${data.periodTo}</td>
-                            <td>${data.userName || 'Неизвестно'}</td>
-                            <td>${data.regularShifts || 0}</td>
-                            <td>${data.extraShifts || 0}</td>
+                            <td>${payment.period_from}<br>${payment.period_to}</td>
+                            <td>${payment.user_name || 'Неизвестно'}</td>
+                            <td>${payment.regular_shifts || 0}</td>
+                            <td>${payment.extra_shifts || 0}</td>
                             <td>${rate} ₽</td>
-                            <td>${data.bonus || 0} ₽</td>
-                            <td>${data.penalty || 0} ₽</td>
-                            <td>${data.bonusNote || ''}</td>
-                            <td><strong>${data.totalAmount || 0} ₽</strong></td>
+                            <td>${payment.bonus || 0} ₽</td>
+                            <td>${payment.penalty || 0} ₽</td>
+                            <td>${payment.bonus_note || ''}</td>
+                            <td><strong>${payment.total_amount || 0} ₽</strong></td>
                         </tr>
                     `;
                 });
@@ -2825,29 +2880,26 @@
             const rate = user.rate || 0;
             
             try {
-                const shifts = await db.collection('shifts')
-                    .where('userId', '==', userId)
-                    .where('date', '>=', fromDate)
-                    .where('date', '<=', toDate)
-                    .get();
+                const { data: shifts, error: shiftsError } = await supabase
+                    .from('shifts')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .gte('date', fromDate)
+                    .lte('date', toDate)
+                    .eq('done', true)
+                    .eq('paid', false);
+                
+                if (shiftsError) throw shiftsError;
                 
                 let regularCount = 0, extraCount = 0, totalAmount = 0;
-                const batch = db.batch();
                 
-                shifts.forEach(doc => {
-                    const data = doc.data();
-                    if (data.done && !data.paid) {
-                        if (data.type === 'regular') {
-                            regularCount++;
-                            totalAmount += rate;
-                        } else if (data.type === 'extra') {
-                            extraCount++;
-                            totalAmount += rate + 100;
-                        }
-                        batch.update(doc.ref, { 
-                            paid: true,
-                            paidAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                shifts.forEach(shift => {
+                    if (shift.type === 'regular') {
+                        regularCount++;
+                        totalAmount += rate;
+                    } else if (shift.type === 'extra') {
+                        extraCount++;
+                        totalAmount += rate + 100;
                     }
                 });
                 
@@ -2857,18 +2909,40 @@
                 }
                 
                 const finalAmount = totalAmount + bonus - penalty;
-                const paymentRef = db.collection('salary_payments').doc();
-                await paymentRef.set({
-                    userId, userName: user.displayName || user.email,
-                    periodFrom: fromDate, periodTo: toDate,
-                    regularShifts: regularCount, extraShifts: extraCount,
-                    baseAmount: totalAmount, bonus, penalty, bonusNote: note,
-                    totalAmount: finalAmount,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    adminId: currentUser.uid
-                });
                 
-                await batch.commit();
+                const { error: paymentError } = await supabase
+                    .from('salary_payments')
+                    .insert([
+                        {
+                            user_id: userId,
+                            user_name: user.displayName || user.email,
+                            period_from: fromDate,
+                            period_to: toDate,
+                            regular_shifts: regularCount,
+                            extra_shifts: extraCount,
+                            base_amount: totalAmount,
+                            bonus: bonus,
+                            penalty: penalty,
+                            bonus_note: note,
+                            total_amount: finalAmount,
+                            admin_id: currentUser.id,
+                            created_at: new Date().toISOString()
+                        }
+                    ]);
+                
+                if (paymentError) throw paymentError;
+                
+                for (const shift of shifts) {
+                    const { error: updateError } = await supabase
+                        .from('shifts')
+                        .update({ 
+                            paid: true,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', shift.id);
+                    
+                    if (updateError) throw updateError;
+                }
                 
                 app.getElement('payment-user-admin').value = '';
                 app.getElement('bonus-amount-admin').value = '0';
@@ -2903,40 +2977,41 @@
         async function loadUserPaymentHistory() {
             if (!currentUser) return;
             try {
-                const snapshot = await db.collection('salary_payments')
-                    .where('userId', '==', currentUser.uid)
-                    .orderBy('createdAt', 'desc')
-                    .limit(20)
-                    .get();
+                const { data, error } = await supabase
+                    .from('salary_payments')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                
+                if (error) throw error;
                 
                 const container = app.getElement('payments-history-user');
                 if (!container) return;
                 
-                if (snapshot.empty) {
+                if (!data || data.length === 0) {
                     container.innerHTML = '<tr><td colspan="9">Нет выплат</td></tr>';
                     return;
                 }
                 
-                const user = allUsers.find(u => u.id === currentUser.uid);
+                const user = allUsers.find(u => u.id === currentUser.id);
                 const rate = user ? user.rate : 0;
                 
                 let html = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.createdAt?.toDate ? 
-                        data.createdAt.toDate().toLocaleDateString('ru-RU') : 'Дата неизвестна';
+                data.forEach(payment => {
+                    const date = payment.created_at ? new Date(payment.created_at).toLocaleDateString('ru-RU') : 'Дата неизвестна';
                     
                     html += `
                         <tr>
                             <td>${date}</td>
-                            <td>${data.periodFrom}<br>${data.periodTo}</td>
-                            <td>${data.regularShifts || 0}</td>
-                            <td>${data.extraShifts || 0}</td>
+                            <td>${payment.period_from}<br>${payment.period_to}</td>
+                            <td>${payment.regular_shifts || 0}</td>
+                            <td>${payment.extra_shifts || 0}</td>
                             <td>${rate} ₽</td>
-                            <td>${data.bonus || 0} ₽</td>
-                            <td>${data.penalty || 0} ₽</td>
-                            <td>${data.bonusNote || ''}</td>
-                            <td><strong>${data.totalAmount || 0} ₽</strong></td>
+                            <td>${payment.bonus || 0} ₽</td>
+                            <td>${payment.penalty || 0} ₽</td>
+                            <td>${payment.bonus_note || ''}</td>
+                            <td><strong>${payment.total_amount || 0} ₽</strong></td>
                         </tr>
                     `;
                 });
@@ -2950,20 +3025,26 @@
         function init() {
             initTabs();
             
-            // Навигация
             ['nav-home', 'nav-login', 'nav-admin', 'nav-user'].forEach(id => {
                 app.safeAddEventListener(id, 'click', (e) => {
                     e.preventDefault();
                     app.showSection(id.replace('nav-', ''));
                 });
             });
-            app.safeAddEventListener('nav-logout', 'click', () => auth.signOut());
+            
+            app.safeAddEventListener('nav-logout', 'click', async () => {
+                await supabase.auth.signOut();
+                currentUser = null;
+                isAdmin = false;
+                app.showSection('welcome-section');
+                app.updateNavigation();
+            });
+            
             app.safeAddEventListener('go-to-login', 'click', (e) => {
                 e.preventDefault();
                 app.showSection('login-section');
             });
             
-            // Установка начальных дат
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
             
@@ -2984,42 +3065,25 @@
             if (postsDate) postsDate.valueAsDate = today;
             if (userPostsDate) userPostsDate.valueAsDate = today;
             
-            // Рендер шаблона постов
             renderPostsTemplate();
             
             app.showSection('welcome-section');
         }
         
-        // === ОБРАБОТЧИК АУТЕНТИФИКАЦИИ ===
-        auth.onAuthStateChanged(async (user) => {
-            currentUser = user;
-            
-            if (user) {
-                await loadUsers();
-                
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                isAdmin = userDoc.exists && userDoc.data().role === 'admin';
-                
-                if (isAdmin) {
-                    app.showSection('admin-section');
-                    await loadAllShiftsForAdmin();
-                    loadPaymentsArchive();
-                } else {
-                    await loadUserAllShiftsOnLogin();
-                    updateUserStats();
-                    loadUserPaymentHistory();
-                    app.showSection('user-section');
-                }
-                
-                app.updateNavigation();
+        // === СЛУШАТЕЛЬ АУТЕНТИФИКАЦИИ ===
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session?.user) {
+                currentUser = session.user;
+                await checkUserRole();
             } else {
+                currentUser = null;
                 isAdmin = false;
                 app.showSection('welcome-section');
                 app.updateNavigation();
             }
         });
         
-        // ЗАПУСК
+        // === ЗАПУСК ===
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
