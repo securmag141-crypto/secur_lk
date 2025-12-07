@@ -681,7 +681,7 @@
         <section id="welcome-section" class="container">
             <h1><i class="fas fa-shield-alt"></i> Система планирования смен</h1>
             <p style="color: #a8b2d1; font-size: 1.1rem;">Администраторы назначают смены, сотрудники просматривают свои графики работы.</p>
-            <button id="go-to-login" onclick="app.showSection('login-section')"><i class="fas fa-sign-in-alt"></i> Вход в систему</button>
+            <button id="go-to-login"><i class="fas fa-sign-in-alt"></i> Вход в систему</button>
         </section>
 
         <section id="login-section" class="container hidden">
@@ -1190,33 +1190,27 @@
         }
         
         // === АУТЕНТИФИКАЦИЯ ===
-        // Добавляем обработчик напрямую
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginBtn = document.getElementById('login-btn');
-            if (loginBtn) {
-                loginBtn.addEventListener('click', async function() {
-                    const email = document.getElementById('login-email')?.value;
-                    const password = document.getElementById('login-password')?.value;
-            
-                    if (!email || !password) {
-                        alert('Введите email и пароль');
-                        return;
-                    }
-            
-                    try {
-                        const { data, error } = await supabase.auth.signInWithPassword({
-                            email,
-                            password
-                        });
-                        
-                        if (error) throw error;
-                        currentUser = data.user;
-                        await checkUserRole();
-                
-                    } catch (error) {
-                        alert('Ошибка: ' + error.message);
-                    }
+        app.safeAddEventListener('login-btn', 'click', async function() {
+            const email = app.getElement('login-email')?.value;
+            const password = app.getElement('login-password')?.value;
+    
+            if (!email || !password) {
+                alert('Введите email и пароль');
+                return;
+            }
+    
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
                 });
+                
+                if (error) throw error;
+                currentUser = data.user;
+                await checkUserRole();
+        
+            } catch (error) {
+                alert('Ошибка входа: ' + error.message);
             }
         });
         
@@ -3036,14 +3030,29 @@
         function init() {
             initTabs();
             
-            ['nav-home', 'nav-login', 'nav-admin', 'nav-user'].forEach(id => {
-                app.safeAddEventListener(id, 'click', (e) => {
-                    e.preventDefault();
-                    app.showSection(id.replace('nav-', ''));
-                });
+            // Навигация
+            app.safeAddEventListener('nav-home', 'click', (e) => {
+                e.preventDefault();
+                app.showSection('welcome-section');
             });
             
-            app.safeAddEventListener('nav-logout', 'click', async () => {
+            app.safeAddEventListener('nav-login', 'click', (e) => {
+                e.preventDefault();
+                app.showSection('login-section');
+            });
+            
+            app.safeAddEventListener('nav-admin', 'click', (e) => {
+                e.preventDefault();
+                app.showSection('admin-section');
+            });
+            
+            app.safeAddEventListener('nav-user', 'click', (e) => {
+                e.preventDefault();
+                app.showSection('user-section');
+            });
+            
+            app.safeAddEventListener('nav-logout', 'click', async (e) => {
+                e.preventDefault();
                 await supabase.auth.signOut();
                 currentUser = null;
                 isAdmin = false;
@@ -3056,6 +3065,7 @@
                 app.showSection('login-section');
             });
             
+            // Настройка дат
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
             
@@ -3096,29 +3106,6 @@
         
         // === ЗАПУСК ===
         document.addEventListener('DOMContentLoaded', init);
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginBtn = document.getElementById('login-btn');
-            if (loginBtn) {
-                loginBtn.addEventListener('click', async function() {
-                    const email = document.getElementById('login-email').value;
-                    const password = document.getElementById('login-password').value;
-    
-                    const { data, error } = await supabase.auth.signInWithPassword({
-                        email,
-                        password
-                    });
-    
-                    if (error) {
-                        console.error('Ошибка входа:', error);
-                        alert('Ошибка: ' + error.message + '\nКод: ' + error.code);
-                    }
-                    else {
-                        currentUser = data.user;
-                        await checkUserRole();
-                    }
-                });
-            }
-        });
     </script>
 </body>
 </html>
