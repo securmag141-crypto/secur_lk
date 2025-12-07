@@ -669,7 +669,7 @@
         <nav>
             <ul>
                 <li><a href="#" id="nav-home"><i class="fas fa-home"></i> Главная</a></li>
-                <li><a href="#" id="nav-login"><i class="fas fa-sign-in-alt"></i> Вход</a></li>
+                <li><a href="#" id="nav-login" class="hidden"><i class="fas fa-sign-in-alt"></i> Вход</a></li>
                 <li><a href="#" id="nav-admin" class="hidden"><i class="fas fa-user-cog"></i> Админ</a></li>
                 <li><a href="#" id="nav-user" class="hidden"><i class="fas fa-user"></i> Кабинет</a></li>
                 <li><a href="#" id="nav-logout" class="hidden"><i class="fas fa-sign-out-alt"></i> Выход</a></li>
@@ -725,9 +725,10 @@
                         <label>Год:</label>
                         <input type="number" id="selected-year" value="2024">
                     </div>
-                    <div style="flex: 2; display: flex; align-items: flex-end;">
+                    <div style="flex: 2; display: flex; align-items: flex-end; gap: 10px;">
                         <button id="load-all-shifts-btn" class="btn-success"><i class="fas fa-sync-alt"></i> Загрузить смены</button>
-                        <button id="mark-done-past" class="btn-secondary" style="margin-left: 10px;"><i class="fas fa-check-double"></i> Отметить прошедшие</button>
+                        <button id="mark-done-past" class="btn-secondary"><i class="fas fa-check-double"></i> Отметить прошедшие</button>
+                        <button id="save-all-shifts-btn" class="btn-success"><i class="fas fa-save"></i> Сохранить все</button>
                     </div>
                 </div>
                 
@@ -1086,59 +1087,6 @@
         // === ИНИЦИАЛИЗАЦИЯ SUPABASE ===
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // === БЕЗОПАСНЫЕ УТИЛИТЫ ===
-        const app = {
-            getElement: function(id) {
-                const el = document.getElementById(id);
-                if (!el && console) console.warn('Элемент не найден:', id);
-                return el;
-            },
-            
-            showSection: function(sectionId) {
-                let fullId = sectionId.includes('-section') ? sectionId : sectionId + '-section';
-                const sections = ['welcome-section', 'login-section', 'admin-section', 'user-section'];
-                sections.forEach(id => {
-                    const el = this.getElement(id);
-                    if (el) el.classList.add('hidden');
-                });
-                
-                const targetSection = this.getElement(fullId);
-                if (targetSection) targetSection.classList.remove('hidden');
-                this.updateNavigation();
-            },
-            
-            updateNavigation: function() {
-                const isLoggedIn = !!currentUser;
-                const isAdmin = currentUser && allUsers.find(u => u.id === currentUser.id && u.role === 'admin');
-                
-                ['nav-home', 'nav-login', 'nav-admin', 'nav-user', 'nav-logout'].forEach((id, i) => {
-                    const el = this.getElement(id);
-                    if (el) {
-                        if (id === 'nav-home') el.classList.toggle('hidden', isLoggedIn);
-                        else if (id === 'nav-login') el.classList.toggle('hidden', isLoggedIn);
-                        else if (id === 'nav-admin') el.classList.toggle('hidden', !isAdmin);
-                        else if (id === 'nav-user') el.classList.toggle('hidden', !isLoggedIn);
-                        else if (id === 'nav-logout') el.classList.toggle('hidden', !isLoggedIn);
-                    }
-                });
-            },
-            
-            safeAddEventListener: function(id, event, handler) {
-                const el = this.getElement(id);
-                if (el) el.addEventListener(event, handler);
-            },
-            
-            showMessage: function(elementId, text, isError = false) {
-                const el = this.getElement(elementId);
-                if (el) {
-                    el.textContent = text;
-                    el.className = `message ${isError ? 'error' : 'success'}`;
-                    el.classList.remove('hidden');
-                    setTimeout(() => el.classList.add('hidden'), 5000);
-                }
-            }
-        };
-        
         // === СОСТОЯНИЕ ===
         let currentUser = null;
         let allUsers = [];
@@ -1168,6 +1116,58 @@
             { number: "15", post: "Резерв", time: "08:00" }
         ];
         
+        // === УТИЛИТЫ ===
+        const utils = {
+            getElement(id) {
+                const el = document.getElementById(id);
+                if (!el) console.warn('Элемент не найден:', id);
+                return el;
+            },
+            
+            showSection(sectionId) {
+                const sections = ['welcome-section', 'login-section', 'admin-section', 'user-section'];
+                sections.forEach(id => {
+                    const el = this.getElement(id);
+                    if (el) el.classList.add('hidden');
+                });
+                
+                const targetSection = this.getElement(sectionId.includes('-section') ? sectionId : sectionId + '-section');
+                if (targetSection) targetSection.classList.remove('hidden');
+                this.updateNavigation();
+            },
+            
+            updateNavigation() {
+                const isLoggedIn = !!currentUser;
+                const isAdminUser = currentUser && allUsers.find(u => u.id === currentUser.id && u.role === 'admin');
+                
+                ['nav-home', 'nav-login', 'nav-admin', 'nav-user', 'nav-logout'].forEach((id, i) => {
+                    const el = this.getElement(id);
+                    if (el) {
+                        if (id === 'nav-home') el.classList.toggle('hidden', isLoggedIn);
+                        else if (id === 'nav-login') el.classList.toggle('hidden', isLoggedIn);
+                        else if (id === 'nav-admin') el.classList.toggle('hidden', !isAdminUser);
+                        else if (id === 'nav-user') el.classList.toggle('hidden', !isLoggedIn);
+                        else if (id === 'nav-logout') el.classList.toggle('hidden', !isLoggedIn);
+                    }
+                });
+            },
+            
+            showMessage(elementId, text, isError = false) {
+                const el = this.getElement(elementId);
+                if (el) {
+                    el.textContent = text;
+                    el.className = `message ${isError ? 'error' : 'success'}`;
+                    el.classList.remove('hidden');
+                    setTimeout(() => el.classList.add('hidden'), 5000);
+                }
+            },
+            
+            safeAddEventListener(id, event, handler) {
+                const el = this.getElement(id);
+                if (el) el.addEventListener(event, handler);
+            }
+        };
+        
         // === ТАБЫ ===
         function initTabs() {
             document.querySelectorAll('.tab').forEach(tab => {
@@ -1189,9 +1189,9 @@
         }
         
         // === АУТЕНТИФИКАЦИЯ ===
-        app.safeAddEventListener('login-btn', 'click', async function() {
-            const email = app.getElement('login-email')?.value;
-            const password = app.getElement('login-password')?.value;
+        async function handleLogin() {
+            const email = utils.getElement('login-email')?.value;
+            const password = utils.getElement('login-password')?.value;
     
             if (!email || !password) {
                 alert('Введите email и пароль');
@@ -1211,7 +1211,7 @@
             } catch (error) {
                 alert('Ошибка входа: ' + error.message);
             }
-        });
+        }
         
         // === ПРОВЕРКА РОЛИ ПОЛЬЗОВАТЕЛЯ ===
         async function checkUserRole() {
@@ -1250,17 +1250,17 @@
                 await loadUsers();
                 
                 if (isAdmin) {
-                    app.showSection('admin-section');
+                    utils.showSection('admin-section');
                     await loadAllShiftsForAdmin();
                     loadPaymentsArchive();
                 } else {
                     await loadUserAllShiftsOnLogin();
                     updateUserStats();
                     loadUserPaymentHistory();
-                    app.showSection('user-section');
+                    utils.showSection('user-section');
                 }
                 
-                app.updateNavigation();
+                utils.updateNavigation();
                 
             } catch (error) {
                 alert('Ошибка проверки роли: ' + error.message);
@@ -1295,7 +1295,7 @@
                     user.displayName = lastName ? `${lastName} ${firstName}` : (user.full_name || user.email);
                 });
                 
-                const container = app.getElement('users-container');
+                const container = utils.getElement('users-container');
                 if (container) {
                     container.innerHTML = allUsers.map(user => `
                         <div class="user-card" style="background: #112240; padding: 0.8rem; margin: 0.5rem 0; border-radius: 5px; border: 1px solid #233554;">
@@ -1306,7 +1306,7 @@
                     `).join('');
                 }
                 
-                const paymentSelect = app.getElement('payment-user-admin');
+                const paymentSelect = utils.getElement('payment-user-admin');
                 if (paymentSelect) {
                     paymentSelect.innerHTML = '<option value="">Выберите охранника</option>';
                     allUsers.forEach(user => {
@@ -1319,7 +1319,7 @@
                     });
                 }
                 
-                if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
+                if (isAdmin && utils.getElement('tab-shifts-admin')?.classList.contains('active')) {
                     await loadAllShiftsForAdmin();
                 }
                 
@@ -1329,12 +1329,12 @@
         }
         
         // === СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ ===
-        app.safeAddEventListener('create-user-btn', 'click', async () => {
-            const email = app.getElement('new-user-email')?.value;
-            const password = app.getElement('new-user-password')?.value;
-            const lastName = app.getElement('new-user-lastname')?.value.trim();
-            const firstName = app.getElement('new-user-firstname')?.value.trim();
-            const rate = parseInt(app.getElement('new-user-rate')?.value) || 1500;
+        async function createUser() {
+            const email = utils.getElement('new-user-email')?.value;
+            const password = utils.getElement('new-user-password')?.value;
+            const lastName = utils.getElement('new-user-lastname')?.value.trim();
+            const firstName = utils.getElement('new-user-firstname')?.value.trim();
+            const rate = parseInt(utils.getElement('new-user-rate')?.value) || 1500;
             
             if (!email || !password || !lastName || !firstName) {
                 alert('Заполните все поля');
@@ -1367,23 +1367,23 @@
                 if (dbError) throw dbError;
                 
                 ['new-user-email', 'new-user-password', 'new-user-lastname', 'new-user-firstname'].forEach(id => {
-                    const el = app.getElement(id);
+                    const el = utils.getElement(id);
                     if (el) el.value = '';
                 });
-                app.getElement('new-user-rate').value = '1500';
+                utils.getElement('new-user-rate').value = '1500';
                 
                 loadUsers();
                 alert(`Охранник ${fullName} создан!`);
             } catch (error) {
                 alert('Ошибка: ' + error.message);
             }
-        });
+        }
         
         // === ЗАГРУЗКА СМЕН ДЛЯ АДМИНА ===
         async function loadAllShiftsForAdmin() {
             try {
-                const month = parseInt(app.getElement('selected-month')?.value || currentMonth);
-                const year = parseInt(app.getElement('selected-year')?.value || currentYear);
+                const month = parseInt(utils.getElement('selected-month')?.value || currentMonth);
+                const year = parseInt(utils.getElement('selected-year')?.value || currentYear);
                 const firstDay = new Date(year, month, 1);
                 const lastDay = new Date(year, month + 1, 0);
                 const startDate = firstDay.toISOString().split('T')[0];
@@ -1434,9 +1434,9 @@
         
         // === РЕНДЕР ТАБЛИЦЫ СМЕН АДМИНА ===
         function renderAdminShiftsTable(month, year) {
-            const tableBody = app.getElement('shifts-table-body');
-            const daysHeader = app.getElement('days-header');
-            const monthYearHeader = app.getElement('table-month-year');
+            const tableBody = utils.getElement('shifts-table-body');
+            const daysHeader = utils.getElement('days-header');
+            const monthYearHeader = utils.getElement('table-month-year');
             
             if (!tableBody || !daysHeader || !monthYearHeader) return;
             
@@ -1554,8 +1554,8 @@
                 });
             });
             
-            const scrollLeftBtn = app.getElement('scroll-left-btn');
-            const scrollRightBtn = app.getElement('scroll-right-btn');
+            const scrollLeftBtn = utils.getElement('scroll-left-btn');
+            const scrollRightBtn = utils.getElement('scroll-right-btn');
             const tableContainer = document.querySelector('.table-responsive');
             
             if (scrollLeftBtn && tableContainer) {
@@ -1643,10 +1643,8 @@
                 cell.setAttribute('data-shift-type', nextItem.type);
                 cell.setAttribute('data-done', nextItem.type === 'done' || nextItem.type === 'done-extra' ? 'true' : 'false');
                 cell.setAttribute('title', nextItem.title);
-                cell.innerHTML = nextItem.type === 'done' || nextItem.type === 'done-extra' ? '' : '';
-                if (nextItem.type && nextItem.type !== '') {
-                    cell.innerHTML += '<button class="delete-shift-btn" title="Удалить смену">×</button>';
-                }
+                cell.innerHTML = '';
+                cell.innerHTML += '<button class="delete-shift-btn" title="Удалить смену">×</button>';
             } else {
                 cell.setAttribute('data-shift-type', '');
                 cell.setAttribute('data-done', 'false');
@@ -1677,25 +1675,27 @@
         }
         
         // === СОХРАНЕНИЕ ВСЕХ СМЕН АДМИНА ===
-        app.safeAddEventListener('save-all-shifts-btn', 'click', async () => {
+        async function saveAllShifts() {
             try {
-                const month = parseInt(app.getElement('selected-month')?.value || currentMonth);
-                const year = parseInt(app.getElement('selected-year')?.value || currentYear);
+                const month = parseInt(utils.getElement('selected-month')?.value || currentMonth);
+                const year = parseInt(utils.getElement('selected-year')?.value || currentYear);
                 
                 const firstDay = new Date(year, month, 1);
                 const lastDay = new Date(year, month + 1, 0);
                 const startDate = firstDay.toISOString().split('T')[0];
                 const endDate = lastDay.toISOString().split('T')[0];
                 
-                const { error: deleteError } = await supabase
+                // Сначала получаем существующие смены
+                const { data: existingShifts, error: fetchError } = await supabase
                     .from('shifts')
-                    .delete()
+                    .select('*')
                     .gte('date', startDate)
                     .lte('date', endDate);
                 
-                if (deleteError) throw deleteError;
+                if (fetchError) throw fetchError;
                 
-                const shiftsToInsert = [];
+                // Собираем смены для вставки/обновления
+                const shiftsToUpsert = [];
                 
                 for (const userId in adminShiftsData) {
                     const userShifts = adminShiftsData[userId];
@@ -1703,38 +1703,58 @@
                     for (const [date, shift] of Object.entries(userShifts)) {
                         const shiftDate = new Date(date);
                         if (shiftDate.getMonth() === month && shiftDate.getFullYear() === year) {
-                            shiftsToInsert.push({
+                            const existingShift = existingShifts?.find(s => 
+                                s.user_id === userId && s.date === date
+                            );
+                            
+                            shiftsToUpsert.push({
+                                id: existingShift?.id || undefined,
                                 user_id: userId,
                                 date,
                                 type: shift.type,
                                 done: shift.done || false,
                                 paid: shift.paid || false,
-                                created_at: new Date().toISOString(),
                                 updated_at: new Date().toISOString()
                             });
                         }
                     }
                 }
                 
-                if (shiftsToInsert.length > 0) {
-                    const { error: insertError } = await supabase
+                // Удаляем смены, которые были удалены из интерфейса
+                const shiftsToKeep = shiftsToUpsert.map(s => s.id).filter(Boolean);
+                const shiftsToDelete = existingShifts?.filter(s => 
+                    !shiftsToKeep.includes(s.id)
+                ) || [];
+                
+                // Выполняем операции
+                if (shiftsToDelete.length > 0) {
+                    const { error: deleteError } = await supabase
                         .from('shifts')
-                        .insert(shiftsToInsert);
+                        .delete()
+                        .in('id', shiftsToDelete.map(s => s.id));
                     
-                    if (insertError) throw insertError;
+                    if (deleteError) throw deleteError;
                 }
                 
-                alert(`Смены сохранены успешно! Изменено: ${shiftsToInsert.length} записей.`);
+                if (shiftsToUpsert.length > 0) {
+                    const { error: upsertError } = await supabase
+                        .from('shifts')
+                        .upsert(shiftsToUpsert);
+                    
+                    if (upsertError) throw upsertError;
+                }
+                
+                alert(`Смены сохранены успешно! Обновлено: ${shiftsToUpsert.length} записей.`);
                 
                 await loadAllShiftsForAdmin();
                 
             } catch (error) {
                 alert('Ошибка сохранения смен: ' + error.message);
             }
-        });
+        }
         
         // === ОТМЕТИТЬ ПРОШЕДШИЕ СМЕНЫ КАК ОТРАБОТАННЫЕ ===
-        app.safeAddEventListener('mark-done-past', 'click', async () => {
+        async function markPastShiftsAsDone() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const todayStr = today.toISOString().split('T')[0];
@@ -1755,320 +1775,34 @@
                     return;
                 }
                 
-                const updates = data.map(shift => ({
-                    id: shift.id,
-                    done: true,
-                    updated_at: new Date().toISOString()
-                }));
-                
-                for (const update of updates) {
+                for (const shift of data) {
                     const { error: updateError } = await supabase
                         .from('shifts')
-                        .update({ done: true, updated_at: new Date().toISOString() })
-                        .eq('id', update.id);
+                        .update({ 
+                            done: true, 
+                            updated_at: new Date().toISOString() 
+                        })
+                        .eq('id', shift.id);
                     
                     if (updateError) throw updateError;
                 }
                 
-                alert(`Отмечено как отработанные: ${updates.length} смен(ы) до ${todayStr}`);
+                alert(`Отмечено как отработанные: ${data.length} смен(ы) до ${todayStr}`);
                 
-                if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
+                if (isAdmin && utils.getElement('tab-shifts-admin')?.classList.contains('active')) {
                     await loadAllShiftsForAdmin();
                 }
     
             } catch (error) {
                 alert('Ошибка: ' + error.message);
             }
-        });
-        
-        // === CSV ИМПОРТ ===
-        app.safeAddEventListener('import-csv-btn', 'click', async function() {
-            const fileInput = app.getElement('csv-file');
-            const month = parseInt(app.getElement('csv-month').value);
-            const year = parseInt(app.getElement('csv-year').value);
-            const resultDiv = app.getElement('csv-result');
-    
-            if (!fileInput.files[0]) {
-                alert('Выберите CSV файл');
-                return;
-            }
-    
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-    
-            reader.onload = async function(e) {
-                try {
-                    const text = e.target.result;
-                    const result = await processCSV(text, month, year);
-            
-                    if (resultDiv) {
-                        resultDiv.innerHTML = `
-                            <div class="success">
-                                <strong>Импорт завершен!</strong><br>
-                                Обработано сотрудников: ${result.employeesProcessed}<br>
-                                Создано смен: ${result.shiftsCreated}<br>
-                                Основных (*): ${result.regularShifts}, Подработок (#): ${result.extraShifts}<br>
-                                ${result.notFoundNames.length > 0 ? 'Не найдено: ' + result.notFoundNames.join(', ') : ''}
-                            </div>
-                        `;
-                        resultDiv.classList.remove('hidden');
-                    }
-            
-                    if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
-                        await loadAllShiftsForAdmin();
-                    }
-            
-                } catch (error) {
-                    alert('Ошибка импорта: ' + error.message);
-                    if (resultDiv) {
-                        resultDiv.innerHTML = `<div class="error">Ошибка: ${error.message}</div>`;
-                        resultDiv.classList.remove('hidden');
-                    }
-                }
-            };
-    
-            reader.readAsText(file);
-        });
-
-        async function processCSV(csvText, month, year) {
-            if (csvText.charCodeAt(0) === 0xFEFF) {
-                csvText = csvText.substring(1);
-            }
-    
-            const lines = csvText.split('\n').filter(line => line.trim() !== '');
-            if (lines.length < 2) {
-                throw new Error('CSV файл пустой или имеет неправильный формат');
-            }
-    
-            const delimiter = lines[0].includes(';') ? ';' : ',';
-            const headers = lines[0].split(delimiter).map(h => h.trim());
-            if (headers[0] !== 'Сотрудник' && headers[0] !== 'Sotrudnik') {
-                throw new Error('Первая колонка должна называться "Сотрудник" или "Sotrudnik"');
-            }
-    
-            const result = {
-                employeesProcessed: 0,
-                shiftsCreated: 0,
-                regularShifts: 0,
-                extraShifts: 0,
-                notFoundNames: []
-            };
-    
-            const shiftsToInsert = [];
-    
-            for (let i = 1; i < lines.length; i++) {
-                const cells = lines[i].split(delimiter).map(c => c.trim());
-                const employeeName = cells[0];
-        
-                if (!employeeName) continue;
-        
-                const employee = findEmployeeByName(employeeName);
-        
-                if (!employee) {
-                    result.notFoundNames.push(employeeName);
-                    continue;
-                }
-        
-                result.employeesProcessed++;
-        
-                for (let day = 1; day <= 31; day++) {
-                    if (day >= cells.length) break;
-            
-                    const symbol = cells[day];
-                    let shiftType = null;
-            
-                    if (symbol === '*') {
-                        shiftType = 'regular';
-                        result.regularShifts++;
-                    } else if (symbol === '#') {
-                        shiftType = 'extra';
-                        result.extraShifts++;
-                    } else {
-                        continue;
-                    }
-            
-                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            
-                    shiftsToInsert.push({
-                        user_id: employee.id,
-                        date: dateStr,
-                        type: shiftType,
-                        done: false,
-                        paid: false,
-                        imported: true,
-                        imported_at: new Date().toISOString(),
-                        created_at: new Date().toISOString()
-                    });
-            
-                    result.shiftsCreated++;
-                }
-            }
-    
-            if (shiftsToInsert.length > 0) {
-                const { error } = await supabase
-                    .from('shifts')
-                    .insert(shiftsToInsert);
-                
-                if (error) throw error;
-            }
-    
-            return result;
-        }
-
-        function findEmployeeByName(name) {
-            const searchName = cyrillicToLatin(name.toLowerCase().trim());
-    
-            return allUsers.find(user => {
-                if (user.role === 'admin') return false;
-        
-                const displayNameLatin = cyrillicToLatin((user.displayName || '').toLowerCase());
-                const fullNameLatin = cyrillicToLatin((user.full_name || '').toLowerCase());
-                const lastNameLatin = cyrillicToLatin((user.last_name || '').toLowerCase());
-                const firstNameLatin = cyrillicToLatin((user.first_name || '').toLowerCase());
-        
-                if (displayNameLatin === searchName || fullNameLatin === searchName) {
-                    return true;
-                }
-        
-                if (displayNameLatin.includes(searchName) || searchName.includes(displayNameLatin)) {
-                    return true;
-                }
-        
-                const fullNameReverseLatin = `${firstNameLatin} ${lastNameLatin}`;
-                if (fullNameReverseLatin === searchName || searchName.includes(fullNameReverseLatin)) {
-                    return true;
-                }
-        
-                return false;
-            });
-        }
-
-        function cyrillicToLatin(text) {
-            const cyr = {
-                'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh',
-                'з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o',
-                'п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'ts',
-                'ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu',
-                'я':'ya',
-                'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'YO','Ж':'ZH',
-                'З':'Z','И':'I','Й':'Y','К':'K','Л':'L','М':'M','Н':'N','О':'O',
-                'П':'P','Р':'R','С':'S','Т':'T','У':'U','Ф':'F','Х':'H','Ц':'TS',
-                'Ч':'CH','Ш':'SH','Щ':'SHCH','Ъ':'','Ы':'Y','Ь':'','Э':'E','Ю':'YU',
-                'Я':'YA'
-            };
-    
-            return text.split('').map(char => cyr[char] || char).join('');
-        }
-        
-        // === ЭКСПОРТ CSV ===
-        app.safeAddEventListener('export-csv-btn', 'click', async function() {
-            const month = parseInt(app.getElement('selected-month').value);
-            const year = parseInt(app.getElement('selected-year').value);
-    
-            try {
-                const csvContent = await generateCSVExport(month, year);
-        
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-        
-                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
-                                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-        
-                link.setAttribute('href', url);
-                link.setAttribute('download', `smens_${monthNames[month]}_${year}.csv`);
-                link.style.visibility = 'hidden';
-        
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-        
-                alert('CSV файл скачан!');
-        
-            } catch (error) {
-                alert('Ошибка экспорта: ' + error.message);
-            }
-        });
-
-        async function generateCSVExport(month, year) {
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startDate = firstDay.toISOString().split('T')[0];
-            const endDate = lastDay.toISOString().split('T')[0];
-    
-            const { data, error } = await supabase
-                .from('shifts')
-                .select('*')
-                .gte('date', startDate)
-                .lte('date', endDate);
-            
-            if (error) throw error;
-    
-            const shiftsByUser = {};
-            data.forEach(shift => {
-                if (!shiftsByUser[shift.user_id]) {
-                    shiftsByUser[shift.user_id] = {};
-                }
-                shiftsByUser[shift.user_id][shift.date] = {
-                    type: shift.type,
-                    done: shift.done,
-                    paid: shift.paid
-                };
-            });
-    
-            let csvContent = 'Sotrudnik';
-            const daysInMonth = lastDay.getDate();
-    
-            for (let day = 1; day <= daysInMonth; day++) {
-                csvContent += `,${day}`;
-            }
-            csvContent += '\n';
-    
-            const employees = allUsers.filter(u => u.role !== 'admin');
-    
-            employees.forEach(employee => {
-                const name = employee.displayName || employee.full_name || `${employee.last_name} ${employee.first_name}`;
-                const nameLatin = cyrillicToLatin(name);
-                csvContent += nameLatin;
-        
-                const userShifts = shiftsByUser[employee.id] || {};
-        
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const shift = userShifts[dateStr];
-            
-                    let symbol = ' ';
-                    if (shift) {
-                        if (shift.type === 'regular') {
-                            symbol = '*';
-                        } else if (shift.type === 'extra') {
-                            symbol = '#';
-                        }
-                    }
-            
-                    csvContent += `,${symbol}`;
-                }
-        
-                csvContent += '\n';
-            });
-    
-            return csvContent;
         }
         
         // === ЗАГРУЗКА СМЕН ПО КНОПКЕ ===
-        app.safeAddEventListener('load-all-shifts-btn', 'click', async () => {
+        async function loadAdminShifts() {
             await loadAllShiftsForAdmin();
-        });
+        }
         
-        // === КНОПКИ МЕСЯЦА/ГОДА ===
-        ['selected-month', 'selected-year'].forEach(id => {
-            app.safeAddEventListener(id, 'change', async () => {
-                if (isAdmin && document.getElementById('tab-shifts-admin')?.classList.contains('active')) {
-                    await loadAllShiftsForAdmin();
-                }
-            });
-        });
-
         // === ЗАГРУЗКА ВСЕХ СМЕН ПОЛЬЗОВАТЕЛЯ ПРИ ВХОДЕ ===
         async function loadUserAllShiftsOnLogin() {
             if (!currentUser) return;
@@ -2096,8 +1830,6 @@
                     };
                 });
                 
-                const currentMonth = new Date().getMonth();
-                const currentYear = new Date().getFullYear();
                 renderUserCalendar(currentMonth, currentYear);
                 
             } catch (error) {
@@ -2109,8 +1841,8 @@
         async function loadUserShiftsForMonth() {
             if (!currentUser) return;
             try {
-                const month = parseInt(app.getElement('user-selected-month')?.value || userViewMonth);
-                const year = parseInt(app.getElement('user-selected-year')?.value || userViewYear);
+                const month = parseInt(utils.getElement('user-selected-month')?.value || userViewMonth);
+                const year = parseInt(utils.getElement('user-selected-year')?.value || userViewYear);
                 
                 const startDate = new Date(year, month - 3, 1);
                 const endDate = new Date(year, month + 4, 0);
@@ -2152,7 +1884,7 @@
         
         // === РЕНДЕР КАЛЕНДАРЯ ПОЛЬЗОВАТЕЛЯ ===
         function renderUserCalendar(month, year) {
-            const container = app.getElement('user-calendar');
+            const container = utils.getElement('user-calendar');
             if (!container || !currentUser) return;
             
             const today = new Date();
@@ -2202,33 +1934,29 @@
         }
         
         // === КНОПКИ НАВИГАЦИИ МЕСЯЦА ===
-        app.safeAddEventListener('prev-month', 'click', function() {
-            let month = parseInt(app.getElement('user-selected-month').value);
-            let year = parseInt(app.getElement('user-selected-year').value);
+        function goToPrevMonth() {
+            let month = parseInt(utils.getElement('user-selected-month').value);
+            let year = parseInt(utils.getElement('user-selected-year').value);
             month--;
             if (month < 0) { month = 11; year--; }
-            app.getElement('user-selected-month').value = month;
-            app.getElement('user-selected-year').value = year;
+            utils.getElement('user-selected-month').value = month;
+            utils.getElement('user-selected-year').value = year;
             loadUserShiftsForMonth();
-        });
+        }
         
-        app.safeAddEventListener('next-month', 'click', function() {
-            let month = parseInt(app.getElement('user-selected-month').value);
-            let year = parseInt(app.getElement('user-selected-year').value);
+        function goToNextMonth() {
+            let month = parseInt(utils.getElement('user-selected-month').value);
+            let year = parseInt(utils.getElement('user-selected-year').value);
             month++;
             if (month > 11) { month = 0; year++; }
-            app.getElement('user-selected-month').value = month;
-            app.getElement('user-selected-year').value = year;
+            utils.getElement('user-selected-month').value = month;
+            utils.getElement('user-selected-year').value = year;
             loadUserShiftsForMonth();
-        });
-        
-        app.safeAddEventListener('load-user-shifts', 'click', () => loadUserShiftsForMonth());
-        app.safeAddEventListener('user-selected-month', 'change', () => loadUserShiftsForMonth());
-        app.safeAddEventListener('user-selected-year', 'change', () => loadUserShiftsForMonth());
+        }
         
         // === ШАБЛОН ПОСТОВ ===
         function renderPostsTemplate() {
-            const container = app.getElement('posts-template');
+            const container = utils.getElement('posts-template');
             if (!container) return;
             
             let html = '';
@@ -2287,476 +2015,6 @@
             }
         }
         
-        // === ЗАГРУЗКА ПОСТОВ ПО ДАТЕ ===
-        app.safeAddEventListener('load-posts-btn', 'click', async function() {
-            const dateInput = app.getElement('posts-date');
-            if (!dateInput || !dateInput.value) {
-                alert('Выберите дату');
-                return;
-            }
-            
-            await loadPostsForDate(dateInput.value, true);
-        });
-        
-        app.safeAddEventListener('create-template-btn', 'click', async function() {
-            const dateInput = app.getElement('posts-date');
-            if (!dateInput || !dateInput.value) {
-                alert('Выберите дату');
-                return;
-            }
-            
-            if (!confirm(`Создать шаблон постов для даты ${dateInput.value}?`)) return;
-            
-            await createPostsFromTemplate(dateInput.value);
-        });
-        
-        async function loadPostsForDate(date, isAdminView = false) {
-            try {
-                const { data, error } = await supabase
-                    .from('posts')
-                    .select('*')
-                    .eq('date', date)
-                    .order('order');
-                
-                if (error) throw error;
-                
-                postsData = data || [];
-                
-                postsData.forEach(post => {
-                    let guardDisplayName = post.guard_name || '';
-                    if (guardDisplayName) {
-                        const nameParts = guardDisplayName.split(' ');
-                        if (nameParts.length >= 2) {
-                            guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
-                        }
-                    }
-                    post.guardDisplayName = guardDisplayName;
-                });
-                
-                if (isAdminView) {
-                    renderAdminPostsTable(date);
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки постов:', error);
-                if (isAdminView) {
-                    const container = app.getElement('posts-admin-container');
-                    if (container) container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
-                }
-            }
-        }
-        
-        // === РЕНДЕР ТАБЛИЦЫ ПОСТОВ АДМИНА ===
-        function renderAdminPostsTable(date) {
-            const container = app.getElement('posts-admin-container');
-            if (!container) return;
-            
-            if (postsData.length === 0) {
-                container.innerHTML = `
-                    <div class="message">
-                        <p>Нет постов на дату ${date}</p>
-                        <button id="create-posts-btn" class="btn-success" style="margin-top: 10px;"><i class="fas fa-plus"></i> Создать из шаблона</button>
-                    </div>
-                `;
-                
-                app.safeAddEventListener('create-posts-btn', 'click', async function() {
-                    await createPostsFromTemplate(date);
-                });
-                return;
-            }
-            
-            const dateObj = new Date(date);
-            const formattedDate = dateObj.toLocaleDateString('ru-RU');
-            
-            let html = `
-                <h3>Посты на дату: ${formattedDate}</h3>
-                <div class="table-responsive">
-                    <table class="posts-table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Пост</th>
-                                <th>Время</th>
-                                <th>Охранник</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            postsData.forEach((post) => {
-                html += `
-                    <tr class="post-row" data-id="${post.id}">
-                        <td>
-                            <input type="text" value="${post.number || ''}" class="number-input" placeholder="№" style="width: 60px;">
-                        </td>
-                        <td>
-                            <input type="text" value="${post.post || ''}" class="post-input" placeholder="Название поста" style="width: 100%;">
-                        </td>
-                        <td>
-                            <input type="time" value="${post.time || '08:00'}" class="time-input">
-                        </td>
-                        <td>
-                            ${renderUserSelectForPosts(post.guard_id)}
-                        </td>
-                        <td class="post-controls">
-                            <button class="btn-success save-post-btn btn-small"><i class="fas fa-save"></i></button>
-                            <button class="btn-danger delete-post-btn btn-small"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-                <div style="margin-top: 1rem;">
-                    <button id="add-new-post-btn" class="btn-secondary"><i class="fas fa-plus"></i> Добавить новую строку</button>
-                    <button id="save-all-posts-btn" class="btn-success" style="margin-left: 10px;"><i class="fas fa-save"></i> Сохранить все</button>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-            
-            app.safeAddEventListener('add-new-post-btn', 'click', function() {
-                addNewPostRowToTable(date);
-            });
-            
-            app.safeAddEventListener('save-all-posts-btn', 'click', function() {
-                saveAllPosts(date);
-            });
-            
-            document.querySelectorAll('.save-post-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const row = this.closest('.post-row');
-                    savePostRow(row, date);
-                });
-            });
-            
-            document.querySelectorAll('.delete-post-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const row = this.closest('.post-row');
-                    deletePostRow(row, date);
-                });
-            });
-        }
-        
-        function renderUserSelectForPosts(selectedId = '') {
-            let html = `<select class="guard-select" style="width: 100%;">`;
-            html += `<option value="">Не назначен</option>`;
-            allUsers.forEach(user => {
-                if (user.role !== 'admin') {
-                    html += `<option value="${user.id}" ${user.id === selectedId ? 'selected' : ''}>${user.displayName}</option>`;
-                }
-            });
-            html += `</select>`;
-            return html;
-        }
-        
-        async function createPostsFromTemplate(date) {
-            try {
-                const { error: deleteError } = await supabase
-                    .from('posts')
-                    .delete()
-                    .eq('date', date);
-                
-                if (deleteError) throw deleteError;
-                
-                const postsToInsert = [];
-                
-                for (let i = 0; i < defaultPosts.length; i++) {
-                    const post = defaultPosts[i];
-                    
-                    postsToInsert.push({
-                        date: date,
-                        number: post.number,
-                        post: post.post,
-                        guard_id: '',
-                        guard_name: '',
-                        time: post.time,
-                        order: i + 1,
-                        created_at: new Date().toISOString()
-                    });
-                }
-                
-                const { error: insertError } = await supabase
-                    .from('posts')
-                    .insert(postsToInsert);
-                
-                if (insertError) throw insertError;
-                
-                alert('Шаблон постов создан в правильном порядке!');
-                await loadPostsForDate(date, true);
-                
-            } catch (error) {
-                alert('Ошибка создания шаблона: ' + error.message);
-            }
-        }
-        
-        async function addNewPostRowToTable(date) {
-            try {
-                let maxOrder = 0;
-                postsData.forEach(post => {
-                    if (post.order !== undefined && post.order > maxOrder) {
-                        maxOrder = post.order;
-                    }
-                });
-                
-                const { error } = await supabase
-                    .from('posts')
-                    .insert([
-                        {
-                            date: date,
-                            number: '',
-                            post: 'Новый пост',
-                            guard_id: '',
-                            guard_name: '',
-                            time: '08:00',
-                            order: maxOrder + 1,
-                            created_at: new Date().toISOString()
-                        }
-                    ]);
-                
-                if (error) throw error;
-                
-                await loadPostsForDate(date, true);
-            } catch (error) {
-                alert('Ошибка создания поста: ' + error.message);
-            }
-        }
-        
-        async function savePostRow(row, date) {
-            const postId = row.getAttribute('data-id');
-            const numberInput = row.querySelector('.number-input');
-            const postInput = row.querySelector('.post-input');
-            const guardSelect = row.querySelector('.guard-select');
-            const timeInput = row.querySelector('.time-input');
-            
-            if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) return;
-            
-            const number = numberInput.value.trim();
-            const post = postInput.value.trim();
-            const guardId = guardSelect.value;
-            const time = timeInput.value;
-            
-            if (!post) {
-                alert('Введите название поста');
-                return;
-            }
-            
-            const guard = allUsers.find(u => u.id === guardId);
-            let guardName = guard ? guard.displayName : '';
-            
-            if (guard && guard.last_name && guard.first_name) {
-                guardName = `${guard.last_name} ${guard.first_name}`;
-            }
-            
-            const existingPost = postsData.find(p => p.id === postId);
-            const order = existingPost ? existingPost.order : (postsData.length + 1);
-            
-            try {
-                const { error } = await supabase
-                    .from('posts')
-                    .update({
-                        number: number,
-                        post: post,
-                        guard_id: guardId,
-                        guard_name: guardName,
-                        time: time,
-                        order: order,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', postId);
-                
-                if (error) throw error;
-                
-                alert('Пост сохранен!');
-            } catch (error) {
-                alert('Ошибка сохранения: ' + error.message);
-            }
-        }
-        
-        async function saveAllPosts(date) {
-            const rows = document.querySelectorAll('.post-row');
-            let hasErrors = false;
-            
-            for (const row of rows) {
-                const postId = row.getAttribute('data-id');
-                const numberInput = row.querySelector('.number-input');
-                const postInput = row.querySelector('.post-input');
-                const guardSelect = row.querySelector('.guard-select');
-                const timeInput = row.querySelector('.time-input');
-                
-                if (!postId || !numberInput || !postInput || !guardSelect || !timeInput) continue;
-                
-                const number = numberInput.value.trim();
-                const post = postInput.value.trim();
-                const guardId = guardSelect.value;
-                const time = timeInput.value;
-                
-                if (!post) {
-                    alert('Заполните название поста во всех строках');
-                    hasErrors = true;
-                    break;
-                }
-                
-                const guard = allUsers.find(u => u.id === guardId);
-                let guardName = guard ? guard.displayName : '';
-                
-                if (guard && guard.last_name && guard.first_name) {
-                    guardName = `${guard.last_name} ${guard.first_name}`;
-                }
-                
-                const existingPost = postsData.find(p => p.id === postId);
-                const order = existingPost ? existingPost.order : (postsData.length + 1);
-                
-                try {
-                    const { error } = await supabase
-                        .from('posts')
-                        .update({
-                            number: number,
-                            post: post,
-                            guard_id: guardId,
-                            guard_name: guardName,
-                            time: time,
-                            order: order,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', postId);
-                    
-                    if (error) throw error;
-                } catch (error) {
-                    alert('Ошибка сохранения: ' + error.message);
-                    hasErrors = true;
-                    break;
-                }
-            }
-            
-            if (!hasErrors) {
-                alert('Все посты сохранены!');
-                await loadPostsForDate(date, true);
-            }
-        }
-        
-        async function deletePostRow(row, date) {
-            const postId = row.getAttribute('data-id');
-            if (!postId) return;
-            
-            if (!confirm('Удалить этот пост?')) return;
-            
-            try {
-                const { error } = await supabase
-                    .from('posts')
-                    .delete()
-                    .eq('id', postId);
-                
-                if (error) throw error;
-                
-                await loadPostsForDate(date, true);
-            } catch (error) {
-                alert('Ошибка удаления: ' + error.message);
-            }
-        }
-        
-        // === ЗАГРУЗКА ПОСТОВ ДЛЯ ПОЛЬЗОВАТЕЛЯ ===
-        app.safeAddEventListener('load-user-posts-btn', 'click', async function() {
-            const dateInput = app.getElement('user-posts-date');
-            if (!dateInput || !dateInput.value) {
-                alert('Выберите дату');
-                return;
-            }
-            
-            await loadPostsForUserDate(dateInput.value);
-        });
-        
-        async function loadPostsForUserDate(date) {
-            try {
-                const { data, error } = await supabase
-                    .from('posts')
-                    .select('*')
-                    .eq('date', date)
-                    .order('order');
-                
-                if (error) throw error;
-                
-                postsData = data || [];
-                
-                postsData.forEach(post => {
-                    let guardDisplayName = post.guard_name || '';
-                    if (guardDisplayName) {
-                        const nameParts = guardDisplayName.split(' ');
-                        if (nameParts.length >= 2) {
-                            guardDisplayName = `${nameParts[0]} ${nameParts.slice(1).join(' ')}`;
-                        }
-                    }
-                    post.guardDisplayName = guardDisplayName;
-                });
-                
-                renderUserPostsTable(date);
-                
-            } catch (error) {
-                console.error('Ошибка загрузки постов:', error);
-                const container = app.getElement('posts-user-container');
-                if (container) container.innerHTML = `<div class="error">Ошибка загрузки: ${error.message}</div>`;
-            }
-        }
-        
-        function renderUserPostsTable(date) {
-            const container = app.getElement('posts-user-container');
-            if (!container) return;
-            
-            if (postsData.length === 0) {
-                container.innerHTML = `
-                    <div class="message">
-                        <p>Нет постов на выбранную дату ${date}</p>
-                        <p>Выберите другую дату или обратитесь к администратору</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const dateObj = new Date(date);
-            const formattedDate = dateObj.toLocaleDateString('ru-RU');
-            
-            let html = `
-                <h3>Посты на дату: ${formattedDate}</h3>
-                <div class="table-responsive">
-                    <table class="posts-table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Пост</th>
-                                <th>Время</th>
-                                <th>Назначен</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            postsData.forEach((post) => {
-                const isAssignedToMe = post.guard_id === currentUser?.id;
-                html += `
-                    <tr>
-                        <td>${post.number || ''}</td>
-                        <td><strong>${post.post || ''}</strong></td>
-                        <td>${post.time || ''}</td>
-                        <td>
-                            ${post.guardDisplayName || post.guard_name || 'Не назначен'}
-                            ${isAssignedToMe ? ' <span style="color:#64ffda;">(Вы)</span>' : ''}
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-        }
-        
         // === ОБНОВЛЕНИЕ СТАТИСТИКИ ===
         function updateUserStats() {
             if (!currentUser) return;
@@ -2777,8 +2035,8 @@
                 }
             });
             
-            const pendingTable = app.getElement('pending-payments');
-            const pendingTotal = app.getElement('pending-total');
+            const pendingTable = utils.getElement('pending-payments');
+            const pendingTotal = utils.getElement('pending-total');
             
             if (pendingTable) {
                 if (regularCount === 0 && extraCount === 0) {
@@ -2810,10 +2068,10 @@
             
             if (pendingTotal) pendingTotal.textContent = `${pendingAmount} ₽`;
             
-            const userName = app.getElement('user-full-name');
-            const userPosition = app.getElement('user-position');
-            const userRate = app.getElement('user-rate');
-            const userEmail = app.getElement('user-email');
+            const userName = utils.getElement('user-full-name');
+            const userPosition = utils.getElement('user-position');
+            const userRate = utils.getElement('user-rate');
+            const userEmail = utils.getElement('user-email');
             
             if (userName) userName.textContent = user.displayName || user.email || 'Имя не указано';
             if (userPosition) userPosition.textContent = user.role === 'admin' ? 'Администратор' : 'Охранник';
@@ -2832,7 +2090,7 @@
                 
                 if (error) throw error;
                 
-                const container = app.getElement('payments-archive-admin');
+                const container = utils.getElement('payments-archive-admin');
                 if (!container) return;
                 
                 if (!data || data.length === 0) {
@@ -2868,13 +2126,13 @@
         }
         
         // === РАСЧЕТ ВЫПЛАТ АДМИНА ===
-        app.safeAddEventListener('calculate-payment-btn-admin', 'click', async () => {
-            const userId = app.getElement('payment-user-admin')?.value;
-            const fromDate = app.getElement('period-from-admin')?.value;
-            const toDate = app.getElement('period-to-admin')?.value;
-            const bonus = parseInt(app.getElement('bonus-amount-admin')?.value) || 0;
-            const penalty = parseInt(app.getElement('penalty-amount-admin')?.value) || 0;
-            const note = app.getElement('bonus-note-admin')?.value;
+        async function calculatePaymentAdmin() {
+            const userId = utils.getElement('payment-user-admin')?.value;
+            const fromDate = utils.getElement('period-from-admin')?.value;
+            const toDate = utils.getElement('period-to-admin')?.value;
+            const bonus = parseInt(utils.getElement('bonus-amount-admin')?.value) || 0;
+            const penalty = parseInt(utils.getElement('penalty-amount-admin')?.value) || 0;
+            const note = utils.getElement('bonus-note-admin')?.value;
             
             if (!userId || !fromDate || !toDate) return alert('Заполните все поля');
             
@@ -2948,12 +2206,12 @@
                     if (updateError) throw updateError;
                 }
                 
-                app.getElement('payment-user-admin').value = '';
-                app.getElement('bonus-amount-admin').value = '0';
-                app.getElement('penalty-amount-admin').value = '0';
-                app.getElement('bonus-note-admin').value = '';
+                utils.getElement('payment-user-admin').value = '';
+                utils.getElement('bonus-amount-admin').value = '0';
+                utils.getElement('penalty-amount-admin').value = '0';
+                utils.getElement('bonus-note-admin').value = '';
                 
-                const resultDiv = app.getElement('calculation-result-admin');
+                const resultDiv = utils.getElement('calculation-result-admin');
                 if (resultDiv) {
                     resultDiv.innerHTML = `
                         <div class="success">
@@ -2975,7 +2233,7 @@
             } catch (error) {
                 alert('Ошибка: ' + error.message);
             }
-        });
+        }
         
         // === ИСТОРИЯ ВЫПЛАТ ПОЛЬЗОВАТЕЛЯ ===
         async function loadUserPaymentHistory() {
@@ -2990,7 +2248,7 @@
                 
                 if (error) throw error;
                 
-                const container = app.getElement('payments-history-user');
+                const container = utils.getElement('payments-history-user');
                 if (!container) return;
                 
                 if (!data || data.length === 0) {
@@ -3035,73 +2293,94 @@
                     currentUser = session.user;
                     await checkUserRole();
                 } else {
-                    // Нет сессии - показываем приветствие
-                    app.showSection('welcome-section');
+                    utils.showSection('welcome-section');
                 }
             } catch (error) {
                 console.error('Ошибка восстановления сессии:', error);
-                app.showSection('welcome-section');
+                utils.showSection('welcome-section');
             }
             
             initTabs();
             
             // Навигация
-            app.safeAddEventListener('nav-home', 'click', (e) => {
+            utils.safeAddEventListener('nav-home', 'click', (e) => {
                 e.preventDefault();
-                app.showSection('welcome-section');
+                utils.showSection('welcome-section');
             });
             
-            app.safeAddEventListener('nav-login', 'click', (e) => {
+            utils.safeAddEventListener('nav-login', 'click', (e) => {
                 e.preventDefault();
-                app.showSection('login-section');
+                utils.showSection('login-section');
             });
             
-            app.safeAddEventListener('nav-admin', 'click', (e) => {
+            utils.safeAddEventListener('nav-admin', 'click', (e) => {
                 e.preventDefault();
-                app.showSection('admin-section');
+                utils.showSection('admin-section');
             });
             
-            app.safeAddEventListener('nav-user', 'click', (e) => {
+            utils.safeAddEventListener('nav-user', 'click', (e) => {
                 e.preventDefault();
-                app.showSection('user-section');
+                utils.showSection('user-section');
             });
             
-            app.safeAddEventListener('nav-logout', 'click', async (e) => {
+            utils.safeAddEventListener('nav-logout', 'click', async (e) => {
                 e.preventDefault();
                 await supabase.auth.signOut();
                 currentUser = null;
                 isAdmin = false;
-                app.showSection('welcome-section');
-                app.updateNavigation();
+                utils.showSection('welcome-section');
+                utils.updateNavigation();
             });
             
-            app.safeAddEventListener('go-to-login', 'click', (e) => {
+            utils.safeAddEventListener('go-to-login', 'click', (e) => {
                 e.preventDefault();
-                app.showSection('login-section');
+                utils.showSection('login-section');
             });
+            
+            // Авторизация
+            utils.safeAddEventListener('login-btn', 'click', handleLogin);
+            
+            // Админ-панель
+            utils.safeAddEventListener('load-all-shifts-btn', 'click', loadAdminShifts);
+            utils.safeAddEventListener('mark-done-past', 'click', markPastShiftsAsDone);
+            utils.safeAddEventListener('save-all-shifts-btn', 'click', saveAllShifts);
+            utils.safeAddEventListener('selected-month', 'change', loadAdminShifts);
+            utils.safeAddEventListener('selected-year', 'change', loadAdminShifts);
+            utils.safeAddEventListener('calculate-payment-btn-admin', 'click', calculatePaymentAdmin);
+            utils.safeAddEventListener('create-user-btn', 'click', createUser);
+            
+            // Пользовательская панель
+            utils.safeAddEventListener('prev-month', 'click', goToPrevMonth);
+            utils.safeAddEventListener('next-month', 'click', goToNextMonth);
+            utils.safeAddEventListener('load-user-shifts', 'click', loadUserShiftsForMonth);
+            utils.safeAddEventListener('user-selected-month', 'change', loadUserShiftsForMonth);
+            utils.safeAddEventListener('user-selected-year', 'change', loadUserShiftsForMonth);
             
             // Настройка дат
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
             
-            app.getElement('selected-month').value = currentMonth;
-            app.getElement('selected-year').value = currentYear;
-            app.getElement('user-selected-month').value = currentMonth;
-            app.getElement('user-selected-year').value = currentYear;
-            app.getElement('csv-month').value = currentMonth;
-            app.getElement('csv-year').value = currentYear;
+            utils.getElement('selected-month').value = currentMonth;
+            utils.getElement('selected-year').value = currentYear;
+            utils.getElement('user-selected-month').value = currentMonth;
+            utils.getElement('user-selected-year').value = currentYear;
+            utils.getElement('csv-month').value = currentMonth;
+            utils.getElement('csv-year').value = currentYear;
             
-            const periodFrom = app.getElement('period-from-admin');
-            const periodTo = app.getElement('period-to-admin');
+            const periodFrom = utils.getElement('period-from-admin');
+            const periodTo = utils.getElement('period-to-admin');
             if (periodFrom) periodFrom.valueAsDate = firstDay;
             if (periodTo) periodTo.valueAsDate = today;
             
-            const postsDate = app.getElement('posts-date');
-            const userPostsDate = app.getElement('user-posts-date');
+            const postsDate = utils.getElement('posts-date');
+            const userPostsDate = utils.getElement('user-posts-date');
             if (postsDate) postsDate.valueAsDate = today;
             if (userPostsDate) userPostsDate.valueAsDate = today;
             
             renderPostsTemplate();
+            
+            // Обновляем навигацию после инициализации
+            utils.updateNavigation();
         }
         
         // === СЛУШАТЕЛЬ АУТЕНТИФИКАЦИИ ===
@@ -3112,7 +2391,7 @@
             } else {
                 currentUser = null;
                 isAdmin = false;
-                app.updateNavigation();
+                utils.updateNavigation();
             }
         });
         
