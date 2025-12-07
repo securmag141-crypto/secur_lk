@@ -1217,7 +1217,19 @@
         // === ПРОВЕРКА РОЛИ ПОЛЬЗОВАТЕЛЯ ===
         async function checkUserRole() {
             if (!currentUser) return;
-            
+            // ОТЛАДКА
+                console.log('Текущий пользователь ID:', currentUser.id);
+                console.log('Email:', currentUser.email);
+    
+                try {
+                    const { data, error } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', currentUser.id)
+                        .single();
+        
+                    console.log('Результат запроса:', data);
+                    console.log('Ошибка:', error);
             try {
                 const { data, error } = await supabase
                     .from('users')
