@@ -1086,6 +1086,37 @@
         
         // === ИНИЦИАЛИЗАЦИЯ SUPABASE ===
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // === ОТЛАДКА ===
+        console.log('Начало скрипта');
+
+// Переопределяем функцию checkUserRole для отладки
+        const originalCheckUserRole = window.checkUserRole;
+        window.checkUserRole = async function() {
+            console.log('checkUserRole вызвана');
+            if (!currentUser) {
+                console.log('Нет currentUser');
+                return;
+            }
+            console.log('Текущий пользователь:', currentUser.email, currentUser.id);
+    
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+                
+                console.log('Запрос к users завершен');
+                console.log('Data:', data);
+                console.log('Error:', error);
+        
+        // Вызываем оригинальную функцию
+                return originalCheckUserRole.apply(this, arguments);
+            } catch (err) {
+                console.error('Ошибка в checkUserRole:', err);
+            }
+        };
         
         // === БЕЗОПАСНЫЕ УТИЛИТЫ ===
         const app = {
