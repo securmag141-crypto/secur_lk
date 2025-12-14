@@ -3,130 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoIP App</title>
+    <title>VoIP Audio Call</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-    <style>
-        body { font-family: Arial; text-align: center; }
-        button { font-size: 20px; margin: 10px; padding: 20px; }
-        input { font-size: 18px; margin: 10px; }
-    </style>
 </head>
 <body>
-    <h1>VoIP App</h1>
-    <div id="login">
-        <input type="email" id="email" placeholder="Email (например, t1@test.com)">
-        <input type="password" id="password" placeholder="Пароль (111111)">
-        <button onclick="login()">Войти</button>
+    <h1>VoIP Audio Call</h1>
+    <div id="auth">
+        <button id="login1">Login as t1@test.com</button>
+        <button id="login2">Login as t2@test.com</button>
+        <p id="user"></p>
     </div>
-    <div id="app" style="display:none;">
-        <h2>Звонки</h2>
-        <button onclick="callUser('t1@test.com')">Позвонить t1@test.com</button>
-        <button onclick="callUser('t2@test.com')">Позвонить t2@test.com</button>
-        <button onclick="hangup()">Повесить</button>
-        <div id="status"></div>
+    <div id="call" style="display:none;">
+        <button id="callBtn">Call Other User</button>
+        <button id="hangupBtn">Hang Up</button>
+        <p id="status"></p>
     </div>
+    <audio id="remoteAudio" autoplay></audio>
 
     <script>
-        // Firebase config (твои ключи)
+        // Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyB_oIgWVcb_56VAdWaVl7GHY3bj75Vt-Wo",
-            authDomain: "voip-app-12345.firebaseapp.com",
-            projectId: "voip-app-12345",
-            storageBucket: "voip-app-12345.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            authDomain: "testcaller-91d8c.firebaseapp.com",
+            projectId: "testcaller-91d8c",
+            storageBucket: "testcaller-91d8c.firebasestorage.app",
+            messagingSenderId: "368258808732",
+            appId: "1:368258808732:web:edc101575b7f6266182659"
         };
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        let localStream, remoteStream, peerConnection;
-        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        let localStream;
+        let remoteStream;
+        let peerConnection;
+        let currentUser;
+        let otherUser = 't1@test.com' === 't1@test.com' ? 't2@test.com' : 't1@test.com'; // Simple toggle
+
+        // Auth buttons
+        document.getElementById('login1').onclick = () => auth.signInWithEmailAndPassword('t1@test.com', '111111');
+        document.getElementById('login2').onclick = () => auth.signInWithEmailAndPassword('t2@test.com', '111111');
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                listenForCalls(user.uid);
-            } else {
-                document.getElementById('login').style.display = 'block';
-                document.getElementById('app').style.display = 'none';
+                currentUser = user.email;
+                document.getElementById('user').textContent = `Logged in as: ${currentUser}`;
+                document.getElementById('auth').style.display = 'none';
+                document.getElementById('call').style.display = 'block';
+                otherUser = currentUser === 't1@test.com' ? 't2@test.com' : 't1@test.com';
+                listenForCalls();
             }
         });
 
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-            } catch (error) {
-                alert('Ошибка: ' + error.message);
-            }
-        }
+        // WebRTC setup
+        const servers = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        };
 
-        async function callUser(targetEmail) {
-            const user = auth.currentUser;
-            if (!user) return;
-            const targetUser = await db.collection('users').where('email', '==', targetEmail).get();
-            if (targetUser.empty) return alert('Пользователь не найден');
-            const targetUid = targetUser.docs[0].id;
+        async function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(servers);
+            remoteStream = new MediaStream();
+            document.getElementById('remoteAudio').srcObject = remoteStream;
 
-            peerConnection = new RTCPeerConnection(configuration);
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            peerConnection.ontrack = event => {
+                event.streams[0].getTracks().forEach(track => {
+                    remoteStream.addTrack(track);
+                });
+            };
 
             peerConnection.onicecandidate = event => {
                 if (event.candidate) {
-                    db.collection('users').doc(user.uid).update({
-                        iceCandidates: firebase.firestore.FieldValue.arrayUnion(event.candidate.toJSON())
-                    });
+                    db.collection('calls').doc(currentUser).collection('candidates').add(event.candidate.toJSON());
                 }
             };
+        }
+
+        // Call button
+        document.getElementById('callBtn').onclick = async () => {
+            document.getElementById('status').textContent = 'Calling...';
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            await createPeerConnection();
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
-            await db.collection('users').doc(user.uid).set({
-                offer: offer,
-                targetUid: targetUid,
-                email: user.email
-            });
-            document.getElementById('status').textContent = 'Звоним...';
-        }
 
-        async function listenForCalls(uid) {
-            db.collection('users').doc(uid).onSnapshot(async doc => {
-                if (!doc.exists) return;
-                const data = doc.data();
-                if (data.offer && !peerConnection) {
-                    peerConnection = new RTCPeerConnection(configuration);
-                    remoteStream = new MediaStream();
-                    peerConnection.ontrack = event => {
-                        remoteStream.addTrack(event.track);
-                        const audio = new Audio();
-                        audio.srcObject = remoteStream;
-                        audio.play();
-                    };
-                    await peerConnection.setRemoteDescription(data.offer);
+            await db.collection('calls').doc(currentUser).set({ offer: offer.toJSON() });
+            listenForAnswer();
+        };
+
+        // Listen for calls
+        function listenForCalls() {
+            db.collection('calls').doc(otherUser).onSnapshot(async snapshot => {
+                const data = snapshot.data();
+                if (data && data.offer && !peerConnection) {
+                    document.getElementById('status').textContent = 'Incoming call...';
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    await createPeerConnection();
+                    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
                     const answer = await peerConnection.createAnswer();
                     await peerConnection.setLocalDescription(answer);
-                    await db.collection('users').doc(uid).update({ answer: answer });
-                    document.getElementById('status').textContent = 'Входящий звонок...';
-                }
-                if (data.iceCandidates) {
-                    data.iceCandidates.forEach(candidate => {
-                        peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                    });
+                    await db.collection('calls').doc(otherUser).update({ answer: answer.toJSON() });
+                    listenForCandidates(otherUser);
                 }
             });
         }
 
-        function hangup() {
-            if (peerConnection) peerConnection.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
-            document.getElementById('status').textContent = '';
+        // Listen for answer
+        async function listenForAnswer() {
+            db.collection('calls').doc(otherUser).onSnapshot(async snapshot => {
+                const data = snapshot.data();
+                if (data && data.answer) {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    listenForCandidates(otherUser);
+                    document.getElementById('status').textContent = 'Connected';
+                }
+            });
         }
+
+        // Listen for ICE candidates
+        function listenForCandidates(user) {
+            db.collection('calls').doc(user).collection('candidates').onSnapshot(snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    }
+                });
+            });
+        }
+
+        // Hang up
+        document.getElementById('hangupBtn').onclick = () => {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('status').textContent = '';
+            db.collection('calls').doc(currentUser).delete();
+            db.collection('calls').doc(otherUser).delete();
+        };
     </script>
 </body>
 </html>
