@@ -1,33 +1,45 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>VoIP Звонок</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple VoIP</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input { margin: 10px; padding: 10px; width: 200px; }
+        button { 
+            margin: 10px; 
+            padding: 20px 40px; /* Больше padding для размера */
+            font-size: 18px; /* Больше шрифт */
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+        }
+        button:hover { background-color: #0056b3; }
+        #status { margin-top: 20px; }
+    </style>
 </head>
 <body>
-    <h1>Тестовый VoIP Звонок</h1>
-    <div id="auth-section">
-        <button id="login-t1">Войти как t1</button>
-        <button id="login-t2">Войти как t2</button>
+    <h1>Simple VoIP App</h1>
+    <div id="login">
+        <input type="email" id="email" placeholder="Email (test1@test.com or test2@test.com)">
+        <input type="password" id="password" placeholder="Password (111111)">
+        <button onclick="login()">Login</button>
     </div>
-    <div id="call-section" style="display: none;">
-        <p>Вы вошли как: <span id="user-name"></span></p>
-        <select id="call-target">
-            <option value="t1">Позвонить t1</option>
-            <option value="t2">Позвонить t2</option>
-        </select>
-        <button id="call-btn">Позвонить</button>
-        <button id="hangup-btn">Повесить трубку</button>
-        <div id="status"></div>
-        <audio id="remote-audio" autoplay></audio>
+    <div id="app" style="display: none;">
+        <p>Logged in as: <span id="user"></span></p>
+        <button onclick="startCall()">Call Other User</button>
+        <button onclick="answerCall()">Answer Call</button>
+        <audio id="remoteAudio" autoplay></audio>
+        <p id="status"></p>
     </div>
+
     <script type="module">
-        // Импорт Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-        import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-        // Конфигурация Firebase (замени на свою)
         const firebaseConfig = {
             apiKey: "AIzaSyB_oIgWVcb_56VAdWaVl7GHY3bj75Vt-Wo",
             authDomain: "testcaller-91d8c.firebaseapp.com",
@@ -41,144 +53,100 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Элементы DOM
-        const loginT1Btn = document.getElementById('login-t1');
-        const loginT2Btn = document.getElementById('login-t2');
-        const callSection = document.getElementById('call-section');
-        const authSection = document.getElementById('auth-section');
-        const userNameSpan = document.getElementById('user-name');
-        const callTarget = document.getElementById('call-target');
-        const callBtn = document.getElementById('call-btn');
-        const hangupBtn = document.getElementById('hangup-btn');
-        const statusDiv = document.getElementById('status');
-        const remoteAudio = document.getElementById('remote-audio');
-
         let currentUser = null;
         let peerConnection = null;
-        let localStream = null;
-        let callInProgress = false;
-
-        // STUN-сервер для WebRTC (бесплатный)
         const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        // Вход как t1
-        loginT1Btn.addEventListener('click', async () => {
+        window.login = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
             try {
-                await signInWithEmailAndPassword(auth, 't1@test.com', '111111');
-                currentUser = 't1';
-                showCallSection();
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                currentUser = userCredential.user;
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                document.getElementById('user').textContent = email;
                 listenForCalls();
             } catch (error) {
-                statusDiv.textContent = 'Ошибка входа: ' + error.message;
+                alert('Login failed: ' + error.message);
             }
-        });
+        };
 
-        // Вход как t2
-        loginT2Btn.addEventListener('click', async () => {
-            try {
-                await signInWithEmailAndPassword(auth, 't2@test.com', '111111');
-                currentUser = 't2';
-                showCallSection();
-                listenForCalls();
-            } catch (error) {
-                statusDiv.textContent = 'Ошибка входа: ' + error.message;
+        window.startCall = async () => {
+            peerConnection = new RTCPeerConnection(configuration);
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    setDoc(doc(db, 'users', currentUser.uid, 'offer', 'candidate'), { candidate: event.candidate });
+                }
+            };
+
+            peerConnection.ontrack = (event) => {
+                document.getElementById('remoteAudio').srcObject = event.streams[0];
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            await setDoc(doc(db, 'users', currentUser.uid, 'offer', 'sdp'), { sdp: offer });
+            document.getElementById('status').textContent = 'Calling...';
+        };
+
+        window.answerCall = async () => {
+            const offerDoc = await getDoc(doc(db, 'users', getOtherUserId(), 'offer', 'sdp'));
+            if (!offerDoc.exists()) {
+                alert('No call to answer');
+                return;
             }
-        });
+            peerConnection = new RTCPeerConnection(configuration);
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
 
-        function showCallSection() {
-            authSection.style.display = 'none';
-            callSection.style.display = 'block';
-            userNameSpan.textContent = currentUser;
-            callTarget.value = currentUser === 't1' ? 't2' : 't1';
-        }
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    setDoc(doc(db, 'users', currentUser.uid, 'answer', 'candidate'), { candidate: event.candidate });
+                }
+            };
 
-        // Слушать входящие звонки
+            peerConnection.ontrack = (event) => {
+                document.getElementById('remoteAudio').srcObject = event.streams[0];
+            };
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDoc.data().sdp));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            await setDoc(doc(db, 'users', currentUser.uid, 'answer', 'sdp'), { sdp: answer });
+            document.getElementById('status').textContent = 'Answering...';
+        };
+
         function listenForCalls() {
-            const userDoc = doc(db, 'users', currentUser);
-            onSnapshot(userDoc, (snapshot) => {
-                const data = snapshot.data();
-                if (data && data.offer && !callInProgress) {
-                    // Входящий звонок
-                    statusDiv.textContent = 'Входящий звонок от ' + data.from + '...';
-                    handleIncomingCall(data);
+            onSnapshot(doc(db, 'users', currentUser.uid, 'answer', 'sdp'), (doc) => {
+                if (doc.exists() && peerConnection) {
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(doc.data().sdp));
+                }
+            });
+            onSnapshot(doc(db, 'users', currentUser.uid, 'offer', 'candidate'), (doc) => {
+                if (doc.exists() && peerConnection) {
+                    peerConnection.addIceCandidate(new RTCIceCandidate(doc.data().candidate));
+                }
+            });
+            onSnapshot(doc(db, 'users', currentUser.uid, 'answer', 'candidate'), (doc) => {
+                if (doc.exists() && peerConnection) {
+                    peerConnection.addIceCandidate(new RTCIceCandidate(doc.data().candidate));
                 }
             });
         }
 
-        // Начать звонок
-        callBtn.addEventListener('click', async () => {
-            const target = callTarget.value;
-            if (target === currentUser) return;
-            callInProgress = true;
-            statusDiv.textContent = 'Звонок ' + target + '...';
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                peerConnection = new RTCPeerConnection(configuration);
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-                peerConnection.ontrack = (event) => {
-                    remoteAudio.srcObject = event.streams[0];
-                };
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                await setDoc(doc(db, 'users', target), { offer: offer, from: currentUser });
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        setDoc(doc(db, 'users', target), { ice: event.candidate }, { merge: true });
-                    }
-                };
-            } catch (error) {
-                statusDiv.textContent = 'Ошибка звонка: ' + error.message;
-                callInProgress = false;
+        function getOtherUserId() {
+            // test1@test.com звонит test2@test.com, и наоборот
+            if (currentUser.email === 'test1@test.com') {
+                return 'test2@test.com';
+            } else if (currentUser.email === 'test2@test.com') {
+                return 'test1@test.com';
             }
-        });
-
-        // Обработать входящий звонок
-        async function handleIncomingCall(data) {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                peerConnection = new RTCPeerConnection(configuration);
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-                peerConnection.ontrack = (event) => {
-                    remoteAudio.srcObject = event.streams[0];
-                };
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                await setDoc(doc(db, 'users', data.from), { answer: answer }, { merge: true });
-                callInProgress = true;
-                statusDiv.textContent = 'Звонок принят!';
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        setDoc(doc(db, 'users', data.from), { ice: event.candidate }, { merge: true });
-                    }
-                };
-                // Слушать ICE от звонящего
-                onSnapshot(doc(db, 'users', currentUser), (snapshot) => {
-                    const iceData = snapshot.data();
-                    if (iceData && iceData.ice) {
-                        peerConnection.addIceCandidate(new RTCIceCandidate(iceData.ice));
-                    }
-                });
-            } catch (error) {
-                statusDiv.textContent = 'Ошибка приёма: ' + error.message;
-            }
+            return null; // На случай ошибки
         }
-
-        // Повесить трубку
-        hangupBtn.addEventListener('click', async () => {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            await deleteDoc(doc(db, 'users', currentUser));
-            callInProgress = false;
-            statusDiv.textContent = 'Звонок завершён.';
-            remoteAudio.srcObject = null;
-        });
     </script>
 </body>
 </html>
