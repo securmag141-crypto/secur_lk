@@ -26,6 +26,8 @@
         let localStream;
         let remoteStream = new MediaStream();
         let pc;
+        let targetEmail; // For caller
+        let fromEmail; // For callee
         const remoteAudio = document.getElementById('remoteAudio');
         remoteAudio.srcObject = remoteStream;
 
@@ -44,8 +46,8 @@
             pc = new RTCPeerConnection();
             pc.onicecandidate = (event) => {
                 if (event.candidate) {
-                    // Send ICE candidate to Firestore
-                    setDoc(doc(db, 'calls', 'ice-' + auth.currentUser.email), { candidate: event.candidate });
+                    // Send ICE candidate to Firestore (serialized)
+                    setDoc(doc(db, 'calls', 'ice-' + auth.currentUser.email), { candidate: event.candidate.toJSON() });
                 }
             };
             pc.ontrack = (event) => {
@@ -56,44 +58,57 @@
         }
 
         // Start call (caller)
-        async function startCall(targetEmail) {
+        async function startCall(target) {
+            targetEmail = target;
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             createPeerConnection();
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
-            // Send offer to Firestore
-            await setDoc(doc(db, 'calls', 'offer-' + auth.currentUser.email), { offer: offer, from: auth.currentUser.email, to: targetEmail });
+            // Send offer to Firestore (serialized)
+            await setDoc(doc(db, 'calls', 'offer'), { offer: offer.toJSON(), from: auth.currentUser.email });
+            // Listen for answer
+            onSnapshot(doc(db, 'calls', 'answer'), (docSnap) => {
+                if (docSnap.exists() && pc.signalingState !== 'stable') {
+                    const data = docSnap.data();
+                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    // Clean up after setting
+                    deleteDoc(doc(db, 'calls', 'offer'));
+                    deleteDoc(doc(db, 'calls', 'answer'));
+                }
+            });
+            // Listen for ICE from callee
+            onSnapshot(doc(db, 'calls', 'ice-' + targetEmail), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            });
         }
 
         // Answer call (callee)
         async function answerCall() {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            createPeerConnection();
             // Listen for offer
-            onSnapshot(doc(db, 'calls', 'offer-' + auth.currentUser.email), async (docSnap) => {
+            onSnapshot(doc(db, 'calls', 'offer'), async (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    fromEmail = data.from;
+                    createPeerConnection();
                     await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
                     const answer = await pc.createAnswer();
                     await pc.setLocalDescription(answer);
-                    // Send answer
-                    await setDoc(doc(db, 'calls', 'answer-' + auth.currentUser.email), { answer: answer });
-                }
-            });
-        }
-
-        // Listen for answer and ICE
-        function listenForAnswer() {
-            onSnapshot(doc(db, 'calls', 'answer-' + auth.currentUser.email), (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                }
-            });
-            onSnapshot(doc(db, 'calls', 'ice-' + auth.currentUser.email), (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    // Send answer (serialized)
+                    await setDoc(doc(db, 'calls', 'answer'), { answer: answer.toJSON() });
+                    // Listen for ICE from caller
+                    onSnapshot(doc(db, 'calls', 'ice-' + fromEmail), (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        }
+                    });
+                    // Clean up after setting
+                    deleteDoc(doc(db, 'calls', 'offer'));
+                    deleteDoc(doc(db, 'calls', 'answer'));
                 }
             });
         }
@@ -104,11 +119,7 @@
         document.getElementById('startCall').onclick = () => startCall('t2@test.com'); // From t1
         document.getElementById('answerCall').onclick = () => answerCall(); // For t2
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                listenForAnswer(); // Always listen for signaling
-            }
-        });
+        // No global listeners on auth change to avoid conflicts
     </script>
 </head>
 <body>
