@@ -4,27 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoIP Audio Call</title>
-</head>
-<body>
-    <div id="login">
-        <input type="email" id="email" placeholder="Email (t1@test.com or t2@test.com)">
-        <input type="password" id="password" placeholder="Password (111111)">
-        <button id="loginBtn">Login</button>
-        <p id="loginStatus"></p>
-    </div>
-    <div id="app" style="display:none;">
-        <p>Logged in as: <span id="userEmail"></span></p>
-        <button id="callBtn">Call t2@test.com</button>
-        <button id="hangupBtn" disabled>Hangup</button>
-        <audio id="remoteAudio" autoplay></audio>
-        <p id="callStatus"></p>
-    </div>
-
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
+        // Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyB_oIgWVcb_56VAdWaVl7GHY3bj75Vt-Wo",
             authDomain: "testcaller-91d8c.firebaseapp.com",
@@ -38,151 +23,99 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
-        let peerConnection = null;
-        let localStream = null;
-        const targetEmail = 't2@test.com'; // Для звонка; для t2 меняй на 't1@test.com'
+        let localStream;
+        let remoteStream = new MediaStream();
+        let pc;
+        const remoteAudio = document.getElementById('remoteAudio');
+        remoteAudio.srcObject = remoteStream;
 
-        // Login
-        document.getElementById('loginBtn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const statusEl = document.getElementById('loginStatus');
-
+        // Authenticate user
+        async function signIn(email, password) {
             try {
-                statusEl.textContent = 'Logging in...';
                 await signInWithEmailAndPassword(auth, email, password);
-                statusEl.textContent = 'Login successful!';
+                console.log('Signed in as', email);
             } catch (error) {
-                statusEl.textContent = 'Login failed: ' + error.message;
+                console.error('Sign-in error:', error);
             }
-        });
+        }
 
-        // Auth state listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                document.getElementById('userEmail').textContent = user.email;
-                document.getElementById('callBtn').disabled = false;
-                listenForCalls();
-            } else {
-                currentUser = null;
-                document.getElementById('login').style.display = 'block';
-                document.getElementById('app').style.display = 'none';
-            }
-        });
+        // Create RTCPeerConnection
+        function createPeerConnection() {
+            pc = new RTCPeerConnection();
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    // Send ICE candidate to Firestore
+                    setDoc(doc(db, 'calls', 'ice-' + auth.currentUser.email), { candidate: event.candidate });
+                }
+            };
+            pc.ontrack = (event) => {
+                remoteStream.addTrack(event.track);
+            };
+            // Add local audio tracks
+            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+        }
 
-        // Call button
-        document.getElementById('callBtn').addEventListener('click', async () => {
-            if (!currentUser || peerConnection) return;
-            const statusEl = document.getElementById('callStatus');
-            statusEl.textContent = 'Getting media...';
+        // Start call (caller)
+        async function startCall(targetEmail) {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            createPeerConnection();
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            // Send offer to Firestore
+            await setDoc(doc(db, 'calls', 'offer-' + auth.currentUser.email), { offer: offer, from: auth.currentUser.email, to: targetEmail });
+        }
 
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                peerConnection = new RTCPeerConnection();
-
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                peerConnection.ontrack = (event) => {
-                    document.getElementById('remoteAudio').srcObject = event.streams[0];
-                    statusEl.textContent = 'Connected!';
-                };
-
-                peerConnection.onicecandidate = async (event) => {
-                    if (event.candidate) {
-                        // ICE candidates можно добавить в Firestore, но для простоты опустим
-                    }
-                };
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-
-                await setDoc(doc(db, 'calls', targetEmail), {
-                    offer: offer,
-                    from: currentUser.email,
-                    timestamp: Date.now()
-                });
-
-                document.getElementById('hangupBtn').disabled = false;
-                statusEl.textContent = 'Offer sent, waiting for answer...';
-            } catch (error) {
-                statusEl.textContent = 'Error: ' + error.message;
-            }
-        });
-
-        // Hangup
-        document.getElementById('hangupBtn').addEventListener('click', async () => {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            document.getElementById('remoteAudio').srcObject = null;
-            document.getElementById('callStatus').textContent = 'Call ended.';
-            document.getElementById('hangupBtn').disabled = true;
-
-            // Clean up Firestore
-            if (currentUser) {
-                await deleteDoc(doc(db, 'calls', currentUser.email));
-                await deleteDoc(doc(db, 'calls', targetEmail));
-            }
-        });
-
-        // Listen for incoming calls
-        async function listenForCalls() {
-            if (!currentUser) return;
-
-            const callRef = doc(db, 'calls', currentUser.email);
-            onSnapshot(callRef, async (docSnap) => {
+        // Answer call (callee)
+        async function answerCall() {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            createPeerConnection();
+            // Listen for offer
+            onSnapshot(doc(db, 'calls', 'offer-' + auth.currentUser.email), async (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    const statusEl = document.getElementById('callStatus');
-
-                    if (data.offer && !peerConnection) {
-                        statusEl.textContent = 'Incoming call from ' + data.from + '. Answering...';
-
-                        try {
-                            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                            peerConnection = new RTCPeerConnection();
-
-                            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                            peerConnection.ontrack = (event) => {
-                                document.getElementById('remoteAudio').srcObject = event.streams[0];
-                                statusEl.textContent = 'Call connected!';
-                            };
-
-                            peerConnection.onicecandidate = async (event) => {
-                                if (event.candidate) {
-                                    // ICE candidates опущены для простоты
-                                }
-                            };
-
-                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                            const answer = await peerConnection.createAnswer();
-                            await peerConnection.setLocalDescription(answer);
-
-                            await setDoc(doc(db, 'calls', data.from), {
-                                answer: answer,
-                                from: currentUser.email
-                            }, { merge: true });
-
-                            document.getElementById('hangupBtn').disabled = false;
-                        } catch (error) {
-                            statusEl.textContent = 'Answer failed: ' + error.message;
-                        }
-                    } else if (data.answer && peerConnection && peerConnection.remoteDescription === null) {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                    }
+                    await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    // Send answer
+                    await setDoc(doc(db, 'calls', 'answer-' + auth.currentUser.email), { answer: answer });
                 }
             });
         }
+
+        // Listen for answer and ICE
+        function listenForAnswer() {
+            onSnapshot(doc(db, 'calls', 'answer-' + auth.currentUser.email), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                }
+            });
+            onSnapshot(doc(db, 'calls', 'ice-' + auth.currentUser.email), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            });
+        }
+
+        // UI elements
+        document.getElementById('signIn1').onclick = () => signIn('t1@test.com', '111111');
+        document.getElementById('signIn2').onclick = () => signIn('t2@test.com', '111111');
+        document.getElementById('startCall').onclick = () => startCall('t2@test.com'); // From t1
+        document.getElementById('answerCall').onclick = () => answerCall(); // For t2
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                listenForAnswer(); // Always listen for signaling
+            }
+        });
     </script>
+</head>
+<body>
+    <button id="signIn1">Sign in as t1@test.com</button>
+    <button id="signIn2">Sign in as t2@test.com</button>
+    <button id="startCall">Start Call (from t1 to t2)</button>
+    <button id="answerCall">Answer Call (as t2)</button>
+    <audio id="remoteAudio" autoplay></audio>
 </body>
 </html>
